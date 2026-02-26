@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS Kasir Pro</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="products-section">
+        <h2>Kasir Pro</h2>
+        <div class="products-grid" id="products"></div>
+    </div>
+
+    <div class="cart-section">
+        <h3>Keranjang</h3>
+        <div class="cart-items" id="cartItems"></div>
+
+        <div class="summary">
+            <div class="row">
+                <span>Total</span>
+                <span id="total">Rp 0</span>
+            </div>
+
+            <div class="row">
+                <span>Bayar</span>
+                <input type="number" id="bayar" placeholder="Masukkan uang">
+            </div>
+
+            <div class="row">
+                <span>Kembali</span>
+                <span id="kembali">Rp 0</span>
+            </div>
+
+            <button class="pay-btn" onclick="checkout()">Bayar</button>
