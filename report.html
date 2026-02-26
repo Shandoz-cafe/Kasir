@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Omset</title>
+
+<style>
+*{box-sizing:border-box;font-family:Segoe UI,Arial;}
+body{margin:0;background:#f1f5f9;padding:20px;}
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  margin-bottom:20px;
+}
+h2{margin-top:0;}
+.big{
+  font-size:26px;
+  font-weight:bold;
+  color:#16a34a;
+}
+</style>
+</head>
+<body>
+
+<h2>Laporan Penjualan</h2>
+
+<div class="card">
+  <div>Total Omset Hari Ini</div>
+  <div class="big" id="todaySales">Rp 0</div>
+</div>
+
+<div class="card">
+  <div>Total Transaksi Hari Ini</div>
+  <div class="big" id="todayTrx">0</div>
+</div>
+
+<div class="card">
+  <div>Total Omset Bulan Ini</div>
+  <div class="big" id="monthSales">Rp 0</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXXt6pg-H09RfkgUhnAlZKMsZU8-9oeqw",
+  authDomain: "kasir-10280.firebaseapp.com",
+  projectId: "kasir-10280",
+  storageBucket: "kasir-10280.firebasestorage.app",
+  messagingSenderId: "170037480150",
+  appId: "1:170037480150:web:45d084d73d9f9834401777"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth,user=>{
+  if(!user){
+    window.location.href="index.html";
+  }
+});
+
+async function loadReport(){
+  const snapshot = await getDocs(collection(db,"transactions"));
+
+  let todayTotal = 0;
+  let todayCount = 0;
+  let monthTotal = 0;
+
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  snapshot.forEach(doc=>{
+    const data = doc.data();
+    const date = data.createdAt.toDate();
+
+    if(
+      date.getDate()===today.getDate() &&
+      date.getMonth()===today.getMonth() &&
+      date.getFullYear()===today.getFullYear()
+    ){
+      todayTotal += data.total;
+      todayCount++;
+    }
+
+    if(
+      date.getMonth()===currentMonth &&
+      date.getFullYear()===currentYear
+    ){
+      monthTotal += data.total;
+    }
+  });
+
+  document.getElementById("todaySales").innerText="Rp "+todayTotal;
+  document.getElementById("todayTrx").innerText=todayCount;
+  document.getElementById("monthSales").innerText="Rp "+monthTotal;
+}
+
+loadReport();
+</script>
+
+</body>
+</html>
