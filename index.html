@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Kasir</title>
+
+<style>
+*{box-sizing:border-box;font-family:Segoe UI,Arial;}
+body{
+  margin:0;
+  height:100vh;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-box{
+  background:#fff;
+  width:100%;
+  max-width:350px;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 20px 40px rgba(0,0,0,.3);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.98);
+}
+
+.small{
+  text-align:center;
+  font-size:12px;
+  margin-top:15px;
+  color:#64748b;
+}
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>Login Kasir</h2>
+
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+
+  <button onclick="loginUser()">Masuk</button>
+
+  <div class="small">
+    Admin buka: admin.html
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXXt6pg-H09RfkgUhnAlZKMsZU8-9oeqw",
+  authDomain: "kasir-10280.firebaseapp.com",
+  projectId: "kasir-10280",
+  storageBucket: "kasir-10280.firebasestorage.app",
+  messagingSenderId: "170037480150",
+  appId: "1:170037480150:web:45d084d73d9f9834401777"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.loginUser = function(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth,email,password)
+    .then(()=>{
+      window.location.href="dashboard.html";
+    })
+    .catch(()=>{
+      alert("Email atau password salah");
+    });
+};
+</script>
+
+</body>
+</html>
