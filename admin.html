@@ -1,0 +1,29 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KasirPro - Admin</title>
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/admin.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>🛠️ Admin Panel</h1>
+  <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
+
+  <h2>Tambah / Edit Produk</h2>
+  <input type="hidden" id="editId">
+  <input type="text" id="productName" placeholder="Nama Produk">
+  <input type="number" id="productPrice" placeholder="Harga">
+  <input type="number" id="productStock" placeholder="Stok">
+  <input type="text" id="productCategory" placeholder="Kategori">
+  <button class="btn btn-primary" id="saveProduct">💾 Simpan</button>
+
+  <h2>Daftar Produk</h2>
+  <div id="productTable"></div>
+</div>
+</body>
+</html>
