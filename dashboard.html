@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS Dashboard</title>
 
+<style>
+*{box-sizing:border-box;font-family:Segoe UI,Arial;}
+body{margin:0;display:flex;height:100vh;background:#f1f5f9;}
+
+.products{
+  width:65%;
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:15px;
+  overflow-y:auto;
+}
+
+.product{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
+  cursor:pointer;
+  font-weight:600;
+}
+
+.cart{
+  width:35%;
+  background:#fff;
+  padding:20px;
+  border-left:1px solid #ddd;
+  display:flex;
+  flex-direction:column;
+}
+
+.cart-items{
+  flex:1;
+  overflow-y:auto;
+}
+
+.cart-item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  font-size:14px;
+}
+
+.qty-btn{
+  padding:2px 8px;
+  background:#e2e8f0;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.total{
+  font-size:20px;
+  font-weight:bold;
+  margin:15px 0;
+}
+
+.pay{
+  background:#16a34a;
+  color:#fff;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="products" id="productList"></div>
+
+<div class="cart">
+  <h3>Keranjang</h3>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="total" id="total">Total: Rp 0</div>
+  <button class="pay" onclick="checkout()">Bayar</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot,
+  doc, updateDoc, addDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAXXt6pg-H09RfkgUhnAlZKMsZU8-9oeqw",
+  authDomain: "kasir-10280.firebaseapp.com",
+  projectId: "kasir-10280",
+  storageBucket: "kasir-10280.firebasestorage.app",
+  messagingSenderId: "170037480150",
+  appId: "1:170037480150:web:45d084d73d9f9834401777"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let cart = [];
+let total = 0;
+
+// CEK LOGIN
+onAuthStateChanged(auth, user=>{
+  if(!user){
+    window.location.href="index.html";
+  }
+});
+
+// LOAD PRODUK REALTIME
+const productList = document.getElementById("productList");
+
+onSnapshot(collection(db,"products"), snapshot=>{
+  productList.innerHTML="";
+  snapshot.forEach(docSnap=>{
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.className="product";
+    div.innerHTML=`${data.name}<br>Rp ${data.price}`;
+    div.onclick=()=>addToCart(docSnap.id,data);
+    productList.appendChild(div);
+  });
+});
+
+// TAMBAH KE CART
+function addToCart(id,data){
+  const existing = cart.find(item=>item.id===id);
+  if(existing){
+    existing.qty++;
+  }else{
+    cart.push({...data,id,qty:1});
+  }
+  renderCart();
+}
+
+// RENDER CART
+function renderCart(){
+  const cartItems=document.getElementById("cartItems");
+  cartItems.innerHTML="";
+  total=0;
+
+  cart.forEach((item,index)=>{
+    total+=item.price*item.qty;
+
+    cartItems.innerHTML+=`
+      <div class="cart-item">
+        <div>
+          ${item.name}<br>
+          <button class="qty-btn" onclick="changeQty(${index},-1)">-</button>
+          ${item.qty}
+          <button class="qty-btn" onclick="changeQty(${index},1)">+</button>
+        </div>
+        <div>Rp ${item.price*item.qty}</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText="Total: Rp "+total;
+}
+
+window.changeQty=function(index,change){
+  cart[index].qty+=change;
+  if(cart[index].qty<=0){
+    cart.splice(index,1);
+  }
+  renderCart();
+};
+
+// CHECKOUT
+window.checkout=async function(){
+  if(cart.length===0){
+    alert("Keranjang kosong");
+    return;
+  }
+
+  const user=auth.currentUser;
+
+  await addDoc(collection(db,"transactions"),{
+    items:cart,
+    total:total,
+    createdAt:new Date(),
+    cashier:user.email
+  });
+
+  // KURANGI STOK
+  for(const item of cart){
+    const productRef=doc(db,"products",item.id);
+    await updateDoc(productRef,{
+      stock:(item.stock||0)-item.qty
+    });
+  }
+
+  alert("Transaksi berhasil");
+  cart=[];
+  renderCart();
+};
+</script>
+
+</body>
+</html>
