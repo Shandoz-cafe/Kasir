@@ -1,50 +1,27 @@
+<!-- pos.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POS Kasir Pro</title>
+<title>KasirPro - POS</title>
 <link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/pos.js"></script>
 </head>
 <body>
-
 <div class="container">
-    <div class="products-section">
-        <h2>Kasir Pro</h2>
-        <div class="products-grid" id="products"></div>
-    </div>
+  <h1>💰 POS Kasir</h1>
+  <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
 
-    <div class="cart-section">
-        <h3>Keranjang</h3>
-        <div class="cart-items" id="cartItems"></div>
+  <h2>Produk</h2>
+  <div id="productList"></div>
 
-        <div class="summary">
-            <div class="row">
-                <span>Total</span>
-                <span id="total">Rp 0</span>
-            </div>
+  <h2>Keranjang</h2>
+  <div id="cartList"></div>
+  <div>Total: <span id="cartTotal">Rp 0</span></div>
 
-            <div class="row">
-                <span>Bayar</span>
-                <input type="number" id="bayar" placeholder="Masukkan uang">
-            </div>
-
-            <div class="row">
-                <span>Kembali</span>
-                <span id="kembali">Rp 0</span>
-            </div>
-
-            <button class="pay-btn" onclick="checkout()">Bayar</button>
-        </div>
-    </div>
+  <button class="btn btn-success" id="checkout">✅ Bayar & Print</button>
 </div>
-
-<!-- Receipt Preview -->
-<div id="receiptPreview" class="receipt" style="display:none; background:white; padding:20px; margin:20px; border-radius:10px;">
-    <div id="receiptContent"></div>
-    <button class="btn pay-btn" onclick="printReceipt()">🖨️ Print Struk</button>
-</div>
-
-<script type="module" src="js/pos.js"></script>
 </body>
 </html>
