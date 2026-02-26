@@ -1,161 +1,197 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loyverse POS Clone - Cafe Bandung</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS BISNIS FINAL</title>
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f9}
+header{background:#111827;color:white;padding:15px;text-align:center}
+.container{padding:15px}
+.card{background:white;padding:15px;border-radius:10px;margin-bottom:15px}
+input,button{padding:10px;width:100%;margin:5px 0;border-radius:6px;border:1px solid #ccc}
+button{background:#2563eb;color:white;border:none}
+.product{display:flex;justify-content:space-between;margin:5px 0}
+.total{font-weight:bold;font-size:18px;margin-top:10px}
+</style>
 </head>
 <body>
-    <!-- LOADING SCREEN -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="logo">
-            <img src="img/logo.png" alt="Cafe Bandung">
-            <h1>Loyverse POS</h1>
-        </div>
-        <div class="spinner"></div>
-    </div>
 
-    <!-- MAIN APP -->
-    <div id="mainApp" class="app-container">
-        <!-- HEADER -->
-        <header class="header">
-            <div class="header-left">
-                <span class="material-icons menu-icon" onclick="toggleSidebar()">menu</span>
-                <h2>CAFE BANDUNG</h2>
-            </div>
-            <div class="header-right">
-                <span class="user-info" id="userInfo">Loading...</span>
-                <span class="material-icons" onclick="logout()">logout</span>
-            </div>
-        </header>
+<div id="loginPage" class="container">
+<div class="card">
+<h2>Login</h2>
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+</div>
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-menu">
-                <a href="#" class="menu-item active" data-tab="pos">
-                    <span class="material-icons">point_of_sale</span>
-                    POS
-                </a>
-                <a href="#" class="menu-item" data-tab="inventory">
-                    <span class="material-icons">inventory</span>
-                    Stok
-                </a>
-                <a href="#" class="menu-item" data-tab="reports">
-                    <span class="material-icons">bar_chart</span>
-                    Laporan
-                </a>
-                <a href="#" class="menu-item" data-tab="settings">
-                    <span class="material-icons">settings</span>
-                    Settings
-                </a>
-            </div>
-        </aside>
+<div id="appPage" style="display:none">
+<header>POS BISNIS FINAL</header>
+<div class="container">
 
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            <!-- POS TAB -->
-            <div id="pos" class="tab-content active">
-                <div class="pos-header">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value" id="todaySales">Rp 0</div>
-                            <div class="stat-label">Penjualan Hari Ini</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="orderCount">0</div>
-                            <div class="stat-label">Order</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="cashRegister">$0</div>
-                            <div class="stat-label">Kasir</div>
-                        </div>
-                    </div>
-                </div>
+<div class="card">
+<h3>Tambah Produk</h3>
+<input type="text" id="name" placeholder="Nama Produk">
+<input type="number" id="price" placeholder="Harga">
+<button onclick="addProduct()">Tambah</button>
+</div>
 
-                <div class="pos-body">
-                    <div class="left-panel">
-                        <!-- PRODUCT SEARCH -->
-                        <div class="search-bar">
-                            <input type="text" id="productSearch" placeholder="🔍 Cari produk atau scan barcode...">
-                            <button onclick="clearCart()">🗑️ New Order</button>
-                        </div>
+<div class="card">
+<h3>Daftar Produk</h3>
+<div id="productList"></div>
+</div>
 
-                        <!-- PRODUCT GRID -->
-                        <div class="product-grid" id="productGrid">
-                            <!-- Products loaded dynamically -->
-                        </div>
-                    </div>
+<div class="card">
+<h3>Keranjang</h3>
+<div id="cartList"></div>
+<div class="total" id="totalText">TOTAL: Rp0</div>
+<button onclick="checkout()">Checkout & Print</button>
+</div>
 
-                    <div class="right-panel">
-                        <!-- CART -->
-                        <div class="cart-section">
-                            <h3>Keranjang <span id="cartItemCount">(0)</span></h3>
-                            <div class="cart-items" id="cartItems"></div>
-                            <div class="cart-total">
-                                <div class="total-row">
-                                    <span>Subtotal:</span>
-                                    <span id="subtotal">Rp 0</span>
-                                </div>
-                                <div class="total-row discount">
-                                    <span>Diskon:</span>
-                                    <input type="number" id="discountInput" min="0" max="100" value="0">%
-                                </div>
-                                <div class="total-row final">
-                                    <span><strong>TOTAL</strong></span>
-                                    <span class="final-total" id="finalTotal">Rp 0</span>
-                                </div>
-                            </div>
+<div class="card" id="dashboardCard">
+<h3>Dashboard</h3>
+Total Transaksi: <b id="trxCount">0</b><br>
+Total Omzet: <b id="trxTotal">0</b>
+</div>
 
-                            <!-- PAYMENT -->
-                            <div class="payment-section">
-                                <div class="payment-row">
-                                    <input type="number" id="cashAmount" placeholder="Uang tunai" step="1000">
-                                    <button class="btn-pay" onclick="processPayment('cash')">💵 TUNAI</button>
-                                </div>
-                                <div class="payment-row">
-                                    <input type="number" id="cardAmount" placeholder="Kartu/QRIS" step="1000">
-                                    <button class="btn-pay" onclick="processPayment('card')">💳 KARTU</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="card">
+<h3>Riwayat</h3>
+<div id="historyList"></div>
+</div>
 
-            <!-- OTHER TABS (Inventory, Reports, Settings) -->
-            <div id="inventory" class="tab-content">
-                <h3>📦 Manajemen Stok</h3>
-                <!-- Inventory content -->
-            </div>
+</div>
+</div>
 
-            <div id="reports" class="tab-content">
-                <h3>📊 Laporan Penjualan</h3>
-                <!-- Reports content -->
-            </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-            <div id="settings" class="tab-content">
-                <h3>⚙️ Pengaturan</h3>
-                <!-- Settings content -->
-            </div>
-        </main>
-    </div>
+const firebaseConfig = {
+  apiKey: "AIzaSyAXXt6pg-H09RfkgUhnAlZKMsZU8-9oeqw",
+  authDomain: "kasir-10280.firebaseapp.com",
+  projectId: "kasir-10280",
+  storageBucket: "kasir-10280.firebasestorage.app",
+  messagingSenderId: "170037480150",
+  appId: "1:170037480150:web:45d084d73d9f9834401777"
+};
 
-    <!-- PRINT MODAL -->
-    <div id="printModal" class="modal">
-        <div class="modal-content">
-            <div id="receiptPreview"></div>
-            <div class="modal-actions">
-                <button class="btn-print" onclick="printReceipt()">🖨️ Print</button>
-                <button class="btn-close" onclick="closePrintModal()">Tutup</button>
-            </div>
-        </div>
-    </div>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-    <!-- Firebase + Scripts -->
-    <script type="module" src="js/firebase.js"></script>
-    <script src="js/printer.js"></script>
-    <script src="js/app.js"></script>
+let products=[];
+let cart=[];
+
+// LOGIN
+window.login = async function(){
+try{
+await signInWithEmailAndPassword(auth,email.value,password.value);
+
+loginPage.style.display="none";
+appPage.style.display="block";
+
+const roleDoc = await getDoc(doc(db,"users",email.value));
+if(roleDoc.exists()){
+if(roleDoc.data().role==="kasir"){
+dashboardCard.style.display="none";
+}
+}
+
+loadHistory();
+
+}catch(e){
+alert("Login gagal");
+}
+}
+
+// PRODUK
+window.addProduct=function(){
+if(!name.value || !price.value)return;
+products.push({n:name.value,p:parseInt(price.value)});
+renderProducts();
+name.value="";
+price.value="";
+}
+
+function renderProducts(){
+let html="";
+products.forEach((x,i)=>{
+html+=`
+<div class="product">
+<span>${x.n} - Rp${x.p}</span>
+<button onclick="addToCart(${i})">+</button>
+</div>`;
+});
+productList.innerHTML=html;
+}
+
+window.addToCart=function(i){
+cart.push(products[i]);
+renderCart();
+}
+
+function renderCart(){
+let total=0;
+let html="";
+cart.forEach(c=>{
+total+=c.p;
+html+=`${c.n} - Rp${c.p}<br>`;
+});
+cartList.innerHTML=html;
+totalText.innerText="TOTAL: Rp"+total;
+}
+
+// CHECKOUT
+window.checkout=async function(){
+if(cart.length===0)return;
+let total=cart.reduce((a,b)=>a+b.p,0);
+
+await addDoc(collection(db,"transaksi"),{
+tanggal:new Date(),
+total:total
+});
+
+printStruk(total);
+
+cart=[];
+renderCart();
+loadHistory();
+}
+
+// PRINT
+function printStruk(total){
+let content="<center><b>TOKO ANDA</b></center><hr>";
+cart.forEach(c=>{
+content+=`${c.n} - Rp${c.p}<br>`;
+});
+content+="<hr>TOTAL: Rp"+total;
+
+let win=window.open("","","width=300,height=600");
+win.document.write(content);
+win.print();
+win.close();
+}
+
+// LOAD HISTORY
+async function loadHistory(){
+const snapshot=await getDocs(collection(db,"transaksi"));
+let count=0;
+let omzet=0;
+let html="";
+snapshot.forEach(doc=>{
+let d=doc.data();
+count++;
+omzet+=d.total;
+html+=`${new Date(d.tanggal.seconds*1000).toLocaleString()} - Rp${d.total}<br>`;
+});
+historyList.innerHTML=html;
+trxCount.innerText=count;
+trxTotal.innerText="Rp"+omzet;
+}
+
+</script>
+
 </body>
 </html>
