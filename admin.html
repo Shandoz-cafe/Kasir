@@ -1,22 +1,33 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Produk Offline</title>
+<title>Admin Kasir Offline</title>
 <link rel="stylesheet" href="css/style.css">
-<script src="js/admin_offline.js" defer></script>
 </head>
 <body>
-<h2>🛠️ Admin Produk</h2>
+<div class="container">
+<h2>Admin Panel</h2>
+<a href="pos.html">Kembali ke POS</a>
 
-<div>
-    <input type="text" id="productName" placeholder="Nama Produk">
-    <input type="number" id="productPrice" placeholder="Harga">
-    <input type="number" id="productStock" placeholder="Stok">
-    <button onclick="addProduct()">➕ Tambah Produk</button>
+<h3>Produk</h3>
+<div class="admin-form">
+<input type="text" id="prodName" placeholder="Nama Produk">
+<input type="number" id="prodPrice" placeholder="Harga">
+<input type="number" id="prodStock" placeholder="Stok">
+<button onclick="addProduct()">Tambah Produk</button>
+<div id="prodList"></div>
 </div>
 
-<div id="productList" style="margin-top:20px;"></div>
+<h3>Akun</h3>
+<div class="admin-form">
+<input type="text" id="accUser" placeholder="Username">
+<input type="password" id="accPass" placeholder="Password">
+<select id="accRole"><option value="kasir">Kasir</option><option value="admin">Admin</option></select>
+<button onclick="addUser()">Tambah Akun</button>
+<div id="userList"></div>
+</div>
+
+<script src="js/admin_offline.js"></script>
 </body>
 </html>
