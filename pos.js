@@ -100,10 +100,12 @@ function previewCheckout() {
     };
 
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
-    
-    // Tampilan HTML untuk Preview di Layar (Visual saja)
+    const storeLogo = localStorage.getItem('storeLogo');
+    let logoHtml = storeLogo ? `<img src="${storeLogo}" style="max-width: 50px; display: block; margin: 0 auto 5px auto; filter: grayscale(100%);">` : '';
+
+    // HTML Preview untuk Layar
     let contentHTML = `
-        <div style="text-align: center;"><strong>${storeName}</strong><br><small>Kasir: ${pendingSale.user}<br>${pendingSale.date}</small></div>
+        <div style="text-align: center;">${logoHtml}<strong>${storeName}</strong><br><small>Kasir: ${pendingSale.user}<br>${pendingSale.date}</small></div>
         <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${pendingSale.customer}</strong></small></div>
         <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
         <table style="width:100%; font-size: 11px;">
@@ -118,12 +120,6 @@ function previewCheckout() {
             <tr><td>Kembali</td><td style="text-align:right;">${pendingSale.change}</td></tr>
         </table>
         <div style="text-align: center; margin-top:10px;"><small>Terima Kasih!</small></div>
-        
-        <div style="border-top: 2px dashed #000; margin-top: 20px; padding-top: 10px; text-align: center;"><strong>--- TIKET DAPUR ---</strong><br><small>ID: ${pendingSale.id}</small></div>
-        <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${pendingSale.customer}</strong></small></div>
-        <table style="width:100%; font-size: 13px; margin-top:10px;">
-            ${pendingSale.items.map(i => `<tr><td style="padding-bottom:5px;"><strong>${i.name}</strong></td><td style="text-align:right;"><strong>x ${i.qty}</strong></td></tr>`).join('')}
-        </table>
     `;
 
     document.getElementById('receiptPreviewContent').innerHTML = contentHTML;
@@ -145,10 +141,15 @@ function confirmAndPrint() {
     sales.push(pendingSale); localStorage.setItem('sales', JSON.stringify(sales));
 
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
+    const storeLogo = localStorage.getItem('storeLogo');
     
-    // HTML Khusus yang akan dikirim langsung ke mesin RawBT
+    // Trik Logo untuk RawBT (Base64 dimasukkan langsung sebagai Image)
+    let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
+    
+    // HTML Struk yang akan masuk ke Mesin Printer
     let printHTML = `
     <div style="text-align: center; font-family: monospace;">
+        ${logoHtml}
         <h3 style="margin:0;">${storeName}</h3>
         <p style="margin:0; font-size:12px;">Kasir: ${pendingSale.user}<br>${pendingSale.date}</p>
     </div>
@@ -165,28 +166,17 @@ function confirmAndPrint() {
         <tr><td>Bayar (${pendingSale.method})</td><td style="text-align:right;">${pendingSale.cash.toLocaleString('id-ID')}</td></tr>
         <tr><td>Kembalian</td><td style="text-align:right;">${pendingSale.change.toLocaleString('id-ID')}</td></tr>
     </table>
-    <div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:10px;">Terima Kasih!</div>
-
-    <div style="margin-top: 40px; border-top: 2px dashed #000; padding-top: 15px; text-align: center; font-family: monospace;">
-        <h3 style="margin:0;">--- TIKET DAPUR ---</h3>
-        <p style="margin:0; font-size:12px;">ID: ${pendingSale.id}<br>${pendingSale.date}</p>
-    </div>
-    <div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${pendingSale.customer}</strong></div>
-    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
-    <table style="width:100%; font-family: monospace; font-size: 14px; border-collapse: collapse;">
-        ${pendingSale.items.map(i => `<tr><td style="padding-bottom:5px;"><b>${i.name}</b></td><td style="text-align:right;"><b>x ${i.qty}</b></td></tr>`).join('')}
-    </table>
-    <div style="text-align: center; font-family: monospace; font-size: 10px; margin-top:20px;">.</div>
+    <div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>
     `;
 
-    // TRIK BYPASS ANDROID PDF -> LANGSUNG KE RAWBT
+    // JALUR TOL KE RAWBT (Mencegah Layar PDF Android Terbuka)
     const base64html = btoa(unescape(encodeURIComponent(printHTML)));
     const rawbtUrl = "rawbt:data:text/html;base64," + base64html;
     
-    // Eksekusi print langsung via URL RawBT
+    // Buka aplikasi RawBT secara otomatis
     window.location.href = rawbtUrl;
 
-    // Reset keranjang setelah ngeprint
+    // Refresh halaman dan bersihkan kasir
     setTimeout(() => { 
         cart = []; 
         document.getElementById('discountInput').value = 0; 
