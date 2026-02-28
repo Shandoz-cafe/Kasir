@@ -1,27 +1,50 @@
-function loadReports() {
+function loadFinanceReports() {
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
-    const tbody = document.getElementById('reportList');
-    let totalRevenue = 0;
+    const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
     
-    tbody.innerHTML = sales.map((s, i) => {
-        totalRevenue += s.total;
-        const itemsList = s.items.map(item => `${item.name} (${item.qty})`).join(', ');
-        return `
-            <tr>
-                <td>${i+1}</td><td>${s.date}</td><td>${s.user}</td>
-                <td>${itemsList}</td><td>Rp ${s.total}</td>
-            </tr>
-        `;
+    // Hitung Pemasukan & Laba
+    let totalOmzet = 0, totalLabaKotor = 0;
+    const salesTbody = document.getElementById('salesList');
+    salesTbody.innerHTML = sales.map((s, i) => {
+        totalOmzet += s.total; totalLabaKotor += (s.netProfit || 0);
+        return `<tr><td>${i+1}</td><td>${s.date}</td><td>Rp ${s.total.toLocaleString('id-ID')}</td><td style="color:#27ae60;">+ Rp ${(s.netProfit||0).toLocaleString('id-ID')}</td></tr>`;
     }).join('');
-    
-    document.getElementById('totalRevenue').innerText = totalRevenue;
+
+    // Hitung Pengeluaran
+    let totalPengeluaran = 0;
+    const expTbody = document.getElementById('expenseList');
+    expTbody.innerHTML = expenses.map((e, i) => {
+        totalPengeluaran += e.amount;
+        return `<tr><td>${i+1}</td><td>${e.date}</td><td>${e.desc}</td><td style="color:#e74c3c;">- Rp ${e.amount.toLocaleString('id-ID')}</td></tr>`;
+    }).join('');
+
+    // Update Dashboard Kartu
+    const labaBersih = totalLabaKotor - totalPengeluaran;
+    document.getElementById('sumOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+    document.getElementById('sumMargin').innerText = `Rp ${totalLabaKotor.toLocaleString('id-ID')}`;
+    document.getElementById('sumExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
+    document.getElementById('sumNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 }
 
-function clearReports() {
-    if(confirm('Yakin ingin menghapus SEMUA data laporan penjualan?')) {
-        localStorage.removeItem('sales');
-        loadReports();
+function addExpense() {
+    const desc = document.getElementById('expDesc').value.trim();
+    const amount = parseFloat(document.getElementById('expAmount').value);
+    
+    if(!desc || isNaN(amount)) return alert('Isi keterangan dan nominal pengeluaran!');
+    
+    const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    expenses.push({ id: Date.now(), date: new Date().toLocaleString('id-ID'), desc: desc, amount: amount });
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    
+    document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = '';
+    loadFinanceReports();
+}
+
+function clearFinanceData() {
+    if(confirm('BAHAYA! Yakin hapus SEMUA data penjualan dan pengeluaran? Data tidak bisa kembali!')) {
+        localStorage.removeItem('sales'); localStorage.removeItem('expenses');
+        loadFinanceReports();
     }
 }
 
-if(document.getElementById('reportList')) { document.addEventListener('DOMContentLoaded', loadReports); }
+if(document.getElementById('salesList')) { document.addEventListener('DOMContentLoaded', loadFinanceReports); }
