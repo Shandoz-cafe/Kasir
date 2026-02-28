@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesin Kasir Tablet</title>
+    <title>Mesin Kasir Flex</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="pos-body">
@@ -15,13 +15,16 @@
     <div class="pos-container">
         <div class="pos-left">
             <div class="filter-bar">
-                <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." oninput="filterProducts()" style="flex: 2;">
-                <select id="sortInput" onchange="setSort(this.value)" style="flex: 1;">
-                    <option value="AZ">Alfabet A-Z</option>
-                    <option value="ZA">Alfabet Z-A</option>
+                <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." oninput="filterAndSortProducts()">
+                <select id="filterSelect" onchange="filterAndSortProducts()">
+                    <optgroup label="Urutkan Abjad">
+                        <option value="sort-AZ">A sampai Z</option>
+                        <option value="sort-ZA">Z sampai A</option>
+                    </optgroup>
+                    <optgroup label="Pilih Kategori (A-Z)" id="categoryOptions">
+                        </optgroup>
                 </select>
             </div>
-            <div class="cat-nav" id="categoryButtons"></div>
             
             <div class="product-scroll">
                 <div class="product-grid" id="productsContainer"></div>
