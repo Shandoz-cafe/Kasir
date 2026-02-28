@@ -40,11 +40,6 @@ function addExpense() {
     loadFinanceReports();
 }
 
-function clearFinanceData() {
-    if(confirm('BAHAYA! Yakin hapus SEMUA data penjualan dan pengeluaran? Data tidak bisa kembali!')) {
-        localStorage.removeItem('sales'); localStorage.removeItem('expenses');
-        loadFinanceReports();
-    }
-}
+// Fungsi clearFinanceData dihapus demi keamanan riwayat omzet toko
 
 if(document.getElementById('salesList')) { document.addEventListener('DOMContentLoaded', loadFinanceReports); }
