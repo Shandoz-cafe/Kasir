@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
@@ -14,13 +14,13 @@
         <h3>Menu Utama</h3>
         <div class="nav-grid">
             <a href="pos.html" class="nav-card">🛒 Mesin Kasir (POS)</a>
-            <a href="products.html" class="nav-card">📦 Kelola Produk</a>
+            <a href="product.html" class="nav-card">📦 Kelola Produk</a>
             <a href="reports.html" class="nav-card">📊 Laporan Penjualan</a>
-            <a href="users.html" class="nav-card" id="menuUsers" style="display:none;">👥 Kelola Pengguna</a>
-            <a href="settings.html" class="nav-card" id="menuSettings" style="display:none;">⚙️ Pengaturan Toko</a>
+            <a href="user.html" class="nav-card" id="menuUsers" style="display:none;">👥 Kelola Pengguna</a>
+            <a href="setting.html" class="nav-card" id="menuSettings" style="display:none;">⚙️ Pengaturan Toko</a>
         </div>
     </div>
-    <script src="js/auth.js"></script>
+    <script src="auth.js"></script>
     <script>
         checkAuth();
         document.getElementById('userNameDisplay').innerText = localStorage.getItem('currentUser');
