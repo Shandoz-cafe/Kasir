@@ -7,30 +7,25 @@
 </head>
 <body>
     <header>
-        <h2>Pengaturan & Cetak</h2>
-        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+        <h2>Setup Identitas Toko</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container">
-        <div class="card" style="max-width: 400px;">
-            <label><strong>Nama Cafe / Toko (Tampil di Struk)</strong></label>
-            <input type="text" id="storeNameInput" style="margin-top: 10px; margin-bottom: 20px;">
+        <div class="card" style="max-width: 450px; margin: auto;">
+            <label><strong>Nama Tercetak di Struk</strong></label>
+            <input type="text" id="storeNameInput" style="margin-top: 10px; margin-bottom: 20px;" placeholder="SHANDOZ Cafe">
             
-            <label><strong>Desain Logo Struk</strong></label>
-            <br><small style="color: #7f8c8d;">Pilih gambar logo eksklusifmu di sini. Pastikan kontrasnya cukup tinggi.</small>
+            <label><strong>Logo Struk Thermal</strong></label>
+            <br><small style="color: #7f8c8d;">Pilih file desain logo hitam-putih milikmu (Opsional).</small>
             <input type="file" id="logoInput" accept="image/*" style="margin-top: 10px;" onchange="previewLogo(event)">
             
-            <div style="margin-top: 10px; text-align: center;">
-                <img id="logoPreview" src="" alt="Preview Logo" style="max-width: 80px; display: none; border-radius: 8px; border: 1px solid #ddd; padding: 5px;">
+            <div style="margin-top: 10px; text-align: center; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                <img id="logoPreview" src="" alt="Preview" style="max-width: 80px; display: none; filter: grayscale(100%); mix-blend-mode: multiply;">
             </div>
             
-            <button class="primary" onclick="saveSettings()" style="margin-top: 20px; width: 100%;">Simpan Perubahan</button>
+            <button class="primary" onclick="saveSettings()" style="margin-top: 20px; width: 100%;">💾 Simpan Pengaturan</button>
         </div>
     </div>
-    <script src="auth.js"></script>
-    <script>
-        checkAuth();
-        if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
-    </script>
-    <script src="setting.js"></script>
+    <script src="auth.js"></script><script>checkAuth(); if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';</script><script src="setting.js"></script>
 </body>
 </html>
