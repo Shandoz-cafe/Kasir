@@ -5,30 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kasir Web - Login</title>
 <link rel="stylesheet" href="css/style.css">
+<style>
+body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display:flex; justify-content:center; align-items:center; height:100vh; }
+.login-card { background:white; padding:30px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:300px; text-align:center; }
+.login-card h2 { margin-bottom:20px; }
+.login-card input { width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc; }
+.login-card button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:8px; background:#3498db; color:white; font-weight:bold; cursor:pointer; }
+.login-card button:hover { background:#2980b9; }
+.login-card small { display:block; margin-top:5px; color:#888; cursor:pointer; }
+</style>
 </head>
 <body>
 
-<div class="login-screen">
-    <h2>🔐 Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <p id="loginMsg"></p>
+<div class="login-card">
+    <h2>Kasir Web</h2>
 
-    <h3>📝 Register</h3>
-    <input type="text" id="regUser" placeholder="Username">
-    <input type="password" id="regPass" placeholder="Password">
-    <button onclick="register()">Register</button>
-    <p id="regMsg"></p>
+    <div id="loginForm">
+        <input type="text" id="loginUser" placeholder="Username">
+        <input type="password" id="loginPass" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <small onclick="showRegister()">Buat Akun</small>
+        <small onclick="showChangePass()">Ganti Password</small>
+    </div>
 
-    <h3>🔄 Ganti Password</h3>
-    <input type="text" id="chgUser" placeholder="Username">
-    <input type="password" id="oldPass" placeholder="Password lama">
-    <input type="password" id="newPass" placeholder="Password baru">
-    <button onclick="changePassword()">Ganti Password</button>
-    <p id="chgMsg"></p>
+    <div id="registerForm" style="display:none;">
+        <input type="text" id="regUser" placeholder="Username Baru">
+        <input type="password" id="regPass" placeholder="Password Baru">
+        <button onclick="register()">Register</button>
+        <small onclick="showLogin()">Kembali ke Login</small>
+    </div>
+
+    <div id="changePassForm" style="display:none;">
+        <input type="text" id="cpUser" placeholder="Username">
+        <input type="password" id="cpOldPass" placeholder="Password Lama">
+        <input type="password" id="cpNewPass" placeholder="Password Baru">
+        <button onclick="changePassword()">Ganti Password</button>
+        <small onclick="showLogin()">Kembali ke Login</small>
+    </div>
 </div>
 
-<script src="js/auth.js"></script>
+<script src="js/users.js"></script>
+<script>
+function showLogin(){
+    document.getElementById('loginForm').style.display='block';
+    document.getElementById('registerForm').style.display='none';
+    document.getElementById('changePassForm').style.display='none';
+}
+
+function showRegister(){
+    document.getElementById('loginForm').style.display='none';
+    document.getElementById('registerForm').style.display='block';
+    document.getElementById('changePassForm').style.display='none';
+}
+
+function showChangePass(){
+    document.getElementById('loginForm').style.display='none';
+    document.getElementById('registerForm').style.display='none';
+    document.getElementById('changePassForm').style.display='block';
+}
+
+// ===== LOGIN OFFLINE =====
+function login(){
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    const users = getUsers();
+    const user = users.find(u=>u.username===username && u.password===password);
+    if(user){
+        localStorage.setItem('currentUser', username);
+        alert('Login berhasil!');
+        window.location.href='dashboard.html';
+    }else{
+        alert('Username atau password salah!');
+    }
+}
+
+// ===== REGISTER OFFLINE =====
+function register(){
+    const username = document.getElementById('regUser').value.trim();
+    const password = document.getElementById('regPass').value;
+    if(!username || !password){ alert('Isi username dan password!'); return; }
+    const users = getUsers();
+    if(users.some(u=>u.username===username)){ alert('Username sudah ada!'); return; }
+    users.push({username,password});
+    saveUsers(users);
+    alert('Akun berhasil dibuat!');
+    showLogin();
+}
+
+// ===== CHANGE PASSWORD OFFLINE =====
+function changePassword(){
+    const username = document.getElementById('cpUser').value.trim();
+    const oldPass = document.getElementById('cpOldPass').value;
+    const newPass = document.getElementById('cpNewPass').value;
+    const users = getUsers();
+    const user = users.find(u=>u.username===username && u.password===oldPass);
+    if(!user){ alert('Username atau password lama salah!'); return; }
+    user.password = newPass;
+    saveUsers(users);
+    alert('Password berhasil diubah!');
+    showLogin();
+}
+</script>
+
 </body>
 </html>
