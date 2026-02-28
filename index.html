@@ -1,25 +1,26 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kasir Pro Offline - Login</title>
+<title>Kasir Offline - Login</title>
 <link rel="stylesheet" href="css/style.css">
-<script src="js/auth_offline.js" defer></script>
 </head>
 <body>
-<div id="loginScreen" class="login-screen">
-    <h2>🔐 Login Kasir Pro Offline</h2>
+<div class="login-screen">
+    <h2>🔐 Login Kasir</h2>
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <p id="loginMsg" style="color:red;"></p>
+    <button onclick="login()">Login</button>
+    <p id="loginMsg" style="color:red; margin-top:10px;"></p>
+
+    <h3>🔄 Ganti Password</h3>
+    <input type="text" id="chgUser" placeholder="Username">
+    <input type="password" id="oldPass" placeholder="Password lama">
+    <input type="password" id="newPass" placeholder="Password baru">
+    <button onclick="changePassword()">Ganti Password</button>
+    <p id="chgMsg" style="color:green; margin-top:10px;"></p>
 </div>
 
-<div id="mainApp" style="display:none;">
-    <p>Selamat datang, <span id="userName"></span></p>
-    <a href="pos.html">Masuk ke POS</a>
-    <button id="logoutBtn">Logout</button>
-</div>
+<script src="js/auth_offline.js"></script>
 </body>
 </html>
