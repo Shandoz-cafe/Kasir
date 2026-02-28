@@ -2,26 +2,59 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Penjualan</title>
+    <title>Buku Keuangan Pintar</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h2>Laporan Penjualan</h2>
-        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+        <h2>Akuntansi Keuangan</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-            <h3 style="margin:0;">Total Pendapatan: Rp <span id="totalRevenue">0</span></h3>
-            <button class="danger" onclick="clearReports()">Hapus Riwayat</button>
+        <div class="summary-grid">
+            <div class="summary-card" style="background: #3498db;">
+                <h4>Total Pemasukan Kotor</h4>
+                <h2 id="sumOmzet">Rp 0</h2>
+            </div>
+            <div class="summary-card" style="background: #f39c12;">
+                <h4>Laba Penjualan (Kotor)</h4>
+                <h2 id="sumMargin">Rp 0</h2>
+            </div>
+            <div class="summary-card" style="background: #e74c3c;">
+                <h4>Total Beban Pengeluaran</h4>
+                <h2 id="sumExpense">Rp 0</h2>
+            </div>
+            <div class="summary-card" style="background: #27ae60;">
+                <h4>Total Laba Bersih</h4>
+                <h2 id="sumNet">Rp 0</h2>
+            </div>
         </div>
-        <table>
-            <thead><tr><th>No</th><th>Tanggal</th><th>Kasir</th><th>Detail Pembelian</th><th>Total (Rp)</th></tr></thead>
-            <tbody id="reportList"></tbody>
-        </table>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="card" style="flex: 2; min-width: 300px;">
+                <h3 style="margin-top:0;">Riwayat Penjualan</h3>
+                <table>
+                    <thead><tr><th>No</th><th>Tanggal</th><th>Omzet</th><th>Laba</th></tr></thead>
+                    <tbody id="salesList"></tbody>
+                </table>
+            </div>
+
+            <div class="card" style="flex: 1; min-width: 300px;">
+                <h3 style="margin-top:0; color:#e74c3c;">Input Pengeluaran Operasional</h3>
+                <small style="color: #7f8c8d; display:block; margin-bottom: 10px;">Catat biaya listrik, sewa, gaji karyawan, beli bahan baku, dll.</small>
+                <input type="text" id="expDesc" placeholder="Keterangan (Contoh: Beli Susu Kental)">
+                <input type="number" id="expAmount" placeholder="Nominal (Rp)">
+                <button class="danger" style="width: 100%; margin-bottom: 20px;" onclick="addExpense()">➖ Catat Pengeluaran</button>
+                
+                <h4 style="border-bottom: 1px solid #eee; padding-bottom: 5px;">Riwayat Keluar</h4>
+                <table style="font-size: 0.85rem;">
+                    <thead><tr><th>No</th><th>Tgl</th><th>Keterangan</th><th>Nominal</th></tr></thead>
+                    <tbody id="expenseList"></tbody>
+                </table>
+            </div>
+        </div>
+        <button class="danger" style="margin-top: 20px;" onclick="clearFinanceData()">⚠️ Hapus Seluruh Riwayat Keuangan</button>
     </div>
-    <script src="auth.js"></script>
-    <script>checkAuth();</script>
-    <script src="reports.js"></script>
+    <script src="auth.js"></script><script>checkAuth();</script><script src="reports.js"></script>
 </body>
 </html>
