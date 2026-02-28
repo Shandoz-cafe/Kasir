@@ -47,3 +47,9 @@ table tr:hover { background: #f8fafc; }
 .payment-box { background: #f8fafc; padding: 20px; border-radius: 15px; margin-top: 15px; border: 1px dashed #cbd5e1; }
 .payment-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.1rem; align-items: center; }
 .payment-total { font-size: 1.8rem; font-weight: 700; color: #e74c3c; border-top: 2px solid #e2e8f0; padding-top: 15px; margin-top: 15px; }
+
+/* Modal Preview Struk */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
+.modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.receipt-preview { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px auto; width: 58mm; text-align: left; font-family: 'Courier New', monospace; font-size: 11px; color: black; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+.filter-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
