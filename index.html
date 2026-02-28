@@ -3,16 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kasir Pro - Login</title>
+<title>Kasir Pro Offline - Login</title>
 <link rel="stylesheet" href="css/style.css">
-<script type="module" src="js/firebase.js"></script>
-<script type="module" src="js/auth.js"></script>
+<script src="js/auth_offline.js" defer></script>
 </head>
 <body>
-<div id="loginScreen">
-    <h2>🔐 Login Kasir Pro</h2>
-    <button id="googleLoginBtn">Login dengan Google</button>
+<div id="loginScreen" class="login-screen">
+    <h2>🔐 Login Kasir Pro Offline</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <p id="loginMsg" style="color:red;"></p>
 </div>
+
 <div id="mainApp" style="display:none;">
     <p>Selamat datang, <span id="userName"></span></p>
     <a href="pos.html">Masuk ke POS</a>
