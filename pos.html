@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h2>Terminal Kasir</h2>
+        <h2>Terminal Kasir - SHANDOZ</h2>
         <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container" style="display: flex; gap: 25px; flex-wrap: wrap;">
@@ -22,39 +22,55 @@
 
         <div class="card" style="flex: 1.2; min-width: 380px;">
             <h3 style="margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">🛒 Keranjang</h3>
-            <div id="cartItems" style="min-height: 150px; max-height: 350px; overflow-y: auto;"></div>
+            <div id="cartItems" style="min-height: 120px; max-height: 250px; overflow-y: auto;"></div>
             
             <div class="payment-box">
-                <div class="payment-row"><span>Subtotal:</span><span id="subtotalDisplay">Rp 0</span></div>
+                <div class="payment-row">
+                    <span style="font-size: 0.9rem;">Pelanggan:</span>
+                    <input type="text" id="custName" placeholder="Nama (Opsional)" style="width: 150px; margin:0; padding:8px; font-size:0.9rem;">
+                </div>
+                <div class="payment-row">
+                    <span style="font-size: 0.9rem;">Metode:</span>
+                    <select id="payMethod" style="width: 150px; margin:0; padding:8px; font-size:0.9rem;" onchange="handlePaymentMethod()">
+                        <option value="Tunai">💵 Tunai</option>
+                        <option value="QRIS">📱 QRIS</option>
+                        <option value="Debit">💳 Kartu Debit</option>
+                    </select>
+                </div>
+                <div class="payment-row" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                    <span>Subtotal:</span><span id="subtotalDisplay">Rp 0</span>
+                </div>
                 <div class="payment-row" style="align-items:center;">
-                    <span>Diskon (Rp):</span>
-                    <input type="number" id="discountInput" value="0" style="width: 140px; margin:0; padding:10px;" oninput="calculateTotal()">
+                    <span>Diskon (%):</span>
+                    <input type="number" id="discountInput" value="0" min="0" max="100" style="width: 80px; margin:0; padding:8px;" oninput="calculateTotal()">
                 </div>
                 <div class="payment-row payment-total"><span>TOTAL:</span><span id="grandTotalDisplay">Rp 0</span></div>
             </div>
 
-            <div style="margin-top: 20px;">
-                <label>Uang Tunai Pelanggan (Rp):</label>
-                <input type="number" id="cashInput" placeholder="100000" style="font-size: 1.5rem; font-weight: bold; color: #27ae60; padding: 15px;" oninput="calculateTotal()">
+            <div style="margin-top: 15px;">
+                <label>Uang Tunai (Rp):</label>
+                <input type="number" id="cashInput" placeholder="Contoh: 100000" style="font-size: 1.5rem; font-weight: bold; color: #27ae60; padding: 15px;" oninput="calculateTotal()">
                 <div class="payment-row" style="font-size: 1.3rem; color: #2a5298; font-weight: bold; margin-top: 15px;">
                     <span>Kembali:</span><span id="changeDisplay">Rp 0</span>
                 </div>
             </div>
-            <button class="success" style="width: 100%; padding: 20px; font-size: 1.3rem; margin-top: 20px;" onclick="previewCheckout()">👀 Preview & Proses Bayar</button>
+            <button class="success" style="width: 100%; padding: 20px; font-size: 1.3rem; margin-top: 15px;" onclick="previewCheckout()">👀 Preview & Bayar</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="previewModal">
         <div class="modal-box">
-            <h3 style="margin-top: 0; color: #1e3c72;">Pratinjau Struk & Tiket Dapur</h3>
+            <h3 style="margin-top: 0; color: #1e3c72;">Pratinjau Struk</h3>
             <div class="receipt-preview" id="receiptPreviewContent"></div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="danger" style="flex: 1;" onclick="closePreview()">Batal</button>
-                <button class="primary" style="flex: 2; font-size: 1.1rem;" onclick="confirmAndPrint()">🖨️ Cetak (RawBT)</button>
+                <button class="primary" style="flex: 2; font-size: 1.1rem;" onclick="confirmAndPrint()">🖨️ Cetak Langsung</button>
             </div>
         </div>
     </div>
 
-    <script src="auth.js"></script><script>checkAuth();</script><script src="pos.js"></script>
+    <script src="auth.js"></script>
+    <script>checkAuth();</script>
+    <script src="pos.js"></script>
 </body>
 </html>
