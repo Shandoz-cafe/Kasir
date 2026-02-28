@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Penjualan</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Laporan Penjualan</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+    </header>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+            <h3 style="margin:0;">Total Pendapatan: Rp <span id="totalRevenue">0</span></h3>
+            <button class="danger" onclick="clearReports()">Hapus Riwayat</button>
+        </div>
+        <table>
+            <thead><tr><th>No</th><th>Tanggal</th><th>Kasir</th><th>Detail Pembelian</th><th>Total (Rp)</th></tr></thead>
+            <tbody id="reportList"></tbody>
+        </table>
+    </div>
+    <script src="js/auth.js"></script>
+    <script>checkAuth();</script>
+    <script src="js/reports.js"></script>
+</body>
+</html>
