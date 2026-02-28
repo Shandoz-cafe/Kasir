@@ -1,17 +1,28 @@
 let cart = [];
 let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0, discountNominal = 0;
-let currentCategory = 'Semua', searchQuery = '';
+let currentCategory = 'Semua', searchQuery = '', currentSort = 'AZ';
 let pendingSale = null;
 
 function loadPOSProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    // Render Navigasi Kategori (Pills)
     const categories = ['Semua', ...new Set(products.map(p => p.category || 'Umum'))];
     const catContainer = document.getElementById('categoryButtons');
     if(catContainer) {
-        catContainer.innerHTML = categories.map(c => `<button class="category-btn ${currentCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`).join('');
+        catContainer.innerHTML = categories.map(c => `<button class="cat-btn ${currentCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`).join('');
     }
 
-    const filtered = products.filter(p => (currentCategory === 'Semua' || (p.category || 'Umum') === currentCategory) && p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    // Filter by Kategori & Pencarian
+    let filtered = products.filter(p => (currentCategory === 'Semua' || (p.category || 'Umum') === currentCategory) && p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Urutkan A-Z / Z-A
+    if(currentSort === 'AZ') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if(currentSort === 'ZA') {
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
     document.getElementById('productsContainer').innerHTML = filtered.map(p => {
         const isOut = p.stock < 1;
         return `<div class="product-card ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
@@ -22,6 +33,7 @@ function loadPOSProducts() {
 
 function setCategory(cat) { currentCategory = cat; loadPOSProducts(); }
 function filterProducts() { searchQuery = document.getElementById('searchInput').value; loadPOSProducts(); }
+function setSort(sortType) { currentSort = sortType; loadPOSProducts(); }
 
 function addToCart(id) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -40,9 +52,9 @@ function addToCart(id) {
 function renderCart() {
     document.getElementById('cartItems').innerHTML = cart.map((item, i) => `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:8px;">
-            <div style="line-height:1.3;"><strong>${item.name}</strong><br><small>${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</small></div>
-            <div style="display:flex; align-items:center; gap:15px;">
-                <strong>Rp ${item.total.toLocaleString('id-ID')}</strong><button class="danger" style="padding:4px 10px;" onclick="cart.splice(${i}, 1); renderCart();">X</button>
+            <div style="line-height:1.2;"><strong>${item.name}</strong><br><small style="color:#7f8c8d;">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</small></div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <strong style="font-size:0.95rem;">Rp ${item.total.toLocaleString('id-ID')}</strong><button class="danger" style="padding:4px 8px; border-radius:5px;" onclick="cart.splice(${i}, 1); renderCart();">X</button>
             </div>
         </div>
     `).join('');
@@ -81,7 +93,7 @@ function calculateTotal() {
     document.getElementById('subtotalDisplay').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
     document.getElementById('grandTotalDisplay').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
     const cd = document.getElementById('changeDisplay');
-    if (change < 0 && cash > 0) { cd.innerText = "Uang Kurang!"; cd.style.color = "#e74c3c"; } 
+    if (change < 0 && cash > 0) { cd.innerText = "Kurang!"; cd.style.color = "#e74c3c"; } 
     else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#2a5298"; }
 }
 
@@ -90,7 +102,7 @@ function previewCheckout() {
     let cash = parseFloat(document.getElementById('cashInput').value) || 0;
     if(cash < grandTotal) return alert('Uang bayar kurang!');
 
-    const custName = document.getElementById('custName').value.trim() || 'Pelanggan Umum';
+    const custName = document.getElementById('custName').value.trim() || 'Umum';
     const payMethod = document.getElementById('payMethod').value;
 
     pendingSale = { 
@@ -103,7 +115,6 @@ function previewCheckout() {
     const storeLogo = localStorage.getItem('storeLogo');
     let logoHtml = storeLogo ? `<img src="${storeLogo}" style="max-width: 50px; display: block; margin: 0 auto 5px auto; filter: grayscale(100%);">` : '';
 
-    // HTML Preview untuk Layar
     let contentHTML = `
         <div style="text-align: center;">${logoHtml}<strong>${storeName}</strong><br><small>Kasir: ${pendingSale.user}<br>${pendingSale.date}</small></div>
         <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${pendingSale.customer}</strong></small></div>
@@ -131,22 +142,17 @@ function closePreview() { document.getElementById('previewModal').style.display 
 function confirmAndPrint() {
     if(!pendingSale) return;
 
-    // Potong Stok
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     pendingSale.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
     localStorage.setItem('products', JSON.stringify(products));
 
-    // Simpan Laporan
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
     sales.push(pendingSale); localStorage.setItem('sales', JSON.stringify(sales));
 
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
     const storeLogo = localStorage.getItem('storeLogo');
-    
-    // Trik Logo untuk RawBT (Base64 dimasukkan langsung sebagai Image)
     let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
     
-    // HTML Struk yang akan masuk ke Mesin Printer
     let printHTML = `
     <div style="text-align: center; font-family: monospace;">
         ${logoHtml}
@@ -169,22 +175,12 @@ function confirmAndPrint() {
     <div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>
     `;
 
-    // JALUR TOL KE RAWBT (Mencegah Layar PDF Android Terbuka)
     const base64html = btoa(unescape(encodeURIComponent(printHTML)));
-    const rawbtUrl = "rawbt:data:text/html;base64," + base64html;
-    
-    // Buka aplikasi RawBT secara otomatis
-    window.location.href = rawbtUrl;
+    window.location.href = "rawbt:data:text/html;base64," + base64html;
 
-    // Refresh halaman dan bersihkan kasir
     setTimeout(() => { 
-        cart = []; 
-        document.getElementById('discountInput').value = 0; 
-        document.getElementById('cashInput').value = ''; 
-        document.getElementById('custName').value = '';
-        closePreview(); 
-        loadPOSProducts(); 
-        renderCart();
+        cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
+        closePreview(); loadPOSProducts(); renderCart();
     }, 1500);
 }
 
