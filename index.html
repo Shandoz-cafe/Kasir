@@ -45,26 +45,13 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display:flex; j
 </div>
 
 <script src="js/users.js"></script>
+<script src="js/auth.js"></script>
 <script>
-function showLogin(){
-    document.getElementById('loginForm').style.display='block';
-    document.getElementById('registerForm').style.display='none';
-    document.getElementById('changePassForm').style.display='none';
-}
+function showLogin(){ document.getElementById('loginForm').style.display='block'; document.getElementById('registerForm').style.display='none'; document.getElementById('changePassForm').style.display='none'; }
+function showRegister(){ document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; document.getElementById('changePassForm').style.display='none'; }
+function showChangePass(){ document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='none'; document.getElementById('changePassForm').style.display='block'; }
 
-function showRegister(){
-    document.getElementById('loginForm').style.display='none';
-    document.getElementById('registerForm').style.display='block';
-    document.getElementById('changePassForm').style.display='none';
-}
-
-function showChangePass(){
-    document.getElementById('loginForm').style.display='none';
-    document.getElementById('registerForm').style.display='none';
-    document.getElementById('changePassForm').style.display='block';
-}
-
-// ===== LOGIN OFFLINE =====
+// LOGIN OFFLINE
 function login(){
     const username = document.getElementById('loginUser').value.trim();
     const password = document.getElementById('loginPass').value;
@@ -72,14 +59,13 @@ function login(){
     const user = users.find(u=>u.username===username && u.password===password);
     if(user){
         localStorage.setItem('currentUser', username);
-        alert('Login berhasil!');
         window.location.href='dashboard.html';
     }else{
         alert('Username atau password salah!');
     }
 }
 
-// ===== REGISTER OFFLINE =====
+// REGISTER OFFLINE
 function register(){
     const username = document.getElementById('regUser').value.trim();
     const password = document.getElementById('regPass').value;
@@ -92,7 +78,7 @@ function register(){
     showLogin();
 }
 
-// ===== CHANGE PASSWORD OFFLINE =====
+// CHANGE PASSWORD OFFLINE
 function changePassword(){
     const username = document.getElementById('cpUser').value.trim();
     const oldPass = document.getElementById('cpOldPass').value;
