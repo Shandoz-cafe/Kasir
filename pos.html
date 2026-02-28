@@ -12,39 +12,49 @@
         <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container" style="display: flex; gap: 25px; flex-wrap: wrap;">
-        
         <div style="flex: 2.5; min-width: 350px;">
             <div class="filter-container">
                 <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari menu..." oninput="filterProducts()">
-                <div class="category-scroll" id="categoryButtons">
-                    </div>
+                <div class="category-scroll" id="categoryButtons"></div>
             </div>
             <div class="product-grid" id="productsContainer"></div>
         </div>
 
-        <div class="card" style="flex: 1.2; min-width: 380px; position: sticky; top: 20px; height: fit-content;">
-            <h3 style="margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size:1.4rem;">🛒 Keranjang Belanja</h3>
+        <div class="card" style="flex: 1.2; min-width: 380px;">
+            <h3 style="margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">🛒 Keranjang</h3>
             <div id="cartItems" style="min-height: 150px; max-height: 350px; overflow-y: auto;"></div>
             
             <div class="payment-box">
-                <div class="payment-row"><span>Subtotal:</span><span id="subtotalDisplay" style="font-weight:600;">Rp 0</span></div>
+                <div class="payment-row"><span>Subtotal:</span><span id="subtotalDisplay">Rp 0</span></div>
                 <div class="payment-row" style="align-items:center;">
                     <span>Diskon (Rp):</span>
-                    <input type="number" id="discountInput" value="0" style="width: 140px; margin:0; padding:10px; font-size:1.1rem;" oninput="calculateTotal()">
+                    <input type="number" id="discountInput" value="0" style="width: 140px; margin:0; padding:10px;" oninput="calculateTotal()">
                 </div>
                 <div class="payment-row payment-total"><span>TOTAL:</span><span id="grandTotalDisplay">Rp 0</span></div>
             </div>
 
             <div style="margin-top: 20px;">
-                <label style="font-size: 1rem; font-weight: 600;">Uang Tunai Pelanggan (Rp):</label>
+                <label>Uang Tunai Pelanggan (Rp):</label>
                 <input type="number" id="cashInput" placeholder="100000" style="font-size: 1.5rem; font-weight: bold; color: #27ae60; padding: 15px;" oninput="calculateTotal()">
                 <div class="payment-row" style="font-size: 1.3rem; color: #2a5298; font-weight: bold; margin-top: 15px;">
-                    <span>Kembalian:</span><span id="changeDisplay">Rp 0</span>
+                    <span>Kembali:</span><span id="changeDisplay">Rp 0</span>
                 </div>
             </div>
-            <button class="success" style="width: 100%; padding: 20px; font-size: 1.3rem; margin-top: 20px; border-radius: 12px;" onclick="checkout()">💵 BAYAR & CETAK (RawBT)</button>
+            <button class="success" style="width: 100%; padding: 20px; font-size: 1.3rem; margin-top: 20px;" onclick="previewCheckout()">👀 Preview & Proses Bayar</button>
         </div>
     </div>
+
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-box">
+            <h3 style="margin-top: 0; color: #1e3c72;">Pratinjau Struk & Tiket Dapur</h3>
+            <div class="receipt-preview" id="receiptPreviewContent"></div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="danger" style="flex: 1;" onclick="closePreview()">Batal</button>
+                <button class="primary" style="flex: 2; font-size: 1.1rem;" onclick="confirmAndPrint()">🖨️ Cetak (RawBT)</button>
+            </div>
+        </div>
+    </div>
+
     <script src="auth.js"></script><script>checkAuth();</script><script src="pos.js"></script>
 </body>
 </html>
