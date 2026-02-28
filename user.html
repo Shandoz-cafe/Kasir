@@ -3,22 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Users</title>
+<title>Users - Kasir Web</title>
 <link rel="stylesheet" href="css/style.css">
+<style>
+body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; padding:20px; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+header h2 { margin:0; }
+table { width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.1); }
+table th, table td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+table th { background:#3498db; color:white; }
+table tr:hover { background:#f1f1f1; }
+input { padding:8px; margin-right:5px; border-radius:5px; border:1px solid #ccc; }
+button { padding:5px 10px; border:none; border-radius:5px; cursor:pointer; margin-right:5px; }
+button.edit { background:#f39c12; color:white; }
+button.delete { background:#e74c3c; color:white; }
+</style>
 </head>
 <body>
-<h2>👥 Users</h2>
-<button onclick="backToDashboard()">⬅️ Dashboard</button>
+
+<header>
+    <h2>Users / Admin</h2>
+    <button onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+</header>
 
 <div>
-    <input type="text" id="userName" placeholder="Username">
-    <input type="password" id="userPass" placeholder="Password">
-    <button onclick="addUser()">➕ Tambah User</button>
+    <input type="text" id="newUser" placeholder="Username baru">
+    <input type="password" id="newPass" placeholder="Password baru">
+    <button onclick="addUser()">Tambah User</button>
 </div>
 
-<h3>Daftar Users</h3>
-<div id="userList"></div>
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody id="userList"></tbody>
+</table>
 
 <script src="js/users.js"></script>
+
 </body>
 </html>
