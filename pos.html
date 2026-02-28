@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kasir Pro Offline - POS</title>
+<title>Kasir Offline - POS</title>
 <link rel="stylesheet" href="css/style.css">
-<script src="js/pos_offline.js" defer></script>
 </head>
 <body>
-<h2>💰 POS Offline</h2>
-<a href="admin.html">Admin Produk</a>
-
-<div>
-    <label>Produk:</label>
-    <input type="text" id="saleProduct" placeholder="Nama Produk">
-    <label>Jumlah:</label>
-    <input type="number" id="saleQty" value="1" min="1">
-    <button onclick="addToCart()">➕ Tambah Item</button>
+<div class="container">
+    <h2>🛒 Kasir Offline</h2>
+    <a href="index.html" onclick="logout()">Logout</a>
+    
+    <div class="products-grid" id="productsGrid"></div>
+    
+    <div class="cart">
+        <h3>Keranjang</h3>
+        <div id="cartItems"></div>
+        <div class="cart-total">Total: Rp <span id="cartTotal">0</span></div>
+        <button class="checkout-btn" onclick="checkout()">Checkout & Print</button>
+    </div>
 </div>
 
-<div id="cartList" style="margin-top:20px;"></div>
-<div>
-    Total: <span id="cartTotal">Rp 0</span>
-    <button onclick="checkout()">✅ Bayar & Print</button>
-    <button onclick="clearCart()">🗑️ Kosongkan</button>
-</div>
+<script src="js/pos_offline.js"></script>
 </body>
 </html>
