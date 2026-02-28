@@ -11,13 +11,13 @@
         <button class="danger" onclick="logout()">Logout</button>
     </header>
     <div class="container">
-        <h3 style="margin-top:0;">Menu Cepat</h3>
+        <h3 style="margin-top:0;">Menu Utama</h3>
         <div class="nav-grid">
             <a href="pos.html" class="nav-card">🛒 <br>Kasir (POS)</a>
-            <a href="product.html" class="nav-card">📦 <br>Stok Produk</a>
-            <a href="reports.html" class="nav-card">📊 <br>Buku Keuangan</a>
-            <a href="user.html" class="nav-card" id="menuUsers" style="display:none;">👥 <br>Akses Staff</a>
-            <a href="setting.html" class="nav-card" id="menuSettings" style="display:none;">⚙️ <br>Setup Printer</a>
+            <a href="product.html" class="nav-card admin-only" style="display:none;">📦 <br>Stok Produk</a>
+            <a href="reports.html" class="nav-card admin-only" style="display:none;">📊 <br>Buku Keuangan</a>
+            <a href="user.html" class="nav-card admin-only" style="display:none;">👥 <br>Akses Staff</a>
+            <a href="setting.html" class="nav-card admin-only" style="display:none;">⚙️ <br>Setup Printer</a>
         </div>
     </div>
     <script src="auth.js"></script>
@@ -25,8 +25,7 @@
         checkAuth();
         document.getElementById('userNameDisplay').innerText = localStorage.getItem('currentUser');
         if(localStorage.getItem('currentRole') === 'admin') {
-            document.getElementById('menuUsers').style.display = 'flex';
-            document.getElementById('menuSettings').style.display = 'flex';
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
         }
     </script>
 </body>
