@@ -2,25 +2,42 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mesin Kasir</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h2>Mesin POS</h2>
-        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+        <h2>Terminal Kasir</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
-    <div class="container" style="display: flex; gap: 20px; align-items: flex-start;">
-        <div id="productsContainer" style="flex: 2; display: flex; flex-wrap: wrap; gap: 15px;"></div>
-        <div class="card" style="flex: 1; min-width: 250px;">
-            <h3 style="margin-top:0;">Keranjang</h3>
-            <div id="cartItems" style="min-height: 150px;"></div>
-            <h3 style="text-align:right; border-top:1px solid #ddd; padding-top:10px;">Total: Rp <span id="cartTotal">0</span></h3>
-            <button class="primary" style="width: 100%; padding: 15px; font-size: 16px; margin-top:10px;" onclick="checkout()">Bayar & Cetak Struk</button>
+    <div class="container" style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 2; min-width: 300px;">
+            <div class="product-grid" id="productsContainer"></div>
+        </div>
+        <div class="card" style="flex: 1; min-width: 320px; position: sticky; top: 20px; height: fit-content;">
+            <h3 style="margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">🛒 Keranjang Belanja</h3>
+            <div id="cartItems" style="min-height: 100px; max-height: 250px; overflow-y: auto;"></div>
+            
+            <div class="payment-box">
+                <div class="payment-row"><span>Subtotal:</span><span id="subtotalDisplay">Rp 0</span></div>
+                <div class="payment-row" style="align-items:center;">
+                    <span>Diskon (Rp):</span>
+                    <input type="number" id="discountInput" value="0" style="width: 120px; margin:0;" oninput="calculateTotal()">
+                </div>
+                <div class="payment-row payment-total"><span>TOTAL:</span><span id="grandTotalDisplay">Rp 0</span></div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label style="font-size: 0.9rem; font-weight: 600;">Uang Tunai Pelanggan (Rp):</label>
+                <input type="number" id="cashInput" placeholder="Contoh: 100000" style="font-size: 1.2rem; font-weight: bold; color: #27ae60;" oninput="calculateTotal()">
+                <div class="payment-row" style="font-size: 1.1rem; color: #2a5298; font-weight: bold;">
+                    <span>Kembalian:</span><span id="changeDisplay">Rp 0</span>
+                </div>
+            </div>
+            <button class="success" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 15px;" onclick="checkout()">💵 Bayar & Cetak Struk (RawBT)</button>
         </div>
     </div>
-    <script src="auth.js"></script>
-    <script>checkAuth();</script>
-    <script src="pos.js"></script>
+    <script src="auth.js"></script><script>checkAuth();</script><script src="pos.js"></script>
 </body>
 </html>
