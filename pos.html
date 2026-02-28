@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesin Kasir Flex</title>
+    <title>Mesin Kasir</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="pos-body">
@@ -18,17 +18,15 @@
                 <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." oninput="filterAndSortProducts()">
                 <select id="filterSelect" onchange="filterAndSortProducts()">
                     <optgroup label="Urutkan Abjad">
-                        <option value="sort-AZ">A sampai Z</option>
-                        <option value="sort-ZA">Z sampai A</option>
+                        <option value="sort-AZ">Abjad A - Z</option>
+                        <option value="sort-ZA">Abjad Z - A</option>
                     </optgroup>
-                    <optgroup label="Pilih Kategori (A-Z)" id="categoryOptions">
+                    <optgroup label="Filter Kategori" id="categoryOptions">
                         </optgroup>
                 </select>
             </div>
             
-            <div class="product-scroll">
-                <div class="product-grid" id="productsContainer"></div>
-            </div>
+            <div class="product-grid" id="productsContainer"></div>
         </div>
 
         <div class="pos-right">
@@ -39,11 +37,11 @@
             <div class="payment-section">
                 <div class="payment-row">
                     <span>Pelanggan:</span>
-                    <input type="text" id="custName" placeholder="Nama..." style="width: 140px; padding:6px; font-size:0.85rem;">
+                    <input type="text" id="custName" placeholder="Nama..." style="width: 140px; padding:6px 10px; font-size:0.85rem; margin:0; border-radius:6px;">
                 </div>
                 <div class="payment-row">
                     <span>Bayar via:</span>
-                    <select id="payMethod" style="width: 140px; padding:6px; font-size:0.85rem;" onchange="handlePaymentMethod()">
+                    <select id="payMethod" style="width: 140px; padding:6px 10px; font-size:0.85rem; margin:0; border-radius:6px;" onchange="handlePaymentMethod()">
                         <option value="Tunai">💵 Tunai</option>
                         <option value="QRIS">📱 QRIS</option>
                         <option value="Debit">💳 Debit</option>
@@ -54,19 +52,20 @@
                 </div>
                 <div class="payment-row">
                     <span>Diskon (%):</span>
-                    <input type="number" id="discountInput" value="0" min="0" max="100" style="width: 70px; padding:6px; text-align:center;" oninput="calculateTotal()">
+                    <input type="number" id="discountInput" value="0" min="0" max="100" style="width: 70px; padding:6px; text-align:center; margin:0; border-radius:6px;" oninput="calculateTotal()">
                 </div>
                 <div class="payment-row payment-total">
                     <span>TOTAL:</span><span id="grandTotalDisplay">Rp 0</span>
                 </div>
 
                 <div style="margin-top: 10px;">
-                    <input type="number" id="cashInput" placeholder="Uang Tunai (Rp)" style="font-size: 1.2rem; font-weight: bold; color: #27ae60; padding: 12px; text-align:center;" oninput="calculateTotal()">
+                    <input type="number" id="cashInput" placeholder="Uang Tunai (Rp)" style="font-size: 1.2rem; font-weight: bold; color: #27ae60; padding: 12px; text-align:center; margin:0; border-radius:8px; width:100%; box-sizing:border-box;" oninput="calculateTotal()">
                     <div class="payment-row" style="font-size: 1.1rem; color: #2a5298; font-weight: bold; margin-top: 5px;">
                         <span>Kembali:</span><span id="changeDisplay">Rp 0</span>
                     </div>
                 </div>
-                <button class="success" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px;" onclick="previewCheckout()">👀 Preview & Bayar</button>
+                
+                <button class="success" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px; border-radius:8px;" onclick="previewCheckout()">👀 Preview & Bayar</button>
             </div>
         </div>
     </div>
