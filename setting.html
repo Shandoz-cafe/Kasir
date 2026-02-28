@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Pengaturan Toko</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
@@ -26,11 +26,11 @@
             <button class="primary" onclick="saveSettings()" style="margin-top: 20px; width: 100%;">Simpan Perubahan</button>
         </div>
     </div>
-    <script src="js/auth.js"></script>
+    <script src="auth.js"></script>
     <script>
         checkAuth();
         if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
     </script>
-    <script src="js/settings.js"></script>
+    <script src="setting.js"></script>
 </body>
 </html>
