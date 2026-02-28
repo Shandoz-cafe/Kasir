@@ -1,30 +1,48 @@
-// Akun default offline
-const defaultUser = { username: 'admin', password: '1234' };
+// Default users
+if(!localStorage.getItem('kasirUsers')){
+    localStorage.setItem('kasirUsers', JSON.stringify([
+        {username:'admin', password:'1234', role:'admin'}
+    ]));
+}
 
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const loginScreen = document.getElementById('loginScreen');
-const mainApp = document.getElementById('mainApp');
-const userNameSpan = document.getElementById('userName');
-const loginMsg = document.getElementById('loginMsg');
-
-loginBtn.addEventListener('click', () => {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    // Cek localStorage atau default
-    let user = JSON.parse(localStorage.getItem('kasirUser')) || defaultUser;
-
-    if(username === user.username && password === user.password){
-        loginScreen.style.display='none';
-        mainApp.style.display='block';
-        userNameSpan.textContent = username;
+// Login
+function login(){
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
+    const users = JSON.parse(localStorage.getItem('kasirUsers')) || [];
+    const match = users.find(u => u.username===user && u.password===pass);
+    if(match){
+        localStorage.setItem('currentUser', JSON.stringify(match));
+        // load data user jika belum ada
+        if(!localStorage.getItem('kasirData_'+user)){
+            localStorage.setItem('kasirData_'+user, JSON.stringify({
+                products: [],
+                sales: [],
+                settings: {storeName:'Cafe Bandung', autoPrint:true}
+            }));
+        }
+        window.location.href = match.role==='admin' ? 'admin.html' : 'pos.html';
     } else {
-        loginMsg.textContent = 'Username atau password salah';
+        document.getElementById('loginMsg').innerText = "Username / Password salah!";
     }
-});
+}
 
-logoutBtn.addEventListener('click', () => {
-    loginScreen.style.display='block';
-    mainApp.style.display='none';
-});
+// Ganti password
+function changePassword(){
+    const user = document.getElementById('chgUser').value.trim();
+    const oldPass = document.getElementById('oldPass').value.trim();
+    const newPass = document.getElementById('newPass').value.trim();
+    if(!user || !oldPass || !newPass) return alert('Isi semua data!');
+    
+    const users = JSON.parse(localStorage.getItem('kasirUsers')) || [];
+    const idx = users.findIndex(u=>u.username===user && u.password===oldPass);
+    if(idx===-1){ 
+        document.getElementById('chgMsg').style.color='red';
+        document.getElementById('chgMsg').innerText='Username / Password lama salah!';
+        return;
+    }
+    users[idx].password = newPass;
+    localStorage.setItem('kasirUsers', JSON.stringify(users));
+    document.getElementById('chgMsg').style.color='green';
+    document.getElementById('chgMsg').innerText='Password berhasil diubah!';
+}
