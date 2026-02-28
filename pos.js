@@ -1,5 +1,5 @@
 let cart = [];
-let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0;
+let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0, discountNominal = 0;
 let currentCategory = 'Semua', searchQuery = '';
 let pendingSale = null;
 
@@ -49,12 +49,32 @@ function renderCart() {
     calculateTotal();
 }
 
+function handlePaymentMethod() {
+    const method = document.getElementById('payMethod').value;
+    const cashInput = document.getElementById('cashInput');
+    if(method !== 'Tunai') {
+        cashInput.value = grandTotal;
+        cashInput.disabled = true;
+    } else {
+        cashInput.value = '';
+        cashInput.disabled = false;
+    }
+    calculateTotal();
+}
+
 function calculateTotal() {
     subtotal = cart.reduce((sum, i) => sum + i.total, 0);
     totalProfit = cart.reduce((sum, i) => sum + i.profit, 0);
-    let discount = parseFloat(document.getElementById('discountInput').value) || 0;
-    if(discount > subtotal) { discount = subtotal; document.getElementById('discountInput').value = subtotal; }
-    grandTotal = subtotal - discount;
+    
+    let discountPercent = parseFloat(document.getElementById('discountInput').value) || 0;
+    if(discountPercent > 100) discountPercent = 100;
+    discountNominal = (subtotal * discountPercent) / 100;
+    
+    grandTotal = subtotal - discountNominal;
+    
+    const method = document.getElementById('payMethod').value;
+    if(method !== 'Tunai') document.getElementById('cashInput').value = grandTotal;
+    
     let cash = parseFloat(document.getElementById('cashInput').value) || 0;
     change = cash - grandTotal;
 
@@ -65,31 +85,42 @@ function calculateTotal() {
     else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#2a5298"; }
 }
 
-// === FITUR PREVIEW STRUK ===
 function previewCheckout() {
     if(cart.length === 0) return alert('Keranjang kosong!');
     let cash = parseFloat(document.getElementById('cashInput').value) || 0;
-    let discount = parseFloat(document.getElementById('discountInput').value) || 0;
     if(cash < grandTotal) return alert('Uang bayar kurang!');
 
-    pendingSale = { id: Date.now(), user: localStorage.getItem('currentUser'), date: new Date().toLocaleString('id-ID'), items: cart, subtotal, discount, total: grandTotal, cash, change, netProfit: totalProfit - discount };
+    const custName = document.getElementById('custName').value.trim() || 'Pelanggan Umum';
+    const payMethod = document.getElementById('payMethod').value;
 
-    // Build HTML Preview
+    pendingSale = { 
+        id: Date.now(), user: localStorage.getItem('currentUser'), date: new Date().toLocaleString('id-ID'), 
+        items: cart, subtotal, discount: discountNominal, total: grandTotal, cash, change, 
+        netProfit: totalProfit - discountNominal, customer: custName, method: payMethod
+    };
+
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
-    const storeLogo = localStorage.getItem('storeLogo');
-    let logoHtml = storeLogo ? `<img src="${storeLogo}" style="max-width: 50px; display: block; margin: 0 auto 5px auto; filter: grayscale(100%);">` : '';
-
+    
+    // Tampilan HTML untuk Preview di Layar (Visual saja)
     let contentHTML = `
-        <div style="text-align: center;">${logoHtml}<strong>${storeName}</strong><br><small>Kasir: ${pendingSale.user}<br>${pendingSale.date}</small></div>
+        <div style="text-align: center;"><strong>${storeName}</strong><br><small>Kasir: ${pendingSale.user}<br>${pendingSale.date}</small></div>
+        <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${pendingSale.customer}</strong></small></div>
         <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
         <table style="width:100%; font-size: 11px;">
             ${pendingSale.items.map(i => `<tr><td colspan="2"><strong>${i.name}</strong></td></tr><tr><td>${i.qty}x ${i.price}</td><td style="text-align:right;">${i.total}</td></tr>`).join('')}
         </table>
         <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
-        <div style="text-align: right;"><strong>TOTAL: Rp ${pendingSale.total}</strong></div>
+        <table style="width:100%; font-size: 11px;">
+            <tr><td>Subtotal</td><td style="text-align:right;">${pendingSale.subtotal}</td></tr>
+            ${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${pendingSale.discount}</td></tr>` : ''}
+            <tr><td><strong>TOTAL</strong></td><td style="text-align:right;"><strong>Rp ${pendingSale.total}</strong></td></tr>
+            <tr><td>${pendingSale.method}</td><td style="text-align:right;">${pendingSale.cash}</td></tr>
+            <tr><td>Kembali</td><td style="text-align:right;">${pendingSale.change}</td></tr>
+        </table>
         <div style="text-align: center; margin-top:10px;"><small>Terima Kasih!</small></div>
         
         <div style="border-top: 2px dashed #000; margin-top: 20px; padding-top: 10px; text-align: center;"><strong>--- TIKET DAPUR ---</strong><br><small>ID: ${pendingSale.id}</small></div>
+        <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${pendingSale.customer}</strong></small></div>
         <table style="width:100%; font-size: 13px; margin-top:10px;">
             ${pendingSale.items.map(i => `<tr><td style="padding-bottom:5px;"><strong>${i.name}</strong></td><td style="text-align:right;"><strong>x ${i.qty}</strong></td></tr>`).join('')}
         </table>
@@ -99,12 +130,8 @@ function previewCheckout() {
     document.getElementById('previewModal').style.display = 'flex';
 }
 
-function closePreview() {
-    document.getElementById('previewModal').style.display = 'none';
-    pendingSale = null;
-}
+function closePreview() { document.getElementById('previewModal').style.display = 'none'; pendingSale = null; }
 
-// === CETAK 2 STRUK (Kasir + Dapur) ===
 function confirmAndPrint() {
     if(!pendingSale) return;
 
@@ -117,46 +144,58 @@ function confirmAndPrint() {
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
     sales.push(pendingSale); localStorage.setItem('sales', JSON.stringify(sales));
 
-    // Siapkan Tampilan Print (Kasir + Tiket Dapur)
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
-    const storeLogo = localStorage.getItem('storeLogo');
-    let logoHtml = storeLogo ? `<img src="${storeLogo}" style="max-width: 60px; display: block; margin: 0 auto 5px auto; filter: grayscale(100%);">` : '';
-
+    
+    // HTML Khusus yang akan dikirim langsung ke mesin RawBT
     let printHTML = `
-    <style>
-        @page { margin: 0; size: 58mm auto; } 
-        body { font-family: 'Courier New', monospace; width: 58mm; padding: 5px; margin: 0 auto; font-size: 11px; color: black; background: white; }
-        .center { text-align: center; } .line { border-bottom: 1px dashed #000; margin: 5px 0; }
-        table { width: 100%; border-collapse: collapse; } td { padding: 3px 0; }
-        .right { text-align: right; } .bold { font-weight: bold; }
-        .dapur-ticket { margin-top: 40px; border-top: 2px dashed #000; padding-top: 15px; } /* Jarak untuk disobek */
-    </style>
-    <div class="center">${logoHtml}<h3 style="margin:0; font-size:14px;">${storeName}</h3><p style="margin: 3px 0; font-size: 10px;">ID: ${pendingSale.id}<br>Kasir: ${pendingSale.user}<br>${pendingSale.date}</p></div>
-    <div class="line"></div>
-    <table>${pendingSale.items.map(i => `<tr><td colspan="2" class="bold">${i.name}</td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td class="right">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table>
-    <div class="line"></div>
-    <table>
-        <tr><td>Subtotal</td><td class="right">${pendingSale.subtotal.toLocaleString('id-ID')}</td></tr>
-        ${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td class="right">- ${pendingSale.discount.toLocaleString('id-ID')}</td></tr>` : ''}
-        <tr><td class="bold">TOTAL</td><td class="right bold">Rp ${pendingSale.total.toLocaleString('id-ID')}</td></tr>
-    </table>
-    <div class="line"></div>
-    <table><tr><td>Tunai</td><td class="right">${pendingSale.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembali</td><td class="right">${pendingSale.change.toLocaleString('id-ID')}</td></tr></table>
-    <div class="center" style="margin-top:15px; font-size: 10px;"><p>Terima kasih!</p></div>
-
-    <div class="dapur-ticket center">
-        <h3 style="margin:0;">--- TIKET DAPUR ---</h3>
-        <p style="margin: 3px 0; font-size: 10px;">ID: ${pendingSale.id}<br>${pendingSale.date}</p>
+    <div style="text-align: center; font-family: monospace;">
+        <h3 style="margin:0;">${storeName}</h3>
+        <p style="margin:0; font-size:12px;">Kasir: ${pendingSale.user}<br>${pendingSale.date}</p>
     </div>
-    <div class="line"></div>
-    <table style="font-size: 13px;">
-        ${pendingSale.items.map(i => `<tr><td class="bold" style="padding-bottom:8px;">${i.name}</td><td class="right bold" style="font-size: 14px;">x ${i.qty}</td></tr>`).join('')}
+    <div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${pendingSale.customer}</strong></div>
+    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
+    <table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">
+        ${pendingSale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}
     </table>
-    <div class="center" style="margin-top:20px; font-size: 10px;">.</div>
+    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
+    <table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">
+        <tr><td>Subtotal</td><td style="text-align:right;">${pendingSale.subtotal.toLocaleString('id-ID')}</td></tr>
+        ${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${pendingSale.discount.toLocaleString('id-ID')}</td></tr>` : ''}
+        <tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${pendingSale.total.toLocaleString('id-ID')}</b></td></tr>
+        <tr><td>Bayar (${pendingSale.method})</td><td style="text-align:right;">${pendingSale.cash.toLocaleString('id-ID')}</td></tr>
+        <tr><td>Kembalian</td><td style="text-align:right;">${pendingSale.change.toLocaleString('id-ID')}</td></tr>
+    </table>
+    <div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:10px;">Terima Kasih!</div>
+
+    <div style="margin-top: 40px; border-top: 2px dashed #000; padding-top: 15px; text-align: center; font-family: monospace;">
+        <h3 style="margin:0;">--- TIKET DAPUR ---</h3>
+        <p style="margin:0; font-size:12px;">ID: ${pendingSale.id}<br>${pendingSale.date}</p>
+    </div>
+    <div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${pendingSale.customer}</strong></div>
+    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
+    <table style="width:100%; font-family: monospace; font-size: 14px; border-collapse: collapse;">
+        ${pendingSale.items.map(i => `<tr><td style="padding-bottom:5px;"><b>${i.name}</b></td><td style="text-align:right;"><b>x ${i.qty}</b></td></tr>`).join('')}
+    </table>
+    <div style="text-align: center; font-family: monospace; font-size: 10px; margin-top:20px;">.</div>
     `;
 
-    document.body.innerHTML = printHTML;
-    setTimeout(() => { window.print(); window.location.reload(); }, 500);
+    // TRIK BYPASS ANDROID PDF -> LANGSUNG KE RAWBT
+    const base64html = btoa(unescape(encodeURIComponent(printHTML)));
+    const rawbtUrl = "rawbt:data:text/html;base64," + base64html;
+    
+    // Eksekusi print langsung via URL RawBT
+    window.location.href = rawbtUrl;
+
+    // Reset keranjang setelah ngeprint
+    setTimeout(() => { 
+        cart = []; 
+        document.getElementById('discountInput').value = 0; 
+        document.getElementById('cashInput').value = ''; 
+        document.getElementById('custName').value = '';
+        closePreview(); 
+        loadPOSProducts(); 
+        renderCart();
+    }, 1500);
 }
 
 if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', loadPOSProducts); }
