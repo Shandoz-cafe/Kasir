@@ -27,14 +27,17 @@ table tr:hover { background: #f8fafc; }
 .nav-card:hover { transform: translateY(-5px); background: #1e3c72; color: white; border-color: #1e3c72; }
 
 /* ========================================= */
-/* RESPONSIVE POS LAYOUT (HP & TABLET) */
+/* LAYOUT KASIR BEBAS SCROLL (ANTI KAKU) */
 /* ========================================= */
 .pos-body { min-height: 100vh; background: #f4f7f6; }
-.pos-container { display: flex; flex-direction: column; gap: 15px; padding: 15px; } /* Mode HP: Keranjang pindah ke bawah, bisa di-scroll alami */
+.pos-container { display: flex; flex-direction: column; gap: 15px; padding: 15px; max-width: 1400px; margin: auto; } 
 
 .pos-left { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+
+/* Filter Bar Diperkecil & Proporsional */
 .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
-.filter-bar input, .filter-bar select { margin: 0; flex: 1; min-width: 150px; }
+.filter-bar input { flex: 2; min-width: 150px; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; }
+.filter-bar select { flex: 1; min-width: 130px; max-width: 220px; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; cursor: pointer; }
 
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 .product-card { background: white; padding: 20px 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid #f0f2f5; transition: 0.2s; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
@@ -45,9 +48,15 @@ table tr:hover { background: #f8fafc; }
 .product-card .price { color: #27ae60; font-weight: 700; font-size: 1.05rem; margin: 0 0 5px 0; }
 .product-card .stock { font-size: 0.75rem; color: #7f8c8d; background: #eee; padding: 2px 8px; border-radius: 8px; display: inline-block; }
 
-.pos-right { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-.payment-section { margin-top: 15px; }
-.payment-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; align-items: center; }
+/* Struktur Kanan (Keranjang & Pembayaran) */
+.pos-right { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+.cart-scroll { overflow-y: auto; max-height: 300px; padding-right: 5px; margin-bottom: 10px; border-bottom: 1px solid #eee; }
+.cart-scroll::-webkit-scrollbar { width: 4px; }
+.cart-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* Area Pembayaran Terkunci di Bawah */
+.payment-section { flex-shrink: 0; }
+.payment-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; align-items: center; }
 .payment-total { font-size: 1.4rem; font-weight: 700; color: #e74c3c; border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 10px; }
 
 /* Modal Preview */
@@ -55,17 +64,11 @@ table tr:hover { background: #f8fafc; }
 .modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
 .receipt-preview { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px auto; width: 58mm; text-align: left; font-family: 'Courier New', monospace; font-size: 11px; color: black; }
 
-/* Mode Layar Besar (Tablet Horizontal / PC) */
+/* Tablet Horizontal / PC */
 @media (min-width: 768px) {
-    .pos-body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-    .pos-container { flex: 1; flex-direction: row; overflow: hidden; }
-    .pos-left { flex: 7; display: flex; flex-direction: column; overflow: hidden; }
-    .product-scroll { flex: 1; overflow-y: auto; padding-right: 5px; }
-    .product-scroll::-webkit-scrollbar { width: 6px; }
-    .product-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .pos-right { flex: 3; display: flex; flex-direction: column; overflow: hidden; min-width: 350px; }
-    .cart-scroll { flex: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; border-bottom: 1px solid #eee; }
-    .cart-scroll::-webkit-scrollbar { width: 4px; }
-    .cart-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .payment-section { margin-top: auto; }
+    .pos-container { flex-direction: row; align-items: flex-start; }
+    .pos-left { flex: 7; }
+    /* Mengunci keranjang agar diam saat produk discroll */
+    .pos-right { flex: 3; min-width: 350px; position: sticky; top: 15px; max-height: calc(100vh - 80px); }
+    .cart-scroll { flex: 1; max-height: unset; overflow-y: auto; }
 }
