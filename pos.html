@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesin Kasir</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Mesin POS</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+    </header>
+    <div class="container" style="display: flex; gap: 20px; align-items: flex-start;">
+        <div id="productsContainer" style="flex: 2; display: flex; flex-wrap: wrap; gap: 15px;"></div>
+        <div class="card" style="flex: 1; min-width: 250px;">
+            <h3 style="margin-top:0;">Keranjang</h3>
+            <div id="cartItems" style="min-height: 150px;"></div>
+            <h3 style="text-align:right; border-top:1px solid #ddd; padding-top:10px;">Total: Rp <span id="cartTotal">0</span></h3>
+            <button class="primary" style="width: 100%; padding: 15px; font-size: 16px; margin-top:10px;" onclick="checkout()">Bayar & Cetak Struk</button>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+    <script>checkAuth();</script>
+    <script src="js/pos.js"></script>
+</body>
+</html>
