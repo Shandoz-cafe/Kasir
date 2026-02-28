@@ -1,33 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Admin Kasir Offline</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasir Web - Admin Users</title>
 <link rel="stylesheet" href="css/style.css">
+<style>
+body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; margin:0; padding:20px; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+header h2 { margin:0; }
+header button { padding:8px 12px; border:none; border-radius:6px; background:#e74c3c; color:white; cursor:pointer; }
+table { width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.1); }
+table th, table td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
+table th { background:#3498db; color:white; }
+table tr:hover { background:#f1f1f1; }
+button.edit, button.delete { padding:5px 10px; border:none; border-radius:5px; cursor:pointer; margin-right:5px; }
+button.edit { background:#f39c12; color:white; }
+button.delete { background:#e74c3c; color:white; }
+input { padding:8px; margin-right:5px; border-radius:5px; border:1px solid #ccc; }
+</style>
 </head>
 <body>
-<div class="container">
-<h2>Admin Panel</h2>
-<a href="pos.html">Kembali ke POS</a>
 
-<h3>Produk</h3>
-<div class="admin-form">
-<input type="text" id="prodName" placeholder="Nama Produk">
-<input type="number" id="prodPrice" placeholder="Harga">
-<input type="number" id="prodStock" placeholder="Stok">
-<button onclick="addProduct()">Tambah Produk</button>
-<div id="prodList"></div>
+<header>
+    <h2>Admin - Users Management</h2>
+    <button onclick="backToDashboard()">⬅️ Dashboard</button>
+</header>
+
+<div>
+    <input type="text" id="newUser" placeholder="Username baru">
+    <input type="password" id="newPass" placeholder="Password baru">
+    <button onclick="addUser()">➕ Tambah User</button>
 </div>
 
-<h3>Akun</h3>
-<div class="admin-form">
-<input type="text" id="accUser" placeholder="Username">
-<input type="password" id="accPass" placeholder="Password">
-<select id="accRole"><option value="kasir">Kasir</option><option value="admin">Admin</option></select>
-<button onclick="addUser()">Tambah Akun</button>
-<div id="userList"></div>
-</div>
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody id="userList"></tbody>
+</table>
 
-<script src="js/admin_offline.js"></script>
+<script src="js/users.js"></script>
+<script>
+function backToDashboard(){
+    window.location.href='dashboard.html';
+}
+
+// ===== Cek admin =====
+document.addEventListener('DOMContentLoaded',()=>{
+    const currentUser = localStorage.getItem('currentUser');
+    if(!currentUser || currentUser!=='admin'){
+        alert('Hanya admin yang bisa mengakses!');
+        window.location.href='dashboard.html';
+    }
+});
+</script>
+
 </body>
 </html>
