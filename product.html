@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Kelola Produk & Stok</title>
+    <title>Kelola Produk</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,17 +15,23 @@
             <h3 style="margin-top:0;">Tambah Produk Baru</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <input type="text" id="prodName" placeholder="Nama Produk" style="flex:2; min-width:150px;">
-                <input type="number" id="prodCost" placeholder="Harga Modal Asli (HPP)" style="flex:1; min-width:150px;">
-                <input type="number" id="prodPrice" placeholder="Harga Jual Kasir" style="flex:1; min-width:150px;">
-                <input type="number" id="prodStock" placeholder="Jumlah Stok Awal" style="flex:1; min-width:120px;">
-                <button class="primary" style="white-space: nowrap; height: fit-content; margin-top: 2px;" onclick="addProduct()">➕ Simpan</button>
+                <input type="text" id="prodCategory" placeholder="Kategori" style="flex:1; min-width:150px;">
+                <input type="number" id="prodCost" placeholder="Modal (HPP)" style="flex:1; min-width:120px;">
+                <input type="number" id="prodPrice" placeholder="Harga Jual" style="flex:1; min-width:120px;">
+                <input type="number" id="prodStock" placeholder="Stok" style="flex:1; min-width:80px;">
+                <button class="primary" style="white-space: nowrap; margin-top: 2px;" onclick="addProduct()">➕ Simpan</button>
             </div>
         </div>
         <table>
-            <thead><tr><th>No</th><th>Nama Item</th><th>Modal</th><th>Jual</th><th>Laba/Item</th><th>Sisa Stok</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>No</th><th>Kategori</th><th>Nama Item</th><th>Modal</th><th>Jual</th><th>Sisa Stok</th><th>Aksi</th></tr></thead>
             <tbody id="productList"></tbody>
         </table>
     </div>
-    <script src="auth.js"></script><script>checkAuth();</script><script src="product.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        checkAuth(); 
+        if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
+    </script>
+    <script src="product.js"></script>
 </body>
 </html>
