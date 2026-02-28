@@ -7,17 +7,17 @@
 </head>
 <body>
     <header>
-        <h2>KasirKu - <span id="userNameDisplay"></span></h2>
+        <h2>SHANDOZ POS - <span id="userNameDisplay"></span></h2>
         <button class="danger" onclick="logout()">Logout</button>
     </header>
     <div class="container">
-        <h3>Menu Utama</h3>
+        <h3 style="margin-top:0;">Menu Cepat</h3>
         <div class="nav-grid">
-            <a href="pos.html" class="nav-card">🛒 Mesin Kasir (POS)</a>
-            <a href="product.html" class="nav-card">📦 Kelola Produk</a>
-            <a href="reports.html" class="nav-card">📊 Laporan Penjualan</a>
-            <a href="user.html" class="nav-card" id="menuUsers" style="display:none;">👥 Kelola Pengguna</a>
-            <a href="setting.html" class="nav-card" id="menuSettings" style="display:none;">⚙️ Pengaturan Toko</a>
+            <a href="pos.html" class="nav-card">🛒 <br>Kasir (POS)</a>
+            <a href="product.html" class="nav-card">📦 <br>Stok Produk</a>
+            <a href="reports.html" class="nav-card">📊 <br>Buku Keuangan</a>
+            <a href="user.html" class="nav-card" id="menuUsers" style="display:none;">👥 <br>Akses Staff</a>
+            <a href="setting.html" class="nav-card" id="menuSettings" style="display:none;">⚙️ <br>Setup Printer</a>
         </div>
     </div>
     <script src="auth.js"></script>
@@ -25,8 +25,8 @@
         checkAuth();
         document.getElementById('userNameDisplay').innerText = localStorage.getItem('currentUser');
         if(localStorage.getItem('currentRole') === 'admin') {
-            document.getElementById('menuUsers').style.display = 'block';
-            document.getElementById('menuSettings').style.display = 'block';
+            document.getElementById('menuUsers').style.display = 'flex';
+            document.getElementById('menuSettings').style.display = 'flex';
         }
     </script>
 </body>
