@@ -1,20 +1,22 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login KasirPro</title>
+<title>Kasir Pro - Login</title>
 <link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/firebase.js"></script>
 <script type="module" src="js/auth.js"></script>
 </head>
 <body>
-<div class="login-screen">
-  <div class="login-card">
-    <h2>🔐 Login KasirPro</h2>
-    <p>Gunakan akun Google</p>
-    <button id="googleLogin" class="btn btn-primary">📧 Login dengan Google</button>
-  </div>
+<div id="loginScreen">
+    <h2>🔐 Login Kasir Pro</h2>
+    <button id="googleLoginBtn">Login dengan Google</button>
+</div>
+<div id="mainApp" style="display:none;">
+    <p>Selamat datang, <span id="userName"></span></p>
+    <a href="pos.html">Masuk ke POS</a>
+    <button id="logoutBtn">Logout</button>
 </div>
 </body>
 </html>
