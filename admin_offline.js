@@ -1,43 +1,64 @@
-let products = JSON.parse(localStorage.getItem('products')) || [];
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+if(!currentUser || currentUser.role!=='admin') window.location.href='index.html';
 
-function renderProducts(){
-    const productList = document.getElementById('productList');
-    productList.innerHTML = products.map((p,i)=>{
-        return `<div>
-            ${p.name} - Rp ${p.price} - Stok: ${p.stock}
-            <button onclick="editProduct(${i})">✏️ Edit</button>
-            <button onclick="deleteProduct(${i})">🗑️ Hapus</button>
-        </div>`;
-    }).join('');
-    localStorage.setItem('products', JSON.stringify(products));
+// Produk
+const dataKey = 'kasirData_'+currentUser.username;
+let userData = JSON.parse(localStorage.getItem(dataKey));
+if(!userData.products) userData.products=[];
+let products = userData.products;
+
+const prodList = document.getElementById('prodList');
+function renderProductsAdmin(){
+    prodList.innerHTML='';
+    products.forEach((p,i)=>{
+        const div = document.createElement('div');
+        div.innerHTML=`${p.name} | Rp ${p.price} | Stok ${p.stock} 
+        <button onclick="deleteProduct(${i})">Hapus</button>`;
+        prodList.appendChild(div);
+    });
 }
-
-window.addProduct = () => {
-    const name = document.getElementById('productName').value.trim();
-    const price = parseInt(document.getElementById('productPrice').value||0);
-    const stock = parseInt(document.getElementById('productStock').value||0);
-    if(!name || price<=0 || stock<0) return alert('Isi semua field dengan benar');
-
-    products.push({name, price, stock});
-    renderProducts();
+function addProduct(){
+    const name=document.getElementById('prodName').value.trim();
+    const price=parseInt(document.getElementById('prodPrice').value);
+    const stock=parseInt(document.getElementById('prodStock').value);
+    if(!name||!price||!stock)return alert('Isi semua data!');
+    products.push({id:Date.now(), name, price, stock});
+    userData.products=products;
+    localStorage.setItem(dataKey, JSON.stringify(userData));
+    renderProductsAdmin();
 }
+function deleteProduct(i){ products.splice(i,1); userData.products=products; localStorage.setItem(dataKey, JSON.stringify(userData)); renderProductsAdmin();}
+renderProductsAdmin();
 
-window.editProduct = (i) => {
-    const p = products[i];
-    const newName = prompt('Nama produk', p.name);
-    const newPrice = parseInt(prompt('Harga produk', p.price));
-    const newStock = parseInt(prompt('Stok produk', p.stock));
-    if(newName && newPrice>=0 && newStock>=0){
-        products[i] = {name:newName, price:newPrice, stock:newStock};
-        renderProducts();
-    }
+// Akun
+let users = JSON.parse(localStorage.getItem('kasirUsers')) || [];
+const userList = document.getElementById('userList');
+function renderUsers(){
+    userList.innerHTML='';
+    users.forEach((u,i)=>{
+        const div=document.createElement('div');
+        div.innerHTML=`${u.username} | ${u.role} 
+        <button onclick="deleteUser(${i})">Hapus</button>`;
+        userList.appendChild(div);
+    });
 }
-
-window.deleteProduct = (i) => {
-    if(confirm('Hapus produk ini?')){
-        products.splice(i,1);
-        renderProducts();
-    }
+function addUser(){
+    const user=document.getElementById('accUser').value.trim();
+    const pass=document.getElementById('accPass').value.trim();
+    const role=document.getElementById('accRole').value;
+    if(!user||!pass) return alert('Isi semua data!');
+    if(users.find(u=>u.username===user)) return alert('Username sudah ada!');
+    users.push({username:user,password:pass,role});
+    localStorage.setItem('kasirUsers', JSON.stringify(users));
+    // buat data kosong untuk user baru
+    localStorage.setItem('kasirData_'+user, JSON.stringify({products:[], sales:[], settings:{storeName:'Cafe Bandung', autoPrint:true}}));
+    renderUsers();
 }
-
-renderProducts();
+function deleteUser(i){
+    const delUser = users[i].username;
+    users.splice(i,1);
+    localStorage.setItem('kasirUsers', JSON.stringify(users));
+    localStorage.removeItem('kasirData_'+delUser);
+    renderUsers();
+}
+renderUsers();
