@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kelola Pengguna</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Pengguna Sistem</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+    </header>
+    <div class="container">
+        <div class="card" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <input type="text" id="newUsername" placeholder="Username Baru" style="margin:0;">
+            <input type="password" id="newPassword" placeholder="Password" style="margin:0;">
+            <select id="newRole" style="margin:0; width:150px;">
+                <option value="kasir">Kasir</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button class="primary" style="white-space: nowrap;" onclick="addUser()">➕ Tambah</button>
+        </div>
+        <table>
+            <thead><tr><th>No</th><th>Username</th><th>Akses (Role)</th><th>Aksi</th></tr></thead>
+            <tbody id="userList"></tbody>
+        </table>
+    </div>
+    <script src="js/auth.js"></script>
+    <script>
+        checkAuth();
+        if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
+    </script>
+    <script src="js/users.js"></script>
+</body>
+</html>
