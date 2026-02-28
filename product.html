@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kelola Produk</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Kelola Produk</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+    </header>
+    <div class="container">
+        <div class="card" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <input type="text" id="prodName" placeholder="Nama Produk" style="margin:0;">
+            <input type="number" id="prodPrice" placeholder="Harga (Rp)" style="margin:0;">
+            <button class="primary" style="white-space: nowrap;" onclick="addProduct()">➕ Tambah</button>
+        </div>
+        <table>
+            <thead><tr><th>No</th><th>Nama Produk</th><th>Harga</th><th>Aksi</th></tr></thead>
+            <tbody id="productList"></tbody>
+        </table>
+    </div>
+    <script src="js/auth.js"></script>
+    <script>checkAuth();</script>
+    <script src="js/products.js"></script>
+</body>
+</html>
