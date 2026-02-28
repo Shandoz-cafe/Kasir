@@ -1,28 +1,51 @@
 let cart = [];
 let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0, discountNominal = 0;
-let currentCategory = 'Semua', searchQuery = '', currentSort = 'AZ';
 let pendingSale = null;
 
-function loadPOSProducts() {
+// Fungsi ini cuma dipanggil sekali pas halaman dibuka / setelah checkout
+function initPOS() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     
-    // Render Navigasi Kategori (Pills)
-    const categories = ['Semua', ...new Set(products.map(p => p.category || 'Umum'))];
-    const catContainer = document.getElementById('categoryButtons');
-    if(catContainer) {
-        catContainer.innerHTML = categories.map(c => `<button class="cat-btn ${currentCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>`).join('');
+    // Ambil kategori unik lalu urutkan sesuai Alfabet (A sampai Z)
+    let categories = [...new Set(products.map(p => p.category || 'Umum'))];
+    categories.sort((a, b) => a.localeCompare(b)); 
+
+    const catOptions = document.getElementById('categoryOptions');
+    if(catOptions) {
+        catOptions.innerHTML = `<option value="cat-Semua">Semua Kategori</option>` + 
+            categories.map(c => `<option value="cat-${c}">Kategori: ${c}</option>`).join('');
     }
 
-    // Filter by Kategori & Pencarian
-    let filtered = products.filter(p => (currentCategory === 'Semua' || (p.category || 'Umum') === currentCategory) && p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    // Urutkan A-Z / Z-A
-    if(currentSort === 'AZ') {
+    // Jalankan filter pertama kali
+    filterAndSortProducts();
+}
+
+// Fungsi ini jalan setiap kali ngetik pencarian atau ganti dropdown filter
+function filterAndSortProducts() {
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    const filterValue = document.getElementById('filterSelect').value; 
+
+    // Filter berdasarkan teks pencarian dulu
+    let filtered = products.filter(p => p.name.toLowerCase().includes(searchQuery));
+
+    // Jika yang dipilih adalah Kategori tertentu
+    if (filterValue.startsWith('cat-')) {
+        const selectedCat = filterValue.replace('cat-', '');
+        if (selectedCat !== 'Semua') {
+            filtered = filtered.filter(p => (p.category || 'Umum') === selectedCat);
+        }
+        // Default dalam kategori diurutkan A-Z
         filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if(currentSort === 'ZA') {
+    } 
+    // Jika yang dipilih adalah mode Urutkan (A-Z / Z-A)
+    else if (filterValue === 'sort-AZ') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (filterValue === 'sort-ZA') {
         filtered.sort((a, b) => b.name.localeCompare(a.name));
     }
 
+    // Render ke layar
     document.getElementById('productsContainer').innerHTML = filtered.map(p => {
         const isOut = p.stock < 1;
         return `<div class="product-card ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
@@ -30,10 +53,6 @@ function loadPOSProducts() {
         </div>`;
     }).join('');
 }
-
-function setCategory(cat) { currentCategory = cat; loadPOSProducts(); }
-function filterProducts() { searchQuery = document.getElementById('searchInput').value; loadPOSProducts(); }
-function setSort(sortType) { currentSort = sortType; loadPOSProducts(); }
 
 function addToCart(id) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -180,8 +199,8 @@ function confirmAndPrint() {
 
     setTimeout(() => { 
         cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
-        closePreview(); loadPOSProducts(); renderCart();
+        closePreview(); initPOS(); renderCart();
     }, 1500);
 }
 
-if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', loadPOSProducts); }
+if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', initPOS); }
