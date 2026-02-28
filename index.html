@@ -1,26 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Kasir Offline - Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kasir Web - Login</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
 <div class="login-screen">
-    <h2>🔐 Login Kasir</h2>
+    <h2>🔐 Login</h2>
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
     <button onclick="login()">Login</button>
-    <p id="loginMsg" style="color:red; margin-top:10px;"></p>
+    <p id="loginMsg"></p>
+
+    <h3>📝 Register</h3>
+    <input type="text" id="regUser" placeholder="Username">
+    <input type="password" id="regPass" placeholder="Password">
+    <button onclick="register()">Register</button>
+    <p id="regMsg"></p>
 
     <h3>🔄 Ganti Password</h3>
     <input type="text" id="chgUser" placeholder="Username">
     <input type="password" id="oldPass" placeholder="Password lama">
     <input type="password" id="newPass" placeholder="Password baru">
     <button onclick="changePassword()">Ganti Password</button>
-    <p id="chgMsg" style="color:green; margin-top:10px;"></p>
+    <p id="chgMsg"></p>
 </div>
 
-<script src="js/auth_offline.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>
