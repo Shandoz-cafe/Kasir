@@ -1,18 +1,41 @@
 let cart = [];
 let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0;
+let currentCategory = 'Semua';
+let searchQuery = '';
 
 function loadPOSProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    // Auto-Generate Tombol Kategori
+    const categories = ['Semua', ...new Set(products.map(p => p.category || 'Umum'))];
+    const catContainer = document.getElementById('categoryButtons');
+    if(catContainer) {
+        catContainer.innerHTML = categories.map(c => `
+            <button class="category-btn ${currentCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</button>
+        `).join('');
+    }
+
+    // Filter by Kategori & Pencarian
+    const filtered = products.filter(p => {
+        const matchCat = currentCategory === 'Semua' || (p.category || 'Umum') === currentCategory;
+        const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCat && matchSearch;
+    });
+
     const container = document.getElementById('productsContainer');
-    container.innerHTML = products.map((p) => {
+    container.innerHTML = filtered.map((p) => {
         const isOut = p.stock < 1;
         return `<div class="product-card ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
+            <div class="cat-badge">${p.category || 'Umum'}</div>
             <h4>${p.name}</h4>
             <p class="price">Rp ${p.price.toLocaleString('id-ID')}</p>
             <p class="stock">Stok: ${p.stock}</p>
         </div>`;
     }).join('');
 }
+
+function setCategory(cat) { currentCategory = cat; loadPOSProducts(); }
+function filterProducts() { searchQuery = document.getElementById('searchInput').value; loadPOSProducts(); }
 
 function addToCart(id) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -21,9 +44,7 @@ function addToCart(id) {
     
     if(existing) {
         if(existing.qty >= product.stock) return alert('Stok tidak mencukupi!');
-        existing.qty++;
-        existing.total = existing.qty * existing.price;
-        existing.profit = (existing.price - existing.cost) * existing.qty;
+        existing.qty++; existing.total = existing.qty * existing.price; existing.profit = (existing.price - existing.cost) * existing.qty;
     } else {
         cart.push({ id: product.id, name: product.name, price: product.price, cost: product.cost, qty: 1, total: product.price, profit: product.price - product.cost });
     }
@@ -33,11 +54,11 @@ function addToCart(id) {
 function renderCart() {
     const list = document.getElementById('cartItems');
     list.innerHTML = cart.map((item, i) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-            <div style="line-height:1.2;"><strong>${item.name}</strong><br><small>${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</small></div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <strong>Rp ${item.total.toLocaleString('id-ID')}</strong>
-                <button class="danger" style="padding:4px 8px; font-size:0.8rem;" onclick="removeFromCart(${i})">X</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:8px;">
+            <div style="line-height:1.3; font-size:1.1rem;"><strong>${item.name}</strong><br><small style="color:#7f8c8d;">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</small></div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <strong style="font-size:1.1rem;">Rp ${item.total.toLocaleString('id-ID')}</strong>
+                <button class="danger" style="padding:6px 12px; font-size:0.9rem; border-radius:8px;" onclick="removeFromCart(${i})">X</button>
             </div>
         </div>
     `).join('');
@@ -62,33 +83,22 @@ function calculateTotal() {
     
     const cd = document.getElementById('changeDisplay');
     if (change < 0 && cash > 0) { cd.innerText = "Uang Kurang!"; cd.style.color = "#e74c3c"; } 
-    else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#27ae60"; }
+    else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#2a5298"; }
 }
 
 function checkout() {
     if(cart.length === 0) return alert('Keranjang kosong!');
     let cash = parseFloat(document.getElementById('cashInput').value) || 0;
     let discount = parseFloat(document.getElementById('discountInput').value) || 0;
-
     if(cash < grandTotal) return alert('Uang pelanggan kurang!');
 
-    // Kurangi Stok Asli
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    cart.forEach(cItem => {
-        const p = products.find(p => p.id === cItem.id);
-        if(p) p.stock -= cItem.qty;
-    });
+    cart.forEach(cItem => { const p = products.find(p => p.id === cItem.id); if(p) p.stock -= cItem.qty; });
     localStorage.setItem('products', JSON.stringify(products));
 
-    // Simpan Transaksi Penjualan
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
-    const finalProfit = totalProfit - discount; // Diskon memotong laba
-    const sale = {
-        id: Date.now(), user: localStorage.getItem('currentUser'), date: new Date().toLocaleString('id-ID'),
-        items: cart, subtotal: subtotal, discount: discount, total: grandTotal, cash: cash, change: change, netProfit: finalProfit
-    };
-    sales.push(sale);
-    localStorage.setItem('sales', JSON.stringify(sales));
+    const sale = { id: Date.now(), user: localStorage.getItem('currentUser'), date: new Date().toLocaleString('id-ID'), items: cart, subtotal: subtotal, discount: discount, total: grandTotal, cash: cash, change: change, netProfit: totalProfit - discount };
+    sales.push(sale); localStorage.setItem('sales', JSON.stringify(sales));
     
     printReceipt(sale);
     cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; renderCart(); loadPOSProducts();
