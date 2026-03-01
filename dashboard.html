@@ -2,28 +2,51 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SHANDOZ POS</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #3498db; }
+        .stat-card h4 { margin: 0 0 10px 0; color: #7f8c8d; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-card h2 { margin: 0; color: #2c3e50; font-size: 1.5rem; }
+    </style>
 </head>
-<body>
+<body class="pos-body" style="overflow-y: auto;">
     <header>
-        <h2>SHANDOZ POS - <span id="userNameDisplay"></span></h2>
+        <h2>SHANDOZ POS - <span id="userNameDisplay" style="color: #f39c12;"></span></h2>
         <button class="danger" onclick="logout()">🛑 Tutup Shift & Logout</button>
     </header>
     <div class="container">
-        <h3 style="margin-top:0;">Menu Utama</h3>
-        <div class="nav-grid">
-            <a href="pos.html" class="nav-card">🛒 <br>Kasir (POS)</a>
-            <a href="product.html" class="nav-card admin-only" style="display:none;">📦 <br>Stok Produk</a>
-            <a href="reports.html" class="nav-card admin-only" style="display:none;">📊 <br>Buku Keuangan</a>
-            <a href="user.html" class="nav-card admin-only" style="display:none;">👥 <br>Akses Staff</a>
-            <a href="setting.html" class="nav-card admin-only" style="display:none;">⚙️ <br>Setup Printer</a>
+        
+        <div class="dashboard-stats admin-only" style="display:none;" id="quickStats">
+            <div class="stat-card" style="border-left-color: #3498db;">
+                <h4>Penjualan Hari Ini</h4>
+                <h2 id="todaySales">0 Transaksi</h2>
+            </div>
+            <div class="stat-card" style="border-left-color: #27ae60;">
+                <h4>Omzet Hari Ini</h4>
+                <h2 id="todayRevenue">Rp 0</h2>
+            </div>
+            <div class="stat-card" style="border-left-color: #e74c3c;">
+                <h4>Pengeluaran Hari Ini</h4>
+                <h2 id="todayExpense">Rp 0</h2>
+            </div>
         </div>
 
-        <div class="card admin-only" style="display:none; margin-top: 30px;">
-            <h3 style="margin-top:0; color:#1e3c72; border-bottom:2px solid #eee; padding-bottom:10px;">🕒 History Cetak Struk (10 Transaksi Terakhir)</h3>
-            <table style="font-size:0.9rem;">
-                <thead><tr><th>Waktu</th><th>ID Shift / Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total (Rp)</th></tr></thead>
+        <h3 style="margin-top:0; color: #1e3c72;">Menu Pintasan</h3>
+        <div class="nav-grid">
+            <a href="pos.html" class="nav-card">🛒 <br><span style="font-size:0.9rem; font-weight:normal; color:#7f8c8d;">Buka Mesin</span><br>Kasir (POS)</a>
+            <a href="product.html" class="nav-card admin-only" style="display:none;">📦 <br><span style="font-size:0.9rem; font-weight:normal; color:#7f8c8d;">Kelola Harga & Stok</span><br>Gudang Produk</a>
+            <a href="reports.html" class="nav-card admin-only" style="display:none;">📊 <br><span style="font-size:0.9rem; font-weight:normal; color:#7f8c8d;">Cek Omzet & Laba</span><br>Buku Keuangan</a>
+            <a href="user.html" class="nav-card admin-only" style="display:none;">👥 <br><span style="font-size:0.9rem; font-weight:normal; color:#7f8c8d;">Akses Staff</span><br>Manajemen PIN</a>
+            <a href="setting.html" class="nav-card admin-only" style="display:none;">⚙️ <br><span style="font-size:0.9rem; font-weight:normal; color:#7f8c8d;">Nama Toko & Logo</span><br>Pengaturan</a>
+        </div>
+
+        <div class="card admin-only" style="display:none; margin-top: 30px; overflow-x: auto;">
+            <h3 style="margin-top:0; color:#1e3c72; border-bottom:2px solid #eee; padding-bottom:10px;">🕒 Aktivitas Kasir Terbaru</h3>
+            <table style="font-size:0.9rem; min-width: 600px;">
+                <thead><tr><th>Waktu</th><th>Shift / Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total (Rp)</th></tr></thead>
                 <tbody id="historyList"></tbody>
             </table>
         </div>
@@ -34,16 +57,29 @@
         checkAuth();
         document.getElementById('userNameDisplay').innerText = localStorage.getItem('currentUser');
         if(localStorage.getItem('currentRole') === 'admin') {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+            document.getElementById('quickStats').style.display = 'grid';
             
             const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+            const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+            const todayStr = new Date().toLocaleDateString('id-ID');
+            
+            // Hitung Statistik Hari Ini secara cerdas
+            const todaySales = sales.filter(s => s.date.includes(todayStr));
+            const todayExpenses = expenses.filter(e => e.date.includes(todayStr));
+            
+            document.getElementById('todaySales').innerText = todaySales.length + " Transaksi";
+            document.getElementById('todayRevenue').innerText = "Rp " + todaySales.reduce((sum, s) => sum + s.total, 0).toLocaleString('id-ID');
+            document.getElementById('todayExpense').innerText = "Rp " + todayExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString('id-ID');
+
+            // Load History Transaksi
             const historyTbody = document.getElementById('historyList');
             const recentSales = sales.slice(-10).reverse();
             
             if(recentSales.length === 0) {
-                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#7f8c8d;">Belum ada riwayat transaksi</td></tr>';
+                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#7f8c8d; padding:20px;">Belum ada riwayat transaksi</td></tr>';
             } else {
-                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; color:#7f8c8d;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || 'Umum'}</td><td>${s.method}</td><td style="font-weight:bold; color:#27ae60;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
+                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; color:#7f8c8d; background:#f0f2f5; padding:2px 5px; border-radius:4px;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || 'Umum'}</td><td>${s.method}</td><td style="font-weight:bold; color:#27ae60;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
             }
         }
     </script>
