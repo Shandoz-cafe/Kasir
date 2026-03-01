@@ -16,22 +16,15 @@ function initPOS() {
     const catOptions = document.getElementById('categoryOptions');
     if(catOptions) {
         catOptions.innerHTML = `<option value="cat-Semua">Semua Kategori</option>` + 
-            categories.map(c => `<option value="cat-${c}">Kategori: ${c}</option>`).join('');
+            categories.map(c => `<option value="cat-${c}">${c}</option>`).join('');
     }
     filterAndSortProducts();
-    
-    // Pastikan kursor otomatis ada di input barcode untuk tembakan fisik
-    const barcodeInp = document.getElementById('barcodeInput');
-    if(barcodeInp) barcodeInp.focus();
 }
 
 function handleNav() {
     const role = localStorage.getItem('currentRole');
     if (role === 'admin') { window.location.href = 'dashboard.html'; } 
-    else {
-        localStorage.removeItem('currentUser'); localStorage.removeItem('currentRole'); localStorage.removeItem('currentShift');
-        window.location.href = 'index.html';
-    }
+    else { localStorage.removeItem('currentUser'); localStorage.removeItem('currentRole'); localStorage.removeItem('currentShift'); window.location.href = 'index.html'; }
 }
 
 function filterAndSortProducts() {
@@ -47,42 +40,27 @@ function filterAndSortProducts() {
     } else if (filterValue === 'sort-AZ') { filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else if (filterValue === 'sort-ZA') { filtered.sort((a, b) => b.name.localeCompare(a.name)); }
 
+    // Merender tampilan produk gaya flat
     document.getElementById('productsContainer').innerHTML = filtered.map(p => {
         const isOut = p.stock < 1;
-        return `<div class="product-card ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
-            <div class="cat-badge">${p.category || 'Umum'}</div><h4>${p.name}</h4><p class="price">Rp ${p.price.toLocaleString('id-ID')}</p><p class="stock">Stok: ${p.stock}</p>
+        return `<div class="product-item ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
+            <span class="item-cat">${p.category || 'Umum'}</span>
+            <div class="item-name">${p.name}</div>
+            <div class="item-price">Rp ${p.price.toLocaleString('id-ID')}</div>
+            <span class="item-stock">Stok: ${p.stock}</span>
         </div>`;
     }).join('');
 }
 
-// === LOGIKA SCANNER BARCODE ===
-function handlePhysicalScanner(e) {
-    if(e.key === 'Enter') {
-        const code = document.getElementById('barcodeInput').value.trim();
-        if(code) processBarcode(code);
-        document.getElementById('barcodeInput').value = ''; // Reset setelah ditembak
-    }
-}
-
-function processBarcode(code) {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const p = products.find(x => x.barcode === code);
-    if(p) {
-        if(p.stock < 1) return alert('Stok produk HABIS!');
-        addToCart(p.id);
-        // Bisa tambahkan suara 'beep' di sini kalau mau
-    } else {
-        alert('Produk dengan Barcode tersebut tidak ditemukan!');
-    }
-}
-
+// Scanner Kamera Saja (Karena Scanner USB otomatis bertindak seperti keyboard, tidak butuh input box khusus)
 let html5QrcodeScanner = null;
 function openScanner() {
     document.getElementById('scannerModal').style.display = 'flex';
     html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
     html5QrcodeScanner.render((decodedText) => {
         closeScanner();
-        processBarcode(decodedText);
+        const p = JSON.parse(localStorage.getItem('products') || '[]').find(x => x.barcode === decodedText);
+        if(p) { if(p.stock < 1) alert('Stok HABIS!'); else addToCart(p.id); } else alert('Barcode tidak ditemukan!');
     }, (error) => {});
 }
 function closeScanner() {
@@ -90,7 +68,6 @@ function closeScanner() {
     document.getElementById('scannerModal').style.display = 'none';
 }
 
-// === LOGIKA KERANJANG ===
 function addToCart(id) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const p = products.find(x => x.id === id);
@@ -106,11 +83,16 @@ function addToCart(id) {
 }
 
 function renderCart() {
+    // Merender item keranjang rapi
     document.getElementById('cartItems').innerHTML = cart.map((item, i) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:8px;">
-            <div style="line-height:1.2;"><strong>${item.name}</strong><br><small style="color:#7f8c8d;">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</small></div>
+        <div class="cart-item">
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-qty">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</div>
+            </div>
             <div style="display:flex; align-items:center; gap:10px;">
-                <strong style="font-size:0.95rem;">Rp ${item.total.toLocaleString('id-ID')}</strong><button class="danger" style="padding:4px 8px; border-radius:5px;" onclick="cart.splice(${i}, 1); renderCart();">X</button>
+                <div class="cart-item-price">Rp ${item.total.toLocaleString('id-ID')}</div>
+                <button class="danger" style="padding:4px 8px;" onclick="cart.splice(${i}, 1); renderCart();">X</button>
             </div>
         </div>
     `).join('');
@@ -144,8 +126,8 @@ function calculateTotal() {
     document.getElementById('subtotalDisplay').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
     document.getElementById('grandTotalDisplay').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
     const cd = document.getElementById('changeDisplay');
-    if (change < 0 && cash > 0) { cd.innerText = "Kurang!"; cd.style.color = "#e74c3c"; } 
-    else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#2a5298"; }
+    if (change < 0 && cash > 0) { cd.innerText = "Kurang!"; cd.style.color = "#ef4444"; } 
+    else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#059669"; }
 }
 
 function previewCheckout() {
@@ -184,7 +166,6 @@ function previewCheckout() {
         </table>
         <div style="text-align: center; margin-top:10px;"><small>Terima Kasih!</small></div>
     `;
-
     document.getElementById('receiptPreviewContent').innerHTML = contentHTML;
     document.getElementById('previewModal').style.display = 'flex';
 }
@@ -193,7 +174,6 @@ function closePreview() { document.getElementById('previewModal').style.display 
 
 function confirmAndPrint() {
     if(!pendingSale) return;
-
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     pendingSale.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
     localStorage.setItem('products', JSON.stringify(products));
@@ -205,27 +185,7 @@ function confirmAndPrint() {
     const storeLogo = localStorage.getItem('storeLogo');
     let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
     
-    let printHTML = `
-    <div style="text-align: center; font-family: monospace;">
-        ${logoHtml}
-        <h3 style="margin:0;">${storeName}</h3>
-        <p style="margin:0; font-size:12px;">Kasir: ${pendingSale.user}<br>${pendingSale.date}</p>
-    </div>
-    <div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${pendingSale.customer}</strong></div>
-    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
-    <table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">
-        ${pendingSale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}
-    </table>
-    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
-    <table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">
-        <tr><td>Subtotal</td><td style="text-align:right;">${pendingSale.subtotal.toLocaleString('id-ID')}</td></tr>
-        ${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${pendingSale.discount.toLocaleString('id-ID')}</td></tr>` : ''}
-        <tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${pendingSale.total.toLocaleString('id-ID')}</b></td></tr>
-        <tr><td>Bayar (${pendingSale.method})</td><td style="text-align:right;">${pendingSale.cash.toLocaleString('id-ID')}</td></tr>
-        <tr><td>Kembalian</td><td style="text-align:right;">${pendingSale.change.toLocaleString('id-ID')}</td></tr>
-    </table>
-    <div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>
-    `;
+    let printHTML = `<div style="text-align: center; font-family: monospace;">${logoHtml}<h3 style="margin:0;">${storeName}</h3><p style="margin:0; font-size:12px;">Kasir: ${pendingSale.user}<br>${pendingSale.date}</p></div><div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${pendingSale.customer}</strong></div><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">${pendingSale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;"><tr><td>Subtotal</td><td style="text-align:right;">${pendingSale.subtotal.toLocaleString('id-ID')}</td></tr>${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${pendingSale.discount.toLocaleString('id-ID')}</td></tr>` : ''}<tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${pendingSale.total.toLocaleString('id-ID')}</b></td></tr><tr><td>Bayar (${pendingSale.method})</td><td style="text-align:right;">${pendingSale.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembalian</td><td style="text-align:right;">${pendingSale.change.toLocaleString('id-ID')}</td></tr></table><div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>`;
 
     const base64html = btoa(unescape(encodeURIComponent(printHTML)));
     window.location.href = "rawbt:data:text/html;base64," + base64html;
@@ -236,57 +196,46 @@ function confirmAndPrint() {
     }, 1500);
 }
 
-// === OPEN BILL LOGIC ===
+// FITUR HOLD BILL
 function saveOpenBill() {
-    if(cart.length === 0) return alert('Keranjang masih kosong!');
+    if(cart.length === 0) return alert('Keranjang kosong!');
     const custName = document.getElementById('custName').value.trim();
-    if(!custName) return alert('Masukkan NAMA PELANGGAN / NOMOR MEJA sebelum menahan tiket!');
+    if(!custName) return alert('Masukkan Nama/Meja!');
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
     openBills.push({ id: "BILL-" + Date.now(), customer: custName, time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), items: cart, total: grandTotal });
     localStorage.setItem('openBills', JSON.stringify(openBills));
-    cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
-    renderCart(); alert(`Tiket untuk [ ${custName} ] berhasil disimpan!`);
+    cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = ''; renderCart();
 }
 function showOpenBills() {
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
     const container = document.getElementById('openBillContent');
-    if(openBills.length === 0) { container.innerHTML = '<p style="color:#7f8c8d; margin-top:20px;">Tidak ada tiket yang menggantung.</p>'; } 
-    else {
-        container.innerHTML = openBills.map((b, i) => `
-            <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
-                <div><strong style="font-size:1.1rem; color:#2c3e50;">Meja/Nama: ${b.customer}</strong> <span style="font-size:0.8rem; color:#7f8c8d; background:#eee; padding:2px 6px; border-radius:5px;">${b.time}</span><br><span style="color:#e74c3c; font-weight:bold;">Rp ${b.total.toLocaleString('id-ID')}</span> <small style="color:#7f8c8d;">(${b.items.length} pesanan)</small></div>
-                <div style="display:flex; gap:5px;"><button class="primary" style="padding:8px 15px;" onclick="recallBill(${i})">Panggil</button><button class="danger" style="padding:8px 15px;" onclick="deleteBill(${i})">X</button></div>
-            </div>`).join('');
-    }
+    if(openBills.length === 0) { container.innerHTML = '<p style="text-align:center; padding:20px;">Kosong.</p>'; } 
+    else { container.innerHTML = openBills.map((b, i) => `<div style="border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between;"><div><strong>${b.customer}</strong> (${b.time})<br><span style="color:#059669; font-weight:bold;">Rp ${b.total.toLocaleString('id-ID')}</span></div><div style="display:flex; gap:5px;"><button class="primary" onclick="recallBill(${i})">Panggil</button><button class="danger" onclick="deleteBill(${i})">X</button></div></div>`).join(''); }
     document.getElementById('openBillModal').style.display = 'flex';
 }
 function closeOpenBillModal() { document.getElementById('openBillModal').style.display = 'none'; }
 function recallBill(index) {
-    if(cart.length > 0 && !confirm('Ada pesanan di keranjang. Timpa pesanan ini?')) return;
+    if(cart.length > 0 && !confirm('Ada pesanan. Timpa?')) return;
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
     cart = openBills[index].items; document.getElementById('custName').value = openBills[index].customer; renderCart();
     openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills)); closeOpenBillModal();
 }
 function deleteBill(index) {
-    if(!confirm('Hapus tiket ini? Data tidak bisa kembali.')) return;
-    const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
-    openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills)); showOpenBills();
+    if(confirm('Hapus tiket?')) { const openBills = JSON.parse(localStorage.getItem('openBills') || '[]'); openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills)); showOpenBills(); }
 }
 
-// === HISTORY & REPRINT KHUSUS KASIR ===
+// HISTORY KASIR
 function showPosHistory() {
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
     const recentSales = sales.slice(-15).reverse();
     const tbody = document.getElementById('posHistoryList');
-    if(recentSales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#7f8c8d;">Belum ada transaksi hari ini</td></tr>'; } 
-    else {
-        tbody.innerHTML = recentSales.map(s => `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 10px 5px;">${s.date}</td><td>${s.customer || 'Umum'}</td><td style="color:#27ae60; font-weight:bold;">Rp ${s.total.toLocaleString('id-ID')}</td><td><button class="primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="reprintSale(${s.id})">🖨️ Cetak</button></td></tr>`).join('');
-    }
+    if(recentSales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">Belum ada transaksi</td></tr>'; } 
+    else { tbody.innerHTML = recentSales.map(s => `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 5px;">${s.date}</td><td>${s.customer || 'Umum'}</td><td style="color:#059669; font-weight:bold;">Rp ${s.total.toLocaleString('id-ID')}</td><td><button class="primary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="reprintSale(${s.id})">🖨️</button></td></tr>`).join(''); }
     document.getElementById('historyModal').style.display = 'flex';
 }
 function closePosHistory() { document.getElementById('historyModal').style.display = 'none'; }
 function reprintSale(saleId) {
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]'); const sale = sales.find(s => s.id === saleId); if(!sale) return alert('Data tidak ditemukan!');
+    const sales = JSON.parse(localStorage.getItem('sales') || '[]'); const sale = sales.find(s => s.id === saleId); if(!sale) return;
     const storeName = localStorage.getItem('storeName') || 'Toko Saya'; const storeLogo = localStorage.getItem('storeLogo'); let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
     let printHTML = `<div style="text-align: center; font-family: monospace;">${logoHtml}<h3 style="margin:0;">${storeName}</h3><p style="margin:0; font-size:12px;">(COPY) Kasir: ${sale.user}<br>${sale.date}</p></div><div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${sale.customer}</strong></div><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">${sale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;"><tr><td>Subtotal</td><td style="text-align:right;">${sale.subtotal.toLocaleString('id-ID')}</td></tr>${sale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${sale.discount.toLocaleString('id-ID')}</td></tr>` : ''}<tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${sale.total.toLocaleString('id-ID')}</b></td></tr><tr><td>Bayar (${sale.method})</td><td style="text-align:right;">${sale.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembalian</td><td style="text-align:right;">${sale.change.toLocaleString('id-ID')}</td></tr></table><div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>`;
     const base64html = btoa(unescape(encodeURIComponent(printHTML))); window.location.href = "rawbt:data:text/html;base64," + base64html;
