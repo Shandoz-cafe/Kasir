@@ -2,43 +2,43 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard Admin</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backoffice - SHANDOZ</title>
+    <link rel="stylesheet" href="style.css?v=final2026">
 </head>
 <body>
     <header>
-        <h2>Admin - <span id="userNameDisplay" style="color: #f59e0b;"></span></h2>
-        <button class="danger" onclick="logout()">🛑 Tutup Shift</button>
+        <h2>⚙️ Backoffice - <span id="userNameDisplay" style="color: #a5d6a7;"></span></h2>
+        <button class="danger" onclick="logout()">🛑 Keluar</button>
     </header>
     
     <div class="container">
         <div class="dash-stats admin-only" style="display:none;" id="quickStats">
-            <div class="stat-box" style="border-color: #3b82f6;">
+            <div class="stat-box">
                 <h4>Transaksi Hari Ini</h4>
                 <h2 id="todaySales">0</h2>
             </div>
-            <div class="stat-box" style="border-color: #10b981;">
+            <div class="stat-box">
                 <h4>Omzet Hari Ini</h4>
                 <h2 id="todayRevenue">Rp 0</h2>
             </div>
-            <div class="stat-box" style="border-color: #ef4444;">
+            <div class="stat-box" style="border-top-color: #f44336;">
                 <h4>Pengeluaran</h4>
-                <h2 id="todayExpense">Rp 0</h2>
+                <h2 id="todayExpense" style="color: #f44336;">Rp 0</h2>
             </div>
         </div>
 
         <div class="dash-menu">
-            <a href="pos.html" class="menu-card">🛒<br><br>Kasir POS</a>
-            <a href="product.html" class="menu-card admin-only" style="display:none;">📦<br><br>Data Barang</a>
-            <a href="reports.html" class="menu-card admin-only" style="display:none;">📊<br><br>Buku Keuangan</a>
-            <a href="user.html" class="menu-card admin-only" style="display:none;">👥<br><br>Manajemen Karyawan</a>
-            <a href="setting.html" class="menu-card admin-only" style="display:none;">⚙️<br><br>Pengaturan Toko</a>
+            <a href="pos.html" class="menu-card"><span style="font-size: 2rem; margin-bottom: 10px;">🛒</span>Kasir (POS)</a>
+            <a href="product.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">📦</span>Barang</a>
+            <a href="reports.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">📊</span>Laporan</a>
+            <a href="user.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">👥</span>Karyawan</a>
+            <a href="setting.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">⚙️</span>Pengaturan</a>
         </div>
 
-        <div class="admin-only" style="display:none; margin-top: 30px;">
-            <h3 style="margin-bottom: 10px; color: #1e293b;">🕒 Aktivitas Terakhir</h3>
-            <div class="table-wrapper">
+        <div class="card admin-only" style="display:none;">
+            <h3 style="margin-top:0; color: #212121; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">🕒 Aktivitas Terakhir</h3>
+            <div class="table-responsive">
                 <table>
                     <thead><tr><th>Waktu</th><th>Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total</th></tr></thead>
                     <tbody id="historyList"></tbody>
@@ -67,12 +67,12 @@
             document.getElementById('todayExpense').innerText = "Rp " + todayExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString('id-ID');
 
             const historyTbody = document.getElementById('historyList');
-            const recentSales = sales.slice(-10).reverse();
+            const recentSales = sales.slice(-15).reverse();
             
             if(recentSales.length === 0) {
-                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Belum ada data</td></tr>';
+                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#9e9e9e;">Belum ada data</td></tr>';
             } else {
-                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; background:#e2e8f0; padding:2px 5px; border-radius:4px;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || 'Umum'}</td><td>${s.method}</td><td style="font-weight:bold; color:#10b981;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
+                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; background:#eeeeee; padding:2px 6px; border-radius:4px;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || '-'}</td><td>${s.method}</td><td style="font-weight:bold; color:#4caf50;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
             }
         }
     </script>
