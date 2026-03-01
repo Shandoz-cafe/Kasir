@@ -3,27 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kasir POS</title>
-    <link rel="stylesheet" href="style.css?v=final2026">
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <title>Kasir - Shandoz</title>
+    <link rel="stylesheet" href="style.css?v=final3">
 </head>
 <body>
     <header>
-        <h2><span style="color:#4caf50;">●</span> POS - <span id="kasirNameDisplay"></span></h2>
+        <h2><span style="color:#2ecc71;">●</span> POS</h2>
         <div style="display: flex; gap: 8px;">
             <button class="primary" onclick="showPosHistory()">🕒 Riwayat</button>
-            <button class="warning" onclick="handleNav()">⬅️ Backoffice</button>
+            <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Menu</button>
         </div>
     </header>
     
     <div class="pos-layout">
-        
         <div class="pos-left">
-            <div class="pos-filter">
-                <button class="primary" style="padding:0 15px;" onclick="openScanner()">📷 Scan</button>
-                <input type="text" id="searchInput" placeholder="Cari barang..." oninput="filterAndSortProducts()">
-                <select id="filterSelect" onchange="filterAndSortProducts()" style="max-width: 140px;">
-                    <option value="cat-Semua">Semua Kategori</option>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="searchInput" placeholder="🔍 Cari menu..." oninput="filterAndSortProducts()" style="margin:0; padding:12px; flex:2;">
+                <select id="filterSelect" onchange="filterAndSortProducts()" style="margin:0; padding:12px; flex:1;">
+                    <option value="cat-Semua">Semua</option>
                     <optgroup label="Kategori" id="categoryOptions"></optgroup>
                 </select>
             </div>
@@ -31,95 +28,59 @@
         </div>
 
         <div class="pos-right">
-            <div class="cart-header">
-                <h3>Tiket Pesanan</h3>
-                <div>
-                    <button class="warning" style="padding: 6px 10px; font-size: 0.8rem;" onclick="saveOpenBill()">Hold</button>
-                    <button class="primary" style="padding: 6px 10px; font-size: 0.8rem; background: #fff; color: #2196f3; border: 1px solid #2196f3;" onclick="showOpenBills()">Buka Tiket</button>
-                </div>
-            </div>
-            
             <div class="cart-list-container" id="cartItems"></div>
             
-            <div class="cart-checkout">
-                <div class="checkout-row">
-                    <span>Pelanggan</span>
-                    <input type="text" id="custName" class="checkout-input" placeholder="Nama (Opsional)">
-                </div>
-                <div class="checkout-row">
-                    <span>Tipe Bayar</span>
-                    <select id="payMethod" class="checkout-input" onchange="handlePaymentMethod()">
-                        <option value="Tunai">Tunai</option>
-                        <option value="QRIS">QRIS</option>
-                        <option value="Debit">Debit</option>
-                    </select>
-                </div>
-                <div class="checkout-row" style="display:none;">
-                    <span>Diskon %</span>
-                    <input type="number" id="discountInput" class="checkout-input" value="0" min="0" max="100" oninput="calculateTotal()">
-                </div>
-                <div class="checkout-row">
-                    <span style="font-weight:bold; color:#212121;">Uang Tunai</span>
-                    <input type="number" id="cashInput" class="checkout-input" placeholder="0" oninput="calculateTotal()" style="font-weight:bold; font-size:1.1rem; color:#4caf50;">
-                </div>
-                <div class="checkout-row" style="margin-top:10px;">
-                    <span>Kembali</span>
-                    <strong id="changeDisplay" style="color:#212121; font-size:1.1rem;">Rp 0</strong>
-                </div>
-                
-                <button class="btn-charge" onclick="previewCheckout()">
-                    <span>BAYAR</span>
-                    <span id="grandTotalDisplay">Rp 0</span>
-                </button>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="custName" placeholder="Nama Pelanggan" style="margin: 0; padding: 12px; flex: 1;">
+                <select id="payMethod" style="margin: 0; padding: 12px; flex: 1;" onchange="calculateTotal()">
+                    <option value="Tunai">Tunai</option><option value="QRIS">QRIS</option>
+                </select>
             </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <b>Tunai:</b>
+                <input type="number" id="cashInput" placeholder="0" oninput="calculateTotal()" style="width: 150px; margin: 0; padding: 10px; text-align: right; font-weight: bold; color: #2ecc71;">
+            </div>
+            
+            <div style="text-align: right; margin-bottom: 10px; font-weight: bold;">
+                Kembali: <span id="changeDisplay" style="font-size: 18px;">Rp 0</span>
+            </div>
+            
+            <button class="btn-charge" onclick="previewCheckout()">
+                <span>BAYAR</span><span id="grandTotalDisplay">Rp 0</span>
+            </button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="scannerModal">
-        <div class="modal-box">
-            <div class="modal-header"><h3>Scan Barcode</h3></div>
-            <div class="modal-body"><div id="reader" style="width: 100%;"></div><button class="danger" style="width: 100%; margin-top: 15px;" onclick="closeScanner()">Batal</button></div>
-        </div>
-    </div>
-    
     <div class="modal-overlay" id="previewModal">
         <div class="modal-box">
-            <div class="modal-header"><h3 id="previewTitle">Pratinjau Struk</h3></div>
-            <div class="modal-body">
-                <div class="receipt-preview" id="receiptPreviewContent"></div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="danger" style="flex: 1;" onclick="closePreview()">Batal</button>
-                    <button class="success" style="flex: 2;" onclick="confirmAndPrint()">🖨️ Cetak</button>
-                </div>
+            <div class="modal-header"><h3 id="previewTitle">Konfirmasi Struk</h3></div>
+            <div class="modal-body" style="background: #eaeff3; display: flex; justify-content: center;">
+                <div id="receiptPreviewContent" style="box-shadow: 0 4px 10px rgba(0,0,0,0.2);"></div>
             </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="openBillModal">
-        <div class="modal-box" style="width: 500px;">
-            <div class="modal-header"><h3>Tiket Hold</h3></div>
-            <div class="modal-body">
-                <div id="openBillContent" style="max-height: 50vh; overflow-y: auto;"></div>
-                <button class="danger" style="width: 100%; margin-top: 15px;" onclick="closeOpenBillModal()">Tutup</button>
+            <div style="padding: 15px; display: flex; gap: 10px; border-top: 1px solid #eee;">
+                <button class="danger" style="flex: 1; padding: 15px;" onclick="closePreview()">Batal</button>
+                <button class="success" style="flex: 2; padding: 15px; font-size: 16px;" onclick="confirmAndPrint()">🖨️ Cetak</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="historyModal">
-        <div class="modal-box" style="width: 550px;">
-            <div class="modal-header"><h3>Riwayat Hari Ini</h3></div>
-            <div class="modal-body">
-                <div style="max-height: 50vh; overflow-y: auto;">
-                    <table style="width: 100%; font-size: 0.85rem;">
-                        <thead><tr><th>Waktu</th><th>Pelanggan</th><th>Total</th><th>Aksi</th></tr></thead>
-                        <tbody id="posHistoryList"></tbody>
-                    </table>
-                </div>
-                <button class="danger" style="width: 100%; margin-top: 15px;" onclick="closePosHistory()">Tutup</button>
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header"><h3>Riwayat Transaksi Terakhir</h3></div>
+            <div class="modal-body" style="padding: 0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead style="background: #f4f6f8;"><tr><th style="padding:15px; text-align:left;">Waktu</th><th style="padding:15px; text-align:right;">Total</th><th style="padding:15px; text-align:center;">Aksi</th></tr></thead>
+                    <tbody id="posHistoryList"></tbody>
+                </table>
+            </div>
+            <div style="padding: 15px; border-top: 1px solid #eee;">
+                <button class="danger" style="width: 100%; padding: 15px;" onclick="closePosHistory()">Tutup</button>
             </div>
         </div>
     </div>
 
-    <script src="auth.js"></script><script>checkAuth();</script><script src="pos.js"></script>
+    <script src="auth.js"></script>
+    <script src="pos.js"></script>
 </body>
 </html>
