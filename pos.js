@@ -2,11 +2,8 @@ let cart = [];
 let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0, discountNominal = 0;
 let pendingSale = null;
 
-// Fungsi ini cuma dipanggil sekali pas halaman dibuka / setelah checkout
 function initPOS() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    
-    // Ambil kategori unik lalu urutkan sesuai Alfabet (A sampai Z)
     let categories = [...new Set(products.map(p => p.category || 'Umum'))];
     categories.sort((a, b) => a.localeCompare(b)); 
 
@@ -15,37 +12,28 @@ function initPOS() {
         catOptions.innerHTML = `<option value="cat-Semua">Semua Kategori</option>` + 
             categories.map(c => `<option value="cat-${c}">Kategori: ${c}</option>`).join('');
     }
-
-    // Jalankan filter pertama kali
     filterAndSortProducts();
 }
 
-// Fungsi ini jalan setiap kali ngetik pencarian atau ganti dropdown filter
 function filterAndSortProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const searchQuery = document.getElementById('searchInput').value.toLowerCase();
     const filterValue = document.getElementById('filterSelect').value; 
 
-    // Filter berdasarkan teks pencarian dulu
     let filtered = products.filter(p => p.name.toLowerCase().includes(searchQuery));
 
-    // Jika yang dipilih adalah Kategori tertentu
     if (filterValue.startsWith('cat-')) {
         const selectedCat = filterValue.replace('cat-', '');
         if (selectedCat !== 'Semua') {
             filtered = filtered.filter(p => (p.category || 'Umum') === selectedCat);
         }
-        // Default dalam kategori diurutkan A-Z
         filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } 
-    // Jika yang dipilih adalah mode Urutkan (A-Z / Z-A)
-    else if (filterValue === 'sort-AZ') {
+    } else if (filterValue === 'sort-AZ') {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else if (filterValue === 'sort-ZA') {
         filtered.sort((a, b) => b.name.localeCompare(a.name));
     }
 
-    // Render ke layar
     document.getElementById('productsContainer').innerHTML = filtered.map(p => {
         const isOut = p.stock < 1;
         return `<div class="product-card ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
@@ -83,13 +71,8 @@ function renderCart() {
 function handlePaymentMethod() {
     const method = document.getElementById('payMethod').value;
     const cashInput = document.getElementById('cashInput');
-    if(method !== 'Tunai') {
-        cashInput.value = grandTotal;
-        cashInput.disabled = true;
-    } else {
-        cashInput.value = '';
-        cashInput.disabled = false;
-    }
+    if(method !== 'Tunai') { cashInput.value = grandTotal; cashInput.disabled = true; } 
+    else { cashInput.value = ''; cashInput.disabled = false; }
     calculateTotal();
 }
 
@@ -123,9 +106,10 @@ function previewCheckout() {
 
     const custName = document.getElementById('custName').value.trim() || 'Umum';
     const payMethod = document.getElementById('payMethod').value;
+    const shiftId = localStorage.getItem('currentShift') || 'No-Shift';
 
     pendingSale = { 
-        id: Date.now(), user: localStorage.getItem('currentUser'), date: new Date().toLocaleString('id-ID'), 
+        id: Date.now(), user: localStorage.getItem('currentUser'), shiftId: shiftId, date: new Date().toLocaleString('id-ID'), 
         items: cart, subtotal, discount: discountNominal, total: grandTotal, cash, change, 
         netProfit: totalProfit - discountNominal, customer: custName, method: payMethod
     };
@@ -203,31 +187,18 @@ function confirmAndPrint() {
     }, 1500);
 }
 
-if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', initPOS); }
-
-// ==========================================
-// FITUR OPEN BILL (HOLD & RECALL TIKET)
-// ==========================================
+// === OPEN BILL LOGIC ===
 function saveOpenBill() {
     if(cart.length === 0) return alert('Keranjang masih kosong!');
     const custName = document.getElementById('custName').value.trim();
     if(!custName) return alert('Masukkan NAMA PELANGGAN / NOMOR MEJA sebelum menahan tiket!');
 
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
-    
-    openBills.push({
-        id: "BILL-" + Date.now(),
-        customer: custName,
-        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-        items: cart,
-        total: grandTotal
-    });
+    openBills.push({ id: "BILL-" + Date.now(), customer: custName, time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), items: cart, total: grandTotal });
     localStorage.setItem('openBills', JSON.stringify(openBills));
     
-    // Bersihkan Kasir
     cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
-    renderCart();
-    alert(`Tiket untuk [ ${custName} ] berhasil disimpan!`);
+    renderCart(); alert(`Tiket untuk [ ${custName} ] berhasil disimpan!`);
 }
 
 function showOpenBills() {
@@ -238,10 +209,10 @@ function showOpenBills() {
         container.innerHTML = '<p style="color:#7f8c8d; margin-top:20px;">Tidak ada tiket yang menggantung.</p>';
     } else {
         container.innerHTML = openBills.map((b, i) => `
-            <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left;">
                 <div>
                     <strong style="font-size:1.1rem; color:#2c3e50;">Meja/Nama: ${b.customer}</strong> <span style="font-size:0.8rem; color:#7f8c8d; background:#eee; padding:2px 6px; border-radius:5px;">${b.time}</span><br>
-                    <span style="color:#e74c3c; font-weight:bold;">Rp ${b.total.toLocaleString('id-ID')}</span> <small style="color:#7f8c8d;">(${b.items.length} macam pesanan)</small>
+                    <span style="color:#e74c3c; font-weight:bold;">Rp ${b.total.toLocaleString('id-ID')}</span> <small style="color:#7f8c8d;">(${b.items.length} pesanan)</small>
                 </div>
                 <div style="display:flex; gap:5px;">
                     <button class="primary" style="padding:8px 15px;" onclick="recallBill(${i})">Panggil</button>
@@ -253,34 +224,24 @@ function showOpenBills() {
     document.getElementById('openBillModal').style.display = 'flex';
 }
 
-function closeOpenBillModal() {
-    document.getElementById('openBillModal').style.display = 'none';
-}
+function closeOpenBillModal() { document.getElementById('openBillModal').style.display = 'none'; }
 
 function recallBill(index) {
-    if(cart.length > 0) {
-        if(!confirm('Ada pesanan di keranjang saat ini. Timpa pesanan ini?')) return;
-    }
+    if(cart.length > 0 && !confirm('Ada pesanan di keranjang. Timpa pesanan ini?')) return;
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
-    const bill = openBills[index];
-    
-    cart = bill.items;
-    document.getElementById('custName').value = bill.customer;
+    cart = openBills[index].items;
+    document.getElementById('custName').value = openBills[index].customer;
     renderCart();
     
-    openBills.splice(index, 1);
-    localStorage.setItem('openBills', JSON.stringify(openBills));
+    openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills));
     closeOpenBillModal();
 }
 
 function deleteBill(index) {
-    if(!confirm('Hapus tiket ini secara permanen? Data tidak bisa kembali.')) return;
+    if(!confirm('Hapus tiket ini? Data tidak bisa kembali.')) return;
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
-    openBills.splice(index, 1);
-    localStorage.setItem('openBills', JSON.stringify(openBills));
-    showOpenBills(); // Refresh tampilan modal
+    openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills));
+    showOpenBills();
 }
 
-// UPDATE PADA FUNGSI confirmAndPrint() LAMA KAMU:
-// Pastikan baris ini diubah untuk memasukkan ID Shift ke riwayat penjualan:
-// pendingSale.shiftId = localStorage.getItem('currentShift') || 'No-Shift';
+if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', initPOS); }
