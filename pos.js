@@ -76,7 +76,7 @@ function renderCart() {
                 <span class="cart-item-name">${item.name}</span>
                 <span class="cart-item-qty">${item.qty} x Rp ${item.price.toLocaleString('id-ID')}</span>
             </div>
-            <div style="display:flex; align-items:center; gap:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
                 <span class="cart-item-price">Rp ${item.total.toLocaleString('id-ID')}</span>
                 <button class="danger" style="padding:4px 8px;" onclick="cart.splice(${i}, 1); renderCart();">X</button>
             </div>
@@ -141,59 +141,60 @@ function reprintSale(saleId) {
     renderPreviewModal(activePrintData, true); 
 }
 
-// === FUNGSI DESAIN PREVIEW STRUK (THERMAL FIX) ===
+// === FUNGSI DESAIN PREVIEW STRUK LAYAR HP (FIX NOMINAL KELUAR) ===
 function renderPreviewModal(data, isCopy) {
     const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
     const storeLogo = localStorage.getItem('storeLogo');
     
-    // Validasi Logo: Pastikan src tidak kosong
+    // Logo Fix
     let logoHtml = '';
     if(storeLogo && storeLogo !== "" && storeLogo !== "undefined") {
-        logoHtml = `<div style="text-align: center;"><img src="${storeLogo}" style="max-width: 120px; max-height: 80px; margin-bottom: 10px; display: inline-block;"></div>`;
+        logoHtml = `<div style="text-align: center;"><img src="${storeLogo}" style="max-height: 50px; width: auto; margin-bottom: 5px; display: inline-block;"></div>`;
     }
 
     const totalQty = data.items.reduce((sum, item) => sum + item.qty, 0);
     
+    // itemsHTML dengan ukuran font lebih kecil & tabel terkunci
     let itemsHTML = data.items.map(i => `
-        <tr style="vertical-align: top;">
-            <td colspan="2" style="padding: 2px 0; word-wrap: break-word; font-weight: bold;">${i.name.toUpperCase()}</td>
+        <tr>
+            <td colspan="2" style="padding: 1px 0; font-size: 11px; word-wrap: break-word; font-weight: bold;">${i.name.toUpperCase()}</td>
         </tr>
-        <tr style="border-bottom: 1px dotted #ccc;">
-            <td style="padding: 0 0 5px 0; width: 60%;">${i.qty}X ${i.price.toLocaleString('id-ID')}</td>
-            <td style="text-align: right; padding: 0 0 5px 0; width: 40%; font-weight: bold;">${i.total.toLocaleString('id-ID')}</td>
+        <tr>
+            <td style="padding: 0 0 3px 0; width: 55%; font-size: 11px;">${i.qty}X ${i.price.toLocaleString('id-ID')}</td>
+            <td style="text-align: right; padding: 0 0 3px 0; width: 45%; font-size: 11px; font-weight: bold;">${i.total.toLocaleString('id-ID')}</td>
         </tr>
     `).join('');
 
     let contentHTML = `
-        <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #000; width: 100%; box-sizing: border-box; text-transform: uppercase; line-height: 1.2;">
+        <div style="font-family: monospace; font-size: 11px; color: #000; width: 100%; max-width: 280px; margin: 0 auto; text-transform: uppercase; line-height: 1.1;">
             ${logoHtml}
-            <div style="text-align: center; margin-bottom: 5px;">
-                <strong style="font-size: 16px;">${storeName}</strong><br>
+            <div style="text-align: center; margin-bottom: 3px;">
+                <strong style="font-size: 13px;">${storeName}</strong><br>
                 ${isCopy ? '(COPY STRUK)<br>' : ''}
             </div>
             
-            <div style="text-align: left; margin-bottom: 5px;">
+            <div style="text-align: left; margin-bottom: 3px; font-size: 10px;">
                 KASIR : ${data.user}<br>
                 PELANGGAN : ${data.customer}
             </div>
 
-            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+            <div style="border-top: 1px dashed #000; margin: 3px 0;"></div>
             
-            <table style="width: 100%; font-size: 13px; font-family: inherit; border-collapse: collapse; table-layout: fixed;">
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                 ${itemsHTML}
             </table>
             
-            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+            <div style="border-top: 1px dashed #000; margin: 3px 0;"></div>
             
-            <table style="width: 100%; font-size: 13px; font-family: inherit; border-collapse: collapse; table-layout: fixed;">
-                <tr><td style="padding: 2px 0;">TOTAL:</td><td style="text-align: right; font-weight: bold;">${data.total.toLocaleString('id-ID')}</td></tr>
-                <tr><td style="padding: 2px 0;">${data.method === 'Tunai' ? 'TUNAI:' : data.method.toUpperCase() + ':'}</td><td style="text-align: right;">${data.cash.toLocaleString('id-ID')}</td></tr>
-                <tr><td style="padding: 2px 0;">KEMBALI:</td><td style="text-align: right;">${data.change.toLocaleString('id-ID')}</td></tr>
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                <tr><td style="padding: 1px 0; font-size: 11px;">TOTAL:</td><td style="text-align: right; font-weight: bold; font-size: 11px;">${data.total.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="padding: 1px 0; font-size: 11px;">${data.method === 'Tunai' ? 'TUNAI:' : data.method.toUpperCase() + ':'}</td><td style="text-align: right; font-size: 11px;">${data.cash.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="padding: 1px 0; font-size: 11px;">KEMBALI:</td><td style="text-align: right; font-size: 11px;">${data.change.toLocaleString('id-ID')}</td></tr>
             </table>
             
-            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+            <div style="border-top: 1px dashed #000; margin: 3px 0;"></div>
             
-            <div style="text-align: center; margin-top: 10px;">
+            <div style="text-align: center; margin-top: 5px; font-size: 10px;">
                 SOLD ${data.items.length} ITEMS, QTY ${totalQty}<br>
                 ${data.date}<br><br>
                 ** TERIMAKASIH **<br>
@@ -225,57 +226,55 @@ function confirmAndPrint() {
     
     let logoPrintHtml = '';
     if(storeLogo && storeLogo !== "" && storeLogo !== "undefined") {
-        logoPrintHtml = `<div style="text-align:center;"><img src="${storeLogo}" style="max-width: 150px; display: block; margin: 0 auto 10px auto;"></div>`;
+        logoPrintHtml = `<div style="text-align:center;"><img src="${storeLogo}" style="max-width: 150px; height: auto; display: block; margin: 0 auto 5px auto;"></div>`;
     }
 
     const totalQty = activePrintData.items.reduce((sum, item) => sum + item.qty, 0);
     let copyTag = isReprintMode ? "(COPY STRUK)<br>" : "";
     
     let itemsHTML = activePrintData.items.map(i => `
-        <tr style="vertical-align: top;">
-            <td colspan="2" style="padding-bottom:2px; font-weight: bold;">${i.name.toUpperCase()}</td>
-        </tr>
+        <tr><td colspan="2" style="font-weight: bold; font-size: 24px;">${i.name.toUpperCase()}</td></tr>
         <tr>
-            <td style="padding-bottom:5px; width: 60%;">${i.qty}X ${i.price.toLocaleString('id-ID')}</td>
-            <td style="text-align: right; padding-bottom:5px; width: 40%; font-weight: bold;">${i.total.toLocaleString('id-ID')}</td>
+            <td style="width: 55%; font-size: 24px;">${i.qty}X ${i.price.toLocaleString('id-ID')}</td>
+            <td style="text-align: right; width: 45%; font-weight: bold; font-size: 24px;">${i.total.toLocaleString('id-ID')}</td>
         </tr>
     `).join('');
 
     let printHTML = `
         <div style="font-family: monospace; font-size: 24px; color: black; width: 100%; text-transform: uppercase;">
             ${logoPrintHtml}
-            <div style="text-align: center; margin-bottom: 10px;">
+            <div style="text-align: center; margin-bottom: 5px;">
                 <b>${storeName}</b><br>
                 ${copyTag}
             </div>
             
-            <div style="text-align: left;">
+            <div style="text-align: left; font-size: 22px;">
                 KASIR : ${activePrintData.user}<br>
                 PELANGGAN: ${activePrintData.customer}
             </div>
 
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 8px 0;">
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
             
-            <table style="width: 100%; font-family: monospace; font-size: 24px; border-collapse: collapse; table-layout: fixed;">
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                 ${itemsHTML}
             </table>
             
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 8px 0;">
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
             
-            <table style="width: 100%; font-family: monospace; font-size: 24px; border-collapse: collapse; table-layout: fixed;">
-                <tr><td style="width: 50%;">TOTAL:</td><td style="text-align: right; width: 50%;"><b>${activePrintData.total.toLocaleString('id-ID')}</b></td></tr>
-                <tr><td style="width: 50%;">BAYAR:</td><td style="text-align: right; width: 50%;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr>
-                <tr><td style="width: 50%;">KEMBALI:</td><td style="text-align: right; width: 50%;">${activePrintData.change.toLocaleString('id-ID')}</td></tr>
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                <tr><td style="width: 50%; font-size: 24px;">TOTAL:</td><td style="text-align: right; width: 50%; font-weight: bold; font-size: 24px;">${activePrintData.total.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="width: 50%; font-size: 24px;">BAYAR:</td><td style="text-align: right; width: 50%; font-size: 24px;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="width: 50%; font-size: 24px;">KEMBALI:</td><td style="text-align: right; width: 50%; font-size: 24px;">${activePrintData.change.toLocaleString('id-ID')}</td></tr>
             </table>
             
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 8px 0;">
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
             
-            <div style="text-align: center; margin-top: 15px;">
+            <div style="text-align: center; margin-top: 10px; font-size: 22px;">
                 SOLD ${activePrintData.items.length} ITEMS, QTY ${totalQty}<br>
                 ${activePrintData.date}<br><br>
                 ** TERIMAKASIH **<br>
                 ATAS KUNJUNGAN ANDA
-                <br><br><br>
+                <br><br><br><br>
             </div>
         </div>
     `;
@@ -288,7 +287,7 @@ function confirmAndPrint() {
     }, 1500);
 }
 
-// HOLD & HISTORY LOGIC (RETAINED)
+// HOLD & HISTORY LOGIC Tetap
 function saveOpenBill() {
     if(cart.length === 0) return alert('Keranjang kosong!');
     const custName = document.getElementById('custName').value.trim();
