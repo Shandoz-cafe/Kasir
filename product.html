@@ -2,36 +2,42 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Kelola Produk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kelola Produk - Shandoz</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
     <header>
-        <h2>Gudang & Produk</h2>
-        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+        <h2>📦 Gudang & Produk</h2>
+        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
+    
     <div class="container">
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="margin-top:0;">Tambah Produk Baru</h3>
+            <h3 style="margin-top:0; margin-bottom: 15px; color: #1e293b;">Tambah Produk Baru</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <input type="text" id="prodName" placeholder="Nama Produk" style="flex:2; min-width:150px; margin:0;">
                 <input type="text" id="prodCategory" placeholder="Kategori" style="flex:1; min-width:120px; margin:0;">
                 
                 <div style="display:flex; flex:2; min-width:200px; gap:5px;">
                     <input type="text" id="prodBarcode" placeholder="Kode Barcode" style="width:100%; margin:0;">
-                    <button class="warning" style="margin:0; white-space:nowrap; border-radius: 8px;" onclick="openScanner()">📷 Scan</button>
+                    <button class="bg-warning" style="margin:0; white-space:nowrap; border-radius: 8px; color: white;" onclick="openScanner()">📷 Scan</button>
                 </div>
                 
                 <input type="number" id="prodCost" placeholder="Modal (HPP)" style="flex:1; min-width:100px; margin:0;">
                 <input type="number" id="prodPrice" placeholder="Harga Jual" style="flex:1; min-width:100px; margin:0;">
                 <input type="number" id="prodStock" placeholder="Stok" style="flex:1; min-width:70px; margin:0;">
-                <button class="primary" style="white-space: nowrap; margin:0;" onclick="addProduct()">➕ Simpan</button>
+                <button class="bg-primary" style="white-space: nowrap; margin:0; color: white;" onclick="addProduct()">➕ Simpan</button>
             </div>
         </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead><tr><th>No</th><th>Barcode</th><th>Kategori</th><th>Nama Item</th><th>Modal</th><th>Jual</th><th>Sisa Stok</th><th>Aksi</th></tr></thead>
+        
+        <div class="card" style="overflow-x: auto; padding: 0;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+                <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
+                    <tr><th style="padding: 15px;">No</th><th>Barcode</th><th>Kategori</th><th>Nama Item</th><th>Modal</th><th>Jual</th><th>Sisa Stok</th><th>Aksi</th></tr>
+                </thead>
                 <tbody id="productList"></tbody>
             </table>
         </div>
@@ -39,14 +45,17 @@
 
     <div class="modal-overlay" id="scannerModal">
         <div class="modal-box">
-            <h3 style="margin-top: 0; color: #1e3c72;">Arahkan Kamera ke Barcode</h3>
+            <h3 style="margin-top: 0; color: #0f172a;">Arahkan Kamera ke Barcode</h3>
             <div id="reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-            <button class="danger" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="closeScanner()">Batal</button>
+            <button class="bg-danger" style="width: 100%; margin-top: 15px; padding: 12px; color: white;" onclick="closeScanner()">Batal</button>
         </div>
     </div>
 
     <script src="auth.js"></script>
-    <script>checkAuth(); if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';</script>
+    <script>
+        checkAuth(); 
+        if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
+    </script>
     <script src="product.js"></script>
 </body>
 </html>
