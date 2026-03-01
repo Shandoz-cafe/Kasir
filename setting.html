@@ -14,10 +14,8 @@
     </header>
 
     <div class="container">
-        
         <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
             <h3 style="margin-top: 0; margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">👥 Manajemen Pengguna</h3>
-            
             <div id="usersList" style="margin-bottom: 20px;"></div>
 
             <div style="background: #f0f8ff; padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px;">
@@ -50,13 +48,13 @@
                 <option value="80">Kertas Besar (Thermal 80mm)</option>
             </select>
 
-            <button class="bg-success" onclick="saveStoreSettings()" style="width: 100%; padding: 18px; font-size: 16px; color:white;">💾 SIMPAN PENGATURAN TOKO</button>
+            <button class="bg-success" onclick="saveStoreSettings()" style="width: 100%; padding: 18px; font-size: 16px; color:white;">💾 SIMPAN PENGATURAN</button>
         </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        checkAuth(); // Kuncian Dihapus!
+        checkAuth();
         let currentLogoBase64 = null;
 
         window.onload = function() {
@@ -86,7 +84,7 @@
         function addKasir() {
             const name = document.getElementById('newKasirName').value;
             const pin = document.getElementById('newKasirPin').value;
-            if(!name || pin.length !== 4) return alert("Nama wajib diisi & PIN wajib 4 angka!");
+            if(!name || pin.length !== 4) return alert("Gagal");
             
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             users.push({ id: 'kasir_'+Date.now(), name: name, role: 'cashier', pin: pin });
@@ -95,12 +93,12 @@
             document.getElementById('newKasirName').value = '';
             document.getElementById('newKasirPin').value = '';
             renderUserList();
-            alert("Kasir baru berhasil ditambahkan!");
+            alert("Sukses");
         }
 
         function changeOwnerPin() {
             const newPin = document.getElementById('newOwnerPin').value;
-            if(newPin.length !== 4) return alert("Gagal! PIN Owner wajib 4 angka!");
+            if(newPin.length !== 4) return alert("Gagal");
             
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             const ownerIndex = users.findIndex(u => u.role === 'admin'); 
@@ -108,14 +106,14 @@
             if(ownerIndex !== -1) {
                 users[ownerIndex].pin = newPin; 
                 localStorage.setItem('users', JSON.stringify(users)); 
-                alert("SUKSES! PIN Owner berhasil diubah menjadi: " + newPin);
+                alert("Sukses");
                 document.getElementById('newOwnerPin').value = '';
                 renderUserList();
             }
         }
 
         function deleteUser(index) {
-            if(confirm("Yakin ingin menghapus akun kasir ini?")) {
+            if(confirm("Hapus?")) {
                 const users = JSON.parse(localStorage.getItem('users') || '[]');
                 users.splice(index, 1);
                 localStorage.setItem('users', JSON.stringify(users));
@@ -123,13 +121,34 @@
             }
         }
 
+        // MESIN KOMPRESOR LOGO OTOMATIS BIAR BISA DI-SAVE
         document.getElementById('storeLogoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    currentLogoBase64 = event.target.result;
-                    document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 300; // Perkecil ukuran gambar ke 300px
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > MAX_WIDTH) {
+                            height = Math.round((height * MAX_WIDTH) / width);
+                            width = MAX_WIDTH;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Kompres jadi JPEG biar sangat ringan di memori
+                        currentLogoBase64 = canvas.toDataURL('image/jpeg', 0.8); 
+                        document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
+                    };
+                    img.src = event.target.result;
                 }
                 reader.readAsDataURL(file);
             }
@@ -137,10 +156,16 @@
 
         function saveStoreSettings() {
             localStorage.setItem('storeName', document.getElementById('storeNameInput').value);
-            localStorage.setItem('storeLogo', currentLogoBase64); 
+            if (currentLogoBase64) {
+                try {
+                    localStorage.setItem('storeLogo', currentLogoBase64); 
+                } catch(e) {
+                    return alert("Gagal");
+                }
+            }
             const pSettings = { paperSize: document.getElementById('paperSizeInput').value, autoPrint: true };
             localStorage.setItem('printerSettings', JSON.stringify(pSettings));
-            alert('Pengaturan Toko & Printer berhasil disimpan!');
+            alert('Sukses');
         }
     </script>
 </body>
