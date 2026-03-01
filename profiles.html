@@ -7,19 +7,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { background: #111827; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        h1 { margin-bottom: 30px; font-weight: 600; letter-spacing: 1px; text-align: center;}
+        h1 { margin-bottom: 30px; font-weight: 600; letter-spacing: 1px; text-align: center; font-size: 22px;}
         
         .profile-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 600px; padding: 20px; }
         .profile-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; text-align: center; width: 140px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
         .profile-card:hover, .profile-card:active { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); transform: translateY(-5px); }
         .avatar { font-size: 50px; margin-bottom: 10px; }
         .name { font-size: 14px; font-weight: 600; }
-        .role-badge { font-size: 10px; background: #3b82f6; padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block;}
+        .role-badge { font-size: 10px; background: #3b82f6; padding: 3px 8px; border-radius: 10px; margin-top: 5px; display: inline-block;}
         .role-cashier { background: #10b981; }
 
         /* Modal PIN */
         .pin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
-        .pin-display { font-size: 30px; letter-spacing: 10px; margin-bottom: 20px; height: 40px; }
+        .pin-display { font-size: 30px; letter-spacing: 10px; margin-bottom: 20px; height: 40px; color: #3b82f6; font-weight: bold;}
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .numpad button { width: 70px; height: 70px; border-radius: 50%; border: none; background: rgba(255,255,255,0.1); color: white; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .numpad button:active { background: rgba(255,255,255,0.3); }
@@ -28,14 +28,16 @@
 </head>
 <body>
 
-    <h1>Siapa yang sedang menggunakan kasir?</h1>
+    <h1>Siapa yang menggunakan kasir?</h1>
     <div class="profile-container" id="profileList">
         </div>
 
     <div class="pin-modal" id="pinModal">
-        <h2 id="pinTitle" style="margin-bottom: 5px;">Masukkan PIN</h2>
-        <p style="color: #aaa; font-size: 12px; margin-bottom: 20px;">PIN Default Owner: 1234</p>
+        <h2 id="pinTitle" style="margin-bottom: 5px; text-align: center;">Masukkan PIN</h2>
+        <p id="pinSubtitle" style="color: #aaa; font-size: 12px; margin-bottom: 20px; text-align: center;">Masukkan 4 digit angka rahasia.</p>
+        
         <div class="pin-display" id="pinDisplay">_ _ _ _</div>
+        
         <div class="numpad">
             <button onclick="pressPin(1)">1</button><button onclick="pressPin(2)">2</button><button onclick="pressPin(3)">3</button>
             <button onclick="pressPin(4)">4</button><button onclick="pressPin(5)">5</button><button onclick="pressPin(6)">6</button>
@@ -73,7 +75,18 @@
             activeProfile = users.find(u => u.id === userId);
             typedPin = "";
             updatePinDisplay();
-            document.getElementById('pinTitle').innerText = "PIN " + activeProfile.name;
+            
+            // CEK APAKAH INI AKUN BARU DAFTAR
+            if (activeProfile.pin === "SETUP") {
+                document.getElementById('pinTitle').innerText = "Buat PIN Baru Owner";
+                document.getElementById('pinSubtitle').innerText = "Buat 4 angka rahasia untuk mengamankan menu Admin.";
+                document.getElementById('pinTitle').style.color = "#2ecc71";
+            } else {
+                document.getElementById('pinTitle').innerText = "PIN " + activeProfile.name;
+                document.getElementById('pinSubtitle').innerText = "Masukkan PIN 4 digit Anda.";
+                document.getElementById('pinTitle').style.color = "#fff";
+            }
+            
             document.getElementById('pinModal').style.display = 'flex';
         }
 
@@ -94,13 +107,30 @@
         }
 
         function submitPin() {
+            if(typedPin.length !== 4) return alert("Perhatian! PIN wajib diisi 4 angka.");
+
+            // JIKA AKUN BARU: SIMPAN PIN BARU & LANGSUNG LOGIN
+            if (activeProfile.pin === "SETUP") {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const idx = users.findIndex(u => u.id === activeProfile.id);
+                
+                users[idx].pin = typedPin; // Ganti "SETUP" jadi angka PIN
+                localStorage.setItem('users', JSON.stringify(users)); // Upload ke Cloud Firebase
+
+                alert("Sip! PIN Rahasia berhasil diamankan. Selamat datang, Bos!");
+                localStorage.setItem('currentUser', activeProfile.name);
+                localStorage.setItem('currentRole', activeProfile.role);
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            // JIKA AKUN LAMA: COCOKKAN PIN
             if(typedPin === activeProfile.pin) {
-                // PIN BENAR! Simpan Sesi dan masuk Dashboard
                 localStorage.setItem('currentUser', activeProfile.name);
                 localStorage.setItem('currentRole', activeProfile.role);
                 window.location.href = 'dashboard.html';
             } else {
-                alert("PIN SALAH!");
+                alert("Ups! PIN yang kamu masukkan salah.");
                 typedPin = ""; updatePinDisplay();
             }
         }
