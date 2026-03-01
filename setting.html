@@ -18,8 +18,7 @@
         <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
             <h3 style="margin-top: 0; margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">👥 Manajemen Pengguna</h3>
             
-            <div id="usersList" style="margin-bottom: 20px;">
-                </div>
+            <div id="usersList" style="margin-bottom: 20px;"></div>
 
             <div style="background: #f0f8ff; padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px;">
                 <h4 style="margin-bottom: 10px; color: #1e3a8a;">+ Tambah Profil Kasir</h4>
@@ -53,17 +52,11 @@
 
             <button class="bg-success" onclick="saveStoreSettings()" style="width: 100%; padding: 18px; font-size: 16px; color:white;">💾 SIMPAN PENGATURAN TOKO</button>
         </div>
-
-        <div style="text-align: center; margin-top: 20px; margin-bottom: 30px; opacity: 0.6;">
-            <h4 style="font-weight: 900; letter-spacing: 1px; color: #0f172a;">SHANDOZ SYSTEMS</h4>
-        </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        checkAuth();
-        if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
-
+        checkAuth(); // Kuncian Dihapus!
         let currentLogoBase64 = null;
 
         window.onload = function() {
@@ -74,7 +67,6 @@
             }
             const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
             document.getElementById('paperSizeInput').value = ps.paperSize;
-            
             renderUserList();
         }
 
