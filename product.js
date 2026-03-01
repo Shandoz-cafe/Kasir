@@ -19,46 +19,37 @@ function loadProducts() {
 }
 
 function addProduct() {
-    const name = document.getElementById('prodName').value;
-    const cat = document.getElementById('prodCategory').value || 'Umum';
-    const barcode = document.getElementById('prodBarcode').value;
-    const cost = parseFloat(document.getElementById('prodCost').value) || 0;
-    const price = parseFloat(document.getElementById('prodPrice').value) || 0;
-    const stock = parseInt(document.getElementById('prodStock').value) || 0;
-
-    if(!name || price <= 0) return alert('Nama dan Harga Jual wajib diisi!');
-
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    products.push({ id: 'prod_'+Date.now(), name, category: cat, barcode, cost, price, stock });
-    localStorage.setItem('products', JSON.stringify(products));
-
-    document.getElementById('prodName').value = ''; 
-    document.getElementById('prodCategory').value = ''; 
-    document.getElementById('prodBarcode').value = ''; 
-    document.getElementById('prodCost').value = ''; 
-    document.getElementById('prodPrice').value = ''; 
-    document.getElementById('prodStock').value = '';
+    const name = document.getElementById('prodName').value.trim();
+    const category = document.getElementById('prodCategory').value.trim() || 'Umum';
+    const barcode = document.getElementById('prodBarcode').value.trim();
+    const cost = parseFloat(document.getElementById('prodCost').value);
+    const price = parseFloat(document.getElementById('prodPrice').value);
+    const stock = parseInt(document.getElementById('prodStock').value);
     
+    if(!name || isNaN(cost) || isNaN(price) || isNaN(stock)) return alert('Gagal');
+    
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    if(barcode && products.find(p => p.barcode === barcode)) return alert('Gagal');
+
+    products.push({ id: Date.now().toString(), barcode, name, category, cost, price, stock });
+    localStorage.setItem('products', JSON.stringify(products));
+    
+    document.getElementById('prodName').value = ''; document.getElementById('prodCategory').value = ''; document.getElementById('prodBarcode').value = '';
+    document.getElementById('prodCost').value = ''; document.getElementById('prodPrice').value = ''; document.getElementById('prodStock').value = '';
     loadProducts();
-    alert("Produk berhasil ditambahkan!");
+    alert("Sukses");
 }
 
 function addStock(index) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const tambah = parseInt(prompt(`Tambah stok untuk [${products[index].name}] sebanyak:`));
-    if(tambah && !isNaN(tambah)) { 
-        products[index].stock += tambah; 
-        localStorage.setItem('products', JSON.stringify(products)); 
-        loadProducts(); 
-    }
+    const tambah = parseInt(prompt(`Tambah stok untuk ${products[index].name} sebanyak:`));
+    if(tambah && !isNaN(tambah)) { products[index].stock += tambah; localStorage.setItem('products', JSON.stringify(products)); loadProducts(); }
 }
 
 function deleteProduct(index) {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    if(confirm(`Yakin ingin menghapus produk [${products[index].name}]?`)) {
-        products.splice(index, 1); 
-        localStorage.setItem('products', JSON.stringify(products)); 
-        loadProducts();
+    if(confirm('Hapus?')) {
+        const products = JSON.parse(localStorage.getItem('products') || '[]');
+        products.splice(index, 1); localStorage.setItem('products', JSON.stringify(products)); loadProducts();
     }
 }
 
@@ -71,7 +62,7 @@ function openScanner() {
     html5QrcodeScanner.render((decodedText) => {
         document.getElementById('prodBarcode').value = decodedText;
         closeScanner();
-    }, (error) => { /* abaikan error pencarian */ });
+    }, (error) => {});
 }
 
 function closeScanner() {
