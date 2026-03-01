@@ -2,46 +2,45 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SHANDOZ POS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Admin</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="pos-body">
+<body>
     <header>
-        <h2>SHANDOZ POS - <span id="userNameDisplay" style="color: #f39c12;"></span></h2>
+        <h2>Admin - <span id="userNameDisplay" style="color: #f59e0b;"></span></h2>
         <button class="danger" onclick="logout()">🛑 Tutup Shift</button>
     </header>
+    
     <div class="container">
-        
-        <div class="dashboard-stats admin-only" style="display:none;" id="quickStats">
-            <div class="stat-card" style="border-left-color: #3498db;">
-                <h4>Penjualan Hari Ini</h4>
-                <h2 id="todaySales">0 Transaksi</h2>
+        <div class="dash-stats admin-only" style="display:none;" id="quickStats">
+            <div class="stat-box" style="border-color: #3b82f6;">
+                <h4>Transaksi Hari Ini</h4>
+                <h2 id="todaySales">0</h2>
             </div>
-            <div class="stat-card" style="border-left-color: #27ae60;">
+            <div class="stat-box" style="border-color: #10b981;">
                 <h4>Omzet Hari Ini</h4>
                 <h2 id="todayRevenue">Rp 0</h2>
             </div>
-            <div class="stat-card" style="border-left-color: #e74c3c;">
-                <h4>Pengeluaran Hari Ini</h4>
+            <div class="stat-box" style="border-color: #ef4444;">
+                <h4>Pengeluaran</h4>
                 <h2 id="todayExpense">Rp 0</h2>
             </div>
         </div>
 
-        <h3 style="margin-top:0; color: #1e3c72;">Menu Pintasan</h3>
-        <div class="nav-grid">
-            <a href="pos.html" class="nav-card">🛒 <br><span style="font-size:0.8rem; font-weight:normal; color:#7f8c8d;">Buka Mesin</span><br>Kasir (POS)</a>
-            <a href="product.html" class="nav-card admin-only" style="display:none;">📦 <br><span style="font-size:0.8rem; font-weight:normal; color:#7f8c8d;">Kelola Stok</span><br>Gudang Produk</a>
-            <a href="reports.html" class="nav-card admin-only" style="display:none;">📊 <br><span style="font-size:0.8rem; font-weight:normal; color:#7f8c8d;">Cek Laba</span><br>Buku Keuangan</a>
-            <a href="user.html" class="nav-card admin-only" style="display:none;">👥 <br><span style="font-size:0.8rem; font-weight:normal; color:#7f8c8d;">Akses Staff</span><br>Manajemen PIN</a>
-            <a href="setting.html" class="nav-card admin-only" style="display:none;">⚙️ <br><span style="font-size:0.8rem; font-weight:normal; color:#7f8c8d;">Nama & Logo</span><br>Pengaturan</a>
+        <div class="dash-menu">
+            <a href="pos.html" class="menu-card">🛒<br><br>Kasir POS</a>
+            <a href="product.html" class="menu-card admin-only" style="display:none;">📦<br><br>Data Barang</a>
+            <a href="reports.html" class="menu-card admin-only" style="display:none;">📊<br><br>Buku Keuangan</a>
+            <a href="user.html" class="menu-card admin-only" style="display:none;">👥<br><br>Manajemen Karyawan</a>
+            <a href="setting.html" class="menu-card admin-only" style="display:none;">⚙️<br><br>Pengaturan Toko</a>
         </div>
 
-        <div class="card admin-only" style="display:none; margin-top: 30px;">
-            <h3 style="margin-top:0; color:#1e3c72; border-bottom:2px solid #eee; padding-bottom:10px;">🕒 Aktivitas Kasir Terbaru</h3>
-            <div class="table-responsive">
-                <table style="min-width: 600px;">
-                    <thead><tr><th>Waktu</th><th>Shift / Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total (Rp)</th></tr></thead>
+        <div class="admin-only" style="display:none; margin-top: 30px;">
+            <h3 style="margin-bottom: 10px; color: #1e293b;">🕒 Aktivitas Terakhir</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Waktu</th><th>Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total</th></tr></thead>
                     <tbody id="historyList"></tbody>
                 </table>
             </div>
@@ -63,7 +62,7 @@
             const todaySales = sales.filter(s => s.date.includes(todayStr));
             const todayExpenses = expenses.filter(e => e.date.includes(todayStr));
             
-            document.getElementById('todaySales').innerText = todaySales.length + " Transaksi";
+            document.getElementById('todaySales').innerText = todaySales.length;
             document.getElementById('todayRevenue').innerText = "Rp " + todaySales.reduce((sum, s) => sum + s.total, 0).toLocaleString('id-ID');
             document.getElementById('todayExpense').innerText = "Rp " + todayExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString('id-ID');
 
@@ -71,9 +70,9 @@
             const recentSales = sales.slice(-10).reverse();
             
             if(recentSales.length === 0) {
-                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#7f8c8d; padding:20px;">Belum ada riwayat transaksi</td></tr>';
+                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Belum ada data</td></tr>';
             } else {
-                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; color:#7f8c8d; background:#f0f2f5; padding:2px 5px; border-radius:4px;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || 'Umum'}</td><td>${s.method}</td><td style="font-weight:bold; color:#27ae60;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
+                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; background:#e2e8f0; padding:2px 5px; border-radius:4px;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || 'Umum'}</td><td>${s.method}</td><td style="font-weight:bold; color:#10b981;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
             }
         }
     </script>
