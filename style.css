@@ -1,162 +1,48 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard - Shandoz POS</title>
-    <link rel="stylesheet" href="style.css?v=final4">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* CSS KHUSUS MODAL KEAMANAN (DIJAMIN TIDAK HANCUR) */
-        .sec-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.9); z-index:99999; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-        .sec-box { background:#fff; width:90%; max-width:340px; border-radius:20px; padding:30px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
-        .sec-input { width:100%; text-align:center; font-size:28px; letter-spacing:10px; padding:15px; border:2px solid #e5e7eb; border-radius:12px; margin:20px 0; outline:none; transition:0.3s; font-weight:bold;}
-        .sec-input:focus { border-color:#3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,0.2); }
-        .sec-btn { width:100%; padding:15px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; margin-bottom:10px; font-size:16px; transition:0.2s;}
-        .sec-btn:active { transform:scale(0.95); }
-        .btn-unlock { background:#3b82f6; color:#fff; }
-        .btn-cancel { background:#f3f4f6; color:#ef4444; }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    </style>
-</head>
-<body>
-    <header>
-        <h2><span style="color:#10b981;">●</span> Dashboard</h2>
-        <div style="display: flex; gap: 8px;">
-            <button class="warning" onclick="window.location.href='profiles.html'" style="padding: 8px 12px; font-size: 12px;">👥 Ganti Profil</button>
-            <button class="danger" onclick="logout()" style="padding: 8px 12px; font-size: 12px;">🛑 Keluar</button>
-        </div>
-    </header>
-    
-    <div class="container">
-        <div class="welcome-card">
-            <h3>Halo, <span id="userNameDisplay">Admin</span>! 👋</h3>
-            <p>Selamat datang di Shandoz Command Center. Semua sistem beroperasi dengan normal.</p>
-        </div>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-title">Pendapatan Hari Ini</div>
-                <div class="stat-value" id="todayIncome">Rp 0</div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-title">Total Transaksi</div>
-                <div class="stat-value" id="todayOrders">0 Tiket</div>
-            </div>
-        </div>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+body { background-color: #f0f4f8; color: #1e293b; -webkit-tap-highlight-color: transparent; overflow-x: hidden;}
+a { text-decoration: none; }
 
-        <div class="chart-card">
-            <div class="chart-header">
-                <h4>📊 Tren Penjualan (7 Hari Terakhir)</h4>
-            </div>
-            <div style="position: relative; height: 200px; width: 100%;">
-                <canvas id="salesChart"></canvas>
-            </div>
-        </div>
+/* HEADER */
+header { background: #0f172a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+header h2 { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-        <h4 style="margin-bottom: 10px; color: #374151; font-weight: 700; margin-left: 5px;">Aplikasi Utama</h4>
-        <div class="dash-menu">
-            <a href="pos.html" class="menu-card">
-                <span class="icon">🛒</span> KASIR (POS)
-            </a>
-            <a href="javascript:void(0)" onclick="checkAccess('product.html')" class="menu-card">
-                <span class="icon">📦</span> GUDANG INVENTORY
-            </a>
-            <a href="javascript:void(0)" onclick="checkAccess('reports.html')" class="menu-card">
-                <span class="icon">📈</span> ANALISA LAPORAN
-            </a>
-            <a href="javascript:void(0)" onclick="checkAccess('setting.html')" class="menu-card">
-                <span class="icon">⚙️</span> PENGATURAN SISTEM
-            </a>
-        </div>
-        
-        <div style="text-align: center; margin-top: 20px; margin-bottom: 30px; opacity: 0.6;">
-            <h4 style="font-weight: 900; letter-spacing: 1px; color: #111827; margin-bottom: 2px;">SHANDOZ <span style="color: #3b82f6;">SYSTEMS</span></h4>
-            <p style="font-size: 10px; font-weight: bold;">v3.0.2 ENTERPRISE EDITION</p>
-        </div>
-    </div>
+/* TOMBOL GLOBAL */
+button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: white;}
+button:active { transform: scale(0.95); }
+.btn-head { padding: 8px 12px; font-size: 12px; }
+.bg-primary { background: #3b82f6; }
+.bg-success { background: #10b981; }
+.bg-danger { background: #ef4444; }
+.bg-warning { background: #f59e0b; }
 
-    <div class="sec-modal" id="secureLock">
-        <div class="sec-box">
-            <h2 style="margin-bottom: 5px; color: #111827;">🔒 Akses Ditolak</h2>
-            <p style="font-size: 13px; color: #6b7280;">Menu ini khusus Owner. Masukkan PIN Owner untuk melanjutkan.</p>
-            <input type="password" id="ownerPinEntry" class="sec-input" placeholder="••••" maxlength="4" pattern="\d*">
-            <button class="sec-btn btn-unlock" onclick="verifyOwnerPin()">Buka Akses</button>
-            <button class="sec-btn btn-cancel" onclick="document.getElementById('secureLock').style.display='none'">Batal</button>
-        </div>
-    </div>
-    
-    <script src="auth.js"></script>
-    <script>
-        checkAuth();
-        
-        const currentUser = localStorage.getItem('currentUser') || 'Admin';
-        const currentRole = localStorage.getItem('currentRole') || 'cashier';
-        document.getElementById('userNameDisplay').innerText = currentUser.toUpperCase();
+/* FORM INPUT */
+input, select { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; color: #334155; }
+input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #475569; }
 
-        // SISTEM KUNCI MENU
-        let pendingUrl = "";
-        function checkAccess(url) {
-            if(currentRole === 'admin') {
-                window.location.href = url; // Owner langsung lewat
-            } else {
-                pendingUrl = url;
-                document.getElementById('ownerPinEntry').value = '';
-                document.getElementById('secureLock').style.display = 'flex'; // Kasir dihadang
-                setTimeout(() => document.getElementById('ownerPinEntry').focus(), 100);
-            }
-        }
+/* POS LAYOUT (KASIR) */
+.pos-layout { display: flex; flex-direction: column; height: calc(100vh - 60px); }
+.pos-left { flex: 1; overflow-y: auto; padding: 10px; background: #f8fafc; }
+.pos-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding-bottom: 20px; }
+.product-item { background: #fff; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 2px solid transparent; transition: 0.2s; display: flex; flex-direction: column; min-height: 110px;}
+.product-item:active { border-color: #3b82f6; transform: scale(0.98); }
+.pos-right { background: #fff; border-top: 1px solid #e2e8f0; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 50; flex-shrink: 0;}
+.cart-list-container { max-height: 25vh; overflow-y: auto; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;}
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; }
+.btn-charge { width: 100%; padding: 18px; font-size: 18px; background: #10b981; color: white; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; margin-top: 10px;}
 
-        function verifyOwnerPin() {
-            const pinAttempt = document.getElementById('ownerPinEntry').value;
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const owner = users.find(u => u.role === 'admin');
-            
-            if(owner && pinAttempt === owner.pin) {
-                window.location.href = pendingUrl; // Pin Benar, masuk!
-            } else {
-                alert("PIN Salah! Akses ditolak.");
-                document.getElementById('ownerPinEntry').value = '';
-            }
-        }
+@media (min-width: 650px) {
+    .pos-layout { flex-direction: row; height: calc(100vh - 60px); overflow: hidden; }
+    .pos-left { flex: 2; overflow-y: auto; }
+    .pos-right { flex: 1; max-width: 400px; overflow-y: auto; border-left: 1px solid #e2e8f0; border-top: none; }
+    .cart-list-container { max-height: 40vh; }
+}
 
-        // MESIN GRAFIK
-        function initDashboardData() {
-            const salesData = JSON.parse(localStorage.getItem('sales') || '[]');
-            const todayStr = new Date().toLocaleDateString('id-ID');
-            let todayIncome = 0; let todayOrders = 0;
-            const last7Days = {};
-            
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                last7Days[d.toLocaleDateString('id-ID')] = 0; 
-            }
-
-            salesData.forEach(sale => {
-                const saleDate = sale.date.split(',')[0].trim();
-                if(saleDate === todayStr) { todayIncome += sale.total; todayOrders++; }
-                if(last7Days[saleDate] !== undefined) { last7Days[saleDate] += sale.total; }
-            });
-
-            document.getElementById('todayIncome').innerText = 'Rp ' + todayIncome.toLocaleString('id-ID');
-            document.getElementById('todayOrders').innerText = todayOrders + ' Tiket';
-
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Object.keys(last7Days).map(date => date.substring(0, 5)),
-                    datasets: [{
-                        label: 'Pendapatan (Rp)', data: Object.values(last7Days),
-                        borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 3, pointBackgroundColor: '#10b981', pointBorderColor: '#fff',
-                        pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
-            });
-        }
-        document.addEventListener('DOMContentLoaded', initDashboardData);
-    </script>
-</body>
-</html>
+/* MODAL FIX ANTI TERTUMPAH (PENTING!) */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 99999; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(4px); }
+.modal-box { background: white; border-radius: 20px; width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+.modal-header { padding: 18px 20px; border-bottom: 1px solid #f1f5f9; background: #fff; }
+.modal-header h3 { margin: 0; font-size: 16px; color: #0f172a; }
+.modal-body { padding: 20px; overflow-y: auto; flex-grow: 1; }
