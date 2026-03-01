@@ -34,13 +34,19 @@
 
     <script src="auth.js"></script>
     <script>
-        // Setup Akun Default
-        if (!localStorage.getItem("users")) {
+        // PERBAIKAN: Memaksa browser menghapus akun lama dan memasukkan sistem PIN
+        let existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+        
+        // Cek apakah data di HP ini belum punya fitur PIN (masih data jadul)
+        let isOldVersion = existingUsers.length === 0 || existingUsers[0].pin === undefined;
+
+        if (isOldVersion) {
             localStorage.setItem("users", JSON.stringify([
                 { username: "admin", pin: "1234", role: "admin" },
                 { username: "kasir", pin: "0000", role: "kasir" }
             ]));
         }
+
         let selectedUser = null;
         
         function renderLoginUsers() {
