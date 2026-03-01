@@ -36,10 +36,9 @@
         if(localStorage.getItem('currentRole') === 'admin') {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
             
-            // Load History Struk ke Tabel
             const sales = JSON.parse(localStorage.getItem('sales') || '[]');
             const historyTbody = document.getElementById('historyList');
-            const recentSales = sales.slice(-10).reverse(); // Ambil 10 terakhir, balik urutannya (terbaru di atas)
+            const recentSales = sales.slice(-10).reverse();
             
             if(recentSales.length === 0) {
                 historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#7f8c8d;">Belum ada riwayat transaksi</td></tr>';
