@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Settings - Shandoz POS</title>
     <link rel="stylesheet" href="style.css?v=final3">
 </head>
@@ -14,13 +14,14 @@
 
     <div class="container">
         <div class="card">
-            <h3 style="margin-bottom: 20px; color: #2196f3; border-bottom: 2px solid #eee; padding-bottom: 10px;">🏢 Profil Toko & Struk</h3>
+            <h3 style="margin-bottom: 20px; color: #2196f3; border-bottom: 2px solid #eee; padding-bottom: 10px;">🏢 Profil Toko & Struk Baja</h3>
             
             <label>Nama Cafe / Toko:</label>
             <input type="text" id="storeNameInput" placeholder="Contoh: SHANDOZ CAFE">
             
-            <label>Link Gambar Logo (URL):</label>
-            <input type="text" id="storeLogoInput" placeholder="https://link-gambar.com/logo.png">
+            <label>Gambar Logo Struk:</label>
+            <input type="file" id="storeLogoInput" accept="image/*">
+            <div id="logoPreview" style="max-height: 80px; margin-bottom: 15px;"></div>
 
             <label>Lebar Kertas Printer Bluetooth:</label>
             <select id="paperSizeInput">
@@ -28,13 +29,7 @@
                 <option value="80">Kertas Besar (Thermal 80mm)</option>
             </select>
 
-            <label>Print Struk Otomatis:</label>
-            <select id="autoPrintInput">
-                <option value="true">Aktif (Langsung Keluar Kertas)</option>
-                <option value="false">Mati (Tampil Preview Saja)</option>
-            </select>
-
-            <button class="success" onclick="saveSettings()" style="width: 100%; padding: 18px; font-size: 16px;">💾 SIMPAN PENGATURAN</button>
+            <button class="success" onclick="saveSettings()" style="width: 100%; padding: 18px; font-size: 16px;">💾 SIMPAN SEMUA PENGATURAN</button>
         </div>
 
         <div class="card" style="text-align: center; background: linear-gradient(145deg, #ffffff, #f0f0f0); border: 1px solid #ddd;">
@@ -52,23 +47,38 @@
     <script src="auth.js"></script>
     <script>
         checkAuth();
+        let currentLogoBase64 = null;
+
         window.onload = function() {
             document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
-            document.getElementById('storeLogoInput').value = localStorage.getItem('storeLogo') || '';
+            currentLogoBase64 = localStorage.getItem('storeLogo');
+            if(currentLogoBase64) {
+                document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
+            }
             const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
             document.getElementById('paperSizeInput').value = ps.paperSize;
-            document.getElementById('autoPrintInput').value = ps.autoPrint.toString();
         }
+
+        // Handle File Upload
+        document.getElementById('storeLogoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentLogoBase64 = event.target.result;
+                    document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 
         function saveSettings() {
             localStorage.setItem('storeName', document.getElementById('storeNameInput').value);
-            localStorage.setItem('storeLogo', document.getElementById('storeLogoInput').value);
-            const pSettings = { 
-                paperSize: document.getElementById('paperSizeInput').value, 
-                autoPrint: document.getElementById('autoPrintInput').value === "true" 
-            };
+            localStorage.setItem('storeLogo', currentLogoBase64); // Simpan Base64
+            const pSettings = { paperSize: document.getElementById('paperSizeInput').value, autoPrint: true };
             localStorage.setItem('printerSettings', JSON.stringify(pSettings));
-            alert('Sukses! Pengaturan sistem telah diperbarui.');
+            alert('Sukses! Pengaturan enterprise telah diperbarui.');
+            window.location.reload();
         }
     </script>
 </body>
