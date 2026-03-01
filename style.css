@@ -27,16 +27,35 @@ table tr:hover { background: #f8fafc; }
 .nav-card:hover { transform: translateY(-5px); background: #1e3c72; color: white; border-color: #1e3c72; }
 
 /* ========================================= */
-/* LAYOUT KASIR BEBAS SCROLL (ANTI KAKU) */
+/* LAYOUT KASIR FULL RESPONSIVE & NATURAL SCROLL */
 /* ========================================= */
-.pos-body { min-height: 100vh; background: #f4f7f6; }
-.pos-container { display: flex; flex-direction: column; gap: 15px; padding: 15px; max-width: 1400px; margin: auto; } 
+.pos-body { 
+    background: #f4f7f6; 
+    min-height: 100vh; 
+    overflow-x: hidden; 
+}
+.pos-container { 
+    display: flex; 
+    flex-wrap: wrap; /* KUNCI: Akan belah dua kalau muat, atas-bawah kalau sempit */
+    gap: 20px; 
+    padding: 20px; 
+    max-width: 1400px; 
+    margin: auto; 
+    align-items: flex-start; 
+} 
 
-.pos-left { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+.pos-left { 
+    flex: 1 1 60%; /* Ambil 60% layar di tablet */
+    min-width: 320px;
+    background: white; 
+    border-radius: 15px; 
+    padding: 15px; 
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+}
 
 .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
-.filter-bar input { flex: 2; min-width: 150px; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; }
-.filter-bar select { flex: 1; min-width: 130px; max-width: 220px; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; cursor: pointer; }
+.filter-bar input { flex: 2; min-width: 150px; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; border: 2px solid #e2e8f0; }
+.filter-bar select { flex: 1; min-width: 130px; max-width: 220px; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; cursor: pointer; border: 2px solid #e2e8f0; }
 
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
 .product-card { background: white; padding: 20px 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid #f0f2f5; transition: 0.2s; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
@@ -47,36 +66,43 @@ table tr:hover { background: #f8fafc; }
 .product-card .price { color: #27ae60; font-weight: 700; font-size: 1.05rem; margin: 0 0 5px 0; }
 .product-card .stock { font-size: 0.75rem; color: #7f8c8d; background: #eee; padding: 2px 8px; border-radius: 8px; display: inline-block; }
 
-/* Struktur Kanan (Keranjang & Pembayaran) */
-.pos-right { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
-.cart-scroll { overflow-y: auto; max-height: 30vh; padding-right: 5px; margin-bottom: 10px; border-bottom: 1px solid #eee; }
-.cart-scroll::-webkit-scrollbar { width: 4px; }
+.pos-right { 
+    flex: 1 1 30%; /* Ambil 30% layar di tablet */
+    min-width: 320px;
+    background: white; 
+    border-radius: 15px; 
+    padding: 15px; 
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+}
+
+/* Membatasi tinggi daftar keranjang agar form bayar tidak terlalu jauh ke bawah */
+.cart-scroll { 
+    max-height: 35vh; 
+    overflow-y: auto; 
+    padding-right: 5px; 
+    margin-bottom: 10px; 
+    border-bottom: 1px solid #eee; 
+}
+.cart-scroll::-webkit-scrollbar { width: 6px; }
 .cart-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-.payment-section { flex-shrink: 0; }
+.payment-section { margin-top: 10px; }
 .payment-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; align-items: center; }
 .payment-total { font-size: 1.4rem; font-weight: 700; color: #e74c3c; border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 10px; }
 
-/* Modal Preview */
+/* ========================================= */
+/* MODAL & TAMPILAN LOGIN GLASSMORPHISM */
+/* ========================================= */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
 .modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
 .receipt-preview { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px auto; width: 58mm; text-align: left; font-family: 'Courier New', monospace; font-size: 11px; color: black; }
 
-/* Tablet Horizontal / PC */
-@media (min-width: 768px) {
-    .pos-container { flex-direction: row; align-items: flex-start; }
-    .pos-left { flex: 7; }
-    .pos-right { 
-        flex: 3; 
-        min-width: 350px; 
-        position: sticky; 
-        top: 15px; 
-        max-height: 95vh; 
-        overflow-y: auto; /* INI KUNCINYA: Memaksa area kotak kanan bisa discroll kalau layar tablet terlalu pendek */
-    }
-    /* Membatasi tinggi daftar pesanan agar form bayar selalu terlihat */
-    .cart-scroll { flex: unset; max-height: 25vh; }
-}
+.user-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.user-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; transition: 0.3s; border: 3px solid transparent; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
+.user-avatar:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+.pin-input { font-size: 2.5rem; text-align: center; letter-spacing: 20px; font-weight: bold; width: 250px; padding: 15px; border-radius: 15px; border: none; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none; background: rgba(255, 255, 255, 0.9); }
+.pin-input:focus { border: 3px solid #f39c12; background: #fff; }
+.login-container { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); max-width: 90%; width: 450px; }
 
 /* Laporan Print */
 .report-header { text-align: center; margin-bottom: 20px; display: none; }
