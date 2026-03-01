@@ -141,39 +141,55 @@ function reprintSale(saleId) {
     renderPreviewModal(activePrintData, true); 
 }
 
-// === FUNGSI DESAIN STRUK (PREVIEW) - DIKUNCI ANTI BERANTAKAN DI APK ===
+// === FUNGSI DESAIN STRUK ALA MINIMARKET (YOMART STYLE) ===
 function renderPreviewModal(data, isCopy) {
-    const storeName = localStorage.getItem('storeName') || 'Toko Saya';
+    const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
+    const totalQty = data.items.reduce((sum, item) => sum + item.qty, 0);
+    const totalItemsCount = data.items.length;
     
-    // Desain Preview menggunakan gaya monospaced murni yang di-lock max-width nya
+    let itemsHTML = data.items.map(i => `
+        <tr><td colspan="2" style="padding: 2px 0;">${i.name.toUpperCase()}</td></tr>
+        <tr>
+            <td style="padding: 0 0 4px 0;">${i.qty}X ${i.price.toLocaleString('id-ID')}</td>
+            <td style="text-align: right; padding: 0 0 4px 0;">${i.total.toLocaleString('id-ID')}</td>
+        </tr>
+    `).join('');
+
     let contentHTML = `
-        <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #000; width: 100%; max-width: 320px; margin: 0 auto;">
-            <div style="text-align: center;">
+        <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #000; width: 100%; max-width: 320px; margin: 0 auto; text-transform: uppercase;">
+            <div style="text-align: center; margin-bottom: 10px;">
                 <strong style="font-size: 16px;">${storeName}</strong><br>
-                ${isCopy ? '(COPY)<br>' : ''}
-                Kasir: ${data.user}<br>
-                ${data.date}
+                ${isCopy ? '(COPY STRUK)<br>' : ''}
             </div>
-            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
-            <div style="text-align: left;">Pelanggan: <strong>${data.customer}</strong></div>
-            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+            
+            <div style="text-align: left; margin-bottom: 5px;">
+                KASIR : ${data.user}<br>
+                PELANGGAN : ${data.customer}
+            </div>
+
+            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+            
             <table style="width: 100%; font-size: 13px; font-family: inherit; border-collapse: collapse;">
-                ${data.items.map(i => `
-                    <tr><td colspan="2" style="padding: 2px 0;"><strong>${i.name}</strong></td></tr>
-                    <tr>
-                        <td style="padding: 0 0 4px 0;">${i.qty} x ${i.price.toLocaleString('id-ID')}</td>
-                        <td style="text-align: right; padding: 0 0 4px 0;">${i.total.toLocaleString('id-ID')}</td>
-                    </tr>
-                `).join('')}
+                ${itemsHTML}
             </table>
-            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+            
+            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+            
             <table style="width: 100%; font-size: 13px; font-family: inherit; border-collapse: collapse;">
-                <tr><td style="padding: 2px 0;"><strong>TOTAL</strong></td><td style="text-align: right;"><strong>Rp ${data.total.toLocaleString('id-ID')}</strong></td></tr>
-                <tr><td style="padding: 2px 0;">Bayar (${data.method})</td><td style="text-align: right;">${data.cash.toLocaleString('id-ID')}</td></tr>
-                <tr><td style="padding: 2px 0;">Kembali</td><td style="text-align: right;">${data.change.toLocaleString('id-ID')}</td></tr>
+                ${data.discount > 0 ? `<tr><td style="padding: 2px 0;">DISKON</td><td style="text-align: right;">-${data.discount.toLocaleString('id-ID')}</td></tr>` : ''}
+                <tr><td style="padding: 2px 0;"><strong>TOTAL:</strong></td><td style="text-align: right;"><strong>${data.total.toLocaleString('id-ID')}</strong></td></tr>
+                <tr><td style="padding: 2px 0;">${data.method === 'Tunai' ? 'TUNAI:' : data.method.toUpperCase() + ':'}</td><td style="text-align: right;">${data.cash.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="padding: 2px 0;">KEMBALI:</td><td style="text-align: right;">${data.change.toLocaleString('id-ID')}</td></tr>
             </table>
-            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
-            <div style="text-align: center; margin-top: 8px;">Terima Kasih!</div>
+            
+            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+            
+            <div style="text-align: center; margin-top: 10px; line-height: 1.5;">
+                SOLD ${totalItemsCount} ITEMS, QTY ${totalQty}<br>
+                ${data.date}<br>
+                <br>
+                ** TERIMAKASIH ATAS KUNJUNGAN ANDA **<br>
+            </div>
         </div>
     `;
     
@@ -183,11 +199,10 @@ function renderPreviewModal(data, isCopy) {
 
 function closePreview() { document.getElementById('previewModal').style.display = 'none'; activePrintData = null; }
 
-// === FUNGSI CETAK KE RAWBT - DESAIN KHUSUS THERMAL 58MM ===
+// === FUNGSI CETAK KE RAWBT THERMAL 58MM (YOMART STYLE) ===
 function confirmAndPrint() {
     if(!activePrintData) return;
     
-    // Simpan data jika transaksi baru
     if (!isReprintMode) {
         const products = JSON.parse(localStorage.getItem('products') || '[]');
         activePrintData.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
@@ -196,42 +211,58 @@ function confirmAndPrint() {
         sales.push(activePrintData); localStorage.setItem('sales', JSON.stringify(sales));
     }
 
-    const storeName = localStorage.getItem('storeName') || 'Toko Saya';
-    let copyTag = isReprintMode ? "(COPY)<br>" : "";
+    const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
+    const totalQty = activePrintData.items.reduce((sum, item) => sum + item.qty, 0);
+    const totalItemsCount = activePrintData.items.length;
+    let copyTag = isReprintMode ? "(COPY STRUK)<br>" : "";
     
-    // Kodingan HTML Mentah yang 100% dipahami RawBT tanpa merusak tabel
+    let itemsHTML = activePrintData.items.map(i => `
+        <tr><td colspan="2" style="padding-bottom:2px;">${i.name.toUpperCase()}</td></tr>
+        <tr>
+            <td style="padding-bottom:5px;">${i.qty}X ${i.price.toLocaleString('id-ID')}</td>
+            <td style="text-align: right; padding-bottom:5px;">${i.total.toLocaleString('id-ID')}</td>
+        </tr>
+    `).join('');
+
     let printHTML = `
-        <div style="font-family: monospace; font-size: 24px; color: black; width: 100%;">
-            <div style="text-align: center;">
+        <div style="font-family: monospace; font-size: 24px; color: black; width: 100%; text-transform: uppercase;">
+            <div style="text-align: center; margin-bottom: 10px;">
                 <b>${storeName}</b><br>
                 ${copyTag}
-                Kasir: ${activePrintData.user}<br>
-                ${activePrintData.date}
             </div>
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
-            <div>Pelanggan: <b>${activePrintData.customer}</b></div>
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
-            <table style="width: 100%; font-family: monospace; font-size: 24px;">
-                ${activePrintData.items.map(i => `
-                    <tr><td colspan="2"><b>${i.name}</b></td></tr>
-                    <tr>
-                        <td>${i.qty} x ${i.price.toLocaleString('id-ID')}</td>
-                        <td style="text-align: right;">${i.total.toLocaleString('id-ID')}</td>
-                    </tr>
-                `).join('')}
+            
+            <div style="text-align: left;">
+                KASIR : ${activePrintData.user}<br>
+                PELANGGAN : ${activePrintData.customer}
+            </div>
+
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 8px 0;">
+            
+            <table style="width: 100%; font-family: monospace; font-size: 24px; border-collapse: collapse;">
+                ${itemsHTML}
             </table>
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
-            <table style="width: 100%; font-family: monospace; font-size: 24px;">
-                <tr><td><b>TOTAL</b></td><td style="text-align: right;"><b>Rp ${activePrintData.total.toLocaleString('id-ID')}</b></td></tr>
-                <tr><td>Bayar</td><td style="text-align: right;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr>
-                <tr><td>Kembali</td><td style="text-align: right;">${activePrintData.change.toLocaleString('id-ID')}</td></tr>
+            
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 8px 0;">
+            
+            <table style="width: 100%; font-family: monospace; font-size: 24px; border-collapse: collapse;">
+                ${activePrintData.discount > 0 ? `<tr><td>DISKON</td><td style="text-align: right;">-${activePrintData.discount.toLocaleString('id-ID')}</td></tr>` : ''}
+                <tr><td><b>TOTAL:</b></td><td style="text-align: right;"><b>${activePrintData.total.toLocaleString('id-ID')}</b></td></tr>
+                <tr><td>${activePrintData.method === 'Tunai' ? 'TUNAI:' : activePrintData.method.toUpperCase() + ':'}</td><td style="text-align: right;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr>
+                <tr><td>KEMBALI:</td><td style="text-align: right;">${activePrintData.change.toLocaleString('id-ID')}</td></tr>
             </table>
-            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
-            <div style="text-align: center;">Terima Kasih!</div>
+            
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 8px 0;">
+            
+            <div style="text-align: center; margin-top: 15px; line-height: 1.5;">
+                SOLD ${totalItemsCount} ITEMS, QTY ${totalQty}<br>
+                ${activePrintData.date}<br>
+                <br>
+                ** TERIMAKASIH ATAS KUNJUNGAN ANDA **<br>
+                <br><br>
+            </div>
         </div>
     `;
 
-    // Lempar ke aplikasi RawBT
     window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
 
     setTimeout(() => { 
