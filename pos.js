@@ -1,6 +1,7 @@
 let cart = [];
 let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0, discountNominal = 0;
-let pendingSale = null;
+let activePrintData = null; // Menyimpan data yang mau dicetak
+let isReprintMode = false;  // Penanda apakah ini print ulang atau transaksi baru
 
 function initPOS() {
     document.getElementById('kasirNameDisplay').innerText = localStorage.getItem('currentUser');
@@ -22,9 +23,8 @@ function initPOS() {
 }
 
 function handleNav() {
-    const role = localStorage.getItem('currentRole');
-    if (role === 'admin') { window.location.href = 'dashboard.html'; } 
-    else { localStorage.removeItem('currentUser'); localStorage.removeItem('currentRole'); localStorage.removeItem('currentShift'); window.location.href = 'index.html'; }
+    if (localStorage.getItem('currentRole') === 'admin') window.location.href = 'dashboard.html';
+    else { localStorage.clear(); window.location.href = 'index.html'; }
 }
 
 function filterAndSortProducts() {
@@ -40,7 +40,6 @@ function filterAndSortProducts() {
     } else if (filterValue === 'sort-AZ') { filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else if (filterValue === 'sort-ZA') { filtered.sort((a, b) => b.name.localeCompare(a.name)); }
 
-    // Merender tampilan produk gaya flat
     document.getElementById('productsContainer').innerHTML = filtered.map(p => {
         const isOut = p.stock < 1;
         return `<div class="product-item ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
@@ -52,7 +51,6 @@ function filterAndSortProducts() {
     }).join('');
 }
 
-// Scanner Kamera Saja (Karena Scanner USB otomatis bertindak seperti keyboard, tidak butuh input box khusus)
 let html5QrcodeScanner = null;
 function openScanner() {
     document.getElementById('scannerModal').style.display = 'flex';
@@ -63,16 +61,12 @@ function openScanner() {
         if(p) { if(p.stock < 1) alert('Stok HABIS!'); else addToCart(p.id); } else alert('Barcode tidak ditemukan!');
     }, (error) => {});
 }
-function closeScanner() {
-    if(html5QrcodeScanner) { html5QrcodeScanner.clear(); }
-    document.getElementById('scannerModal').style.display = 'none';
-}
+function closeScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear(); } document.getElementById('scannerModal').style.display = 'none'; }
 
 function addToCart(id) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const p = products.find(x => x.id === id);
     const existing = cart.find(x => x.id === id);
-    
     if(existing) {
         if(existing.qty >= p.stock) return alert('Stok kurang!');
         existing.qty++; existing.total = existing.qty * existing.price; existing.profit = (existing.price - existing.cost) * existing.qty;
@@ -83,7 +77,6 @@ function addToCart(id) {
 }
 
 function renderCart() {
-    // Merender item keranjang rapi
     document.getElementById('cartItems').innerHTML = cart.map((item, i) => `
         <div class="cart-item">
             <div class="cart-item-info">
@@ -110,11 +103,9 @@ function handlePaymentMethod() {
 function calculateTotal() {
     subtotal = cart.reduce((sum, i) => sum + i.total, 0);
     totalProfit = cart.reduce((sum, i) => sum + i.profit, 0);
-    
     let discountPercent = parseFloat(document.getElementById('discountInput').value) || 0;
     if(discountPercent > 100) discountPercent = 100;
     discountNominal = (subtotal * discountPercent) / 100;
-    
     grandTotal = subtotal - discountNominal;
     
     const method = document.getElementById('payMethod').value;
@@ -126,43 +117,63 @@ function calculateTotal() {
     document.getElementById('subtotalDisplay').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
     document.getElementById('grandTotalDisplay').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
     const cd = document.getElementById('changeDisplay');
-    if (change < 0 && cash > 0) { cd.innerText = "Kurang!"; cd.style.color = "#ef4444"; } 
+    if (change < 0 && cash > 0) { cd.innerText = "Uang Kurang!"; cd.style.color = "#ef4444"; } 
     else { cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`; cd.style.color = "#059669"; }
 }
 
+// === PREVIEW BARU TRANSAKSI ===
 function previewCheckout() {
     if(cart.length === 0) return alert('Keranjang kosong!');
     let cash = parseFloat(document.getElementById('cashInput').value) || 0;
     if(cash < grandTotal) return alert('Uang bayar kurang!');
 
-    const custName = document.getElementById('custName').value.trim() || 'Umum';
-    const payMethod = document.getElementById('payMethod').value;
-    const shiftId = localStorage.getItem('currentShift') || 'No-Shift';
+    isReprintMode = false; // Tandai ini transaksi baru
+    document.getElementById('previewTitle').innerText = "Konfirmasi Pembayaran";
 
-    pendingSale = { 
-        id: Date.now(), user: localStorage.getItem('currentUser'), shiftId: shiftId, date: new Date().toLocaleString('id-ID'), 
-        items: cart, subtotal, discount: discountNominal, total: grandTotal, cash, change, 
-        netProfit: totalProfit - discountNominal, customer: custName, method: payMethod
+    activePrintData = { 
+        id: Date.now(), user: localStorage.getItem('currentUser'), shiftId: (localStorage.getItem('currentShift') || 'No-Shift'), 
+        date: new Date().toLocaleString('id-ID'), items: cart, subtotal, discount: discountNominal, total: grandTotal, 
+        cash, change, netProfit: totalProfit - discountNominal, 
+        customer: document.getElementById('custName').value.trim() || 'Umum', 
+        method: document.getElementById('payMethod').value
     };
+    renderPreviewModal(activePrintData, false);
+}
 
+// === PREVIEW REPRINT DARI HISTORY ===
+function reprintSale(saleId) {
+    const sales = JSON.parse(localStorage.getItem('sales') || '[]'); 
+    const sale = sales.find(s => s.id === saleId); 
+    if(!sale) return alert('Data tidak ditemukan!');
+
+    isReprintMode = true; // Tandai ini cetak ulang
+    activePrintData = sale;
+    document.getElementById('previewTitle').innerText = "Cetak Ulang (Reprint)";
+    
+    document.getElementById('historyModal').style.display = 'none'; // Tutup modal history
+    renderPreviewModal(activePrintData, true); // Buka modal preview
+}
+
+// === FUNGSI PEMBUAT STRUK ===
+function renderPreviewModal(data, isCopy) {
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
     const storeLogo = localStorage.getItem('storeLogo');
     let logoHtml = storeLogo ? `<img src="${storeLogo}" style="max-width: 50px; display: block; margin: 0 auto 5px auto; filter: grayscale(100%);">` : '';
 
     let contentHTML = `
-        <div style="text-align: center;">${logoHtml}<strong>${storeName}</strong><br><small>Kasir: ${pendingSale.user}<br>${pendingSale.date}</small></div>
-        <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${pendingSale.customer}</strong></small></div>
+        <div style="text-align: center;">${logoHtml}<strong>${storeName}</strong><br><small>${isCopy ? '(COPY) ' : ''}Kasir: ${data.user}<br>${data.date}</small></div>
+        <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${data.customer}</strong></small></div>
         <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
         <table style="width:100%; font-size: 11px;">
-            ${pendingSale.items.map(i => `<tr><td colspan="2"><strong>${i.name}</strong></td></tr><tr><td>${i.qty}x ${i.price}</td><td style="text-align:right;">${i.total}</td></tr>`).join('')}
+            ${data.items.map(i => `<tr><td colspan="2"><strong>${i.name}</strong></td></tr><tr><td>${i.qty}x ${i.price}</td><td style="text-align:right;">${i.total}</td></tr>`).join('')}
         </table>
         <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
         <table style="width:100%; font-size: 11px;">
-            <tr><td>Subtotal</td><td style="text-align:right;">${pendingSale.subtotal}</td></tr>
-            ${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${pendingSale.discount}</td></tr>` : ''}
-            <tr><td><strong>TOTAL</strong></td><td style="text-align:right;"><strong>Rp ${pendingSale.total}</strong></td></tr>
-            <tr><td>${pendingSale.method}</td><td style="text-align:right;">${pendingSale.cash}</td></tr>
-            <tr><td>Kembali</td><td style="text-align:right;">${pendingSale.change}</td></tr>
+            <tr><td>Subtotal</td><td style="text-align:right;">${data.subtotal}</td></tr>
+            ${data.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${data.discount}</td></tr>` : ''}
+            <tr><td><strong>TOTAL</strong></td><td style="text-align:right;"><strong>Rp ${data.total}</strong></td></tr>
+            <tr><td>${data.method}</td><td style="text-align:right;">${data.cash}</td></tr>
+            <tr><td>Kembali</td><td style="text-align:right;">${data.change}</td></tr>
         </table>
         <div style="text-align: center; margin-top:10px;"><small>Terima Kasih!</small></div>
     `;
@@ -170,33 +181,41 @@ function previewCheckout() {
     document.getElementById('previewModal').style.display = 'flex';
 }
 
-function closePreview() { document.getElementById('previewModal').style.display = 'none'; pendingSale = null; }
+function closePreview() { document.getElementById('previewModal').style.display = 'none'; activePrintData = null; }
 
+// === EKSEKUSI CETAK KE RAWBT ===
 function confirmAndPrint() {
-    if(!pendingSale) return;
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    pendingSale.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
-    localStorage.setItem('products', JSON.stringify(products));
+    if(!activePrintData) return;
 
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
-    sales.push(pendingSale); localStorage.setItem('sales', JSON.stringify(sales));
+    // JIKA INI TRANSAKSI BARU (Bukan Reprint), POTONG STOK & SIMPAN LAPORAN
+    if (!isReprintMode) {
+        const products = JSON.parse(localStorage.getItem('products') || '[]');
+        activePrintData.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
+        localStorage.setItem('products', JSON.stringify(products));
+
+        const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+        sales.push(activePrintData); localStorage.setItem('sales', JSON.stringify(sales));
+    }
 
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
     const storeLogo = localStorage.getItem('storeLogo');
     let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
+    let copyTag = isReprintMode ? "(COPY) " : "";
     
-    let printHTML = `<div style="text-align: center; font-family: monospace;">${logoHtml}<h3 style="margin:0;">${storeName}</h3><p style="margin:0; font-size:12px;">Kasir: ${pendingSale.user}<br>${pendingSale.date}</p></div><div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${pendingSale.customer}</strong></div><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">${pendingSale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;"><tr><td>Subtotal</td><td style="text-align:right;">${pendingSale.subtotal.toLocaleString('id-ID')}</td></tr>${pendingSale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${pendingSale.discount.toLocaleString('id-ID')}</td></tr>` : ''}<tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${pendingSale.total.toLocaleString('id-ID')}</b></td></tr><tr><td>Bayar (${pendingSale.method})</td><td style="text-align:right;">${pendingSale.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembalian</td><td style="text-align:right;">${pendingSale.change.toLocaleString('id-ID')}</td></tr></table><div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>`;
+    let printHTML = `<div style="text-align: center; font-family: monospace;">${logoHtml}<h3 style="margin:0;">${storeName}</h3><p style="margin:0; font-size:12px;">${copyTag}Kasir: ${activePrintData.user}<br>${activePrintData.date}</p></div><div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${activePrintData.customer}</strong></div><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">${activePrintData.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;"><tr><td>Subtotal</td><td style="text-align:right;">${activePrintData.subtotal.toLocaleString('id-ID')}</td></tr>${activePrintData.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${activePrintData.discount.toLocaleString('id-ID')}</td></tr>` : ''}<tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${activePrintData.total.toLocaleString('id-ID')}</b></td></tr><tr><td>Bayar (${activePrintData.method})</td><td style="text-align:right;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembalian</td><td style="text-align:right;">${activePrintData.change.toLocaleString('id-ID')}</td></tr></table><div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>`;
 
     const base64html = btoa(unescape(encodeURIComponent(printHTML)));
     window.location.href = "rawbt:data:text/html;base64," + base64html;
 
     setTimeout(() => { 
-        cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
+        if(!isReprintMode) { // Bersihkan keranjang jika transaksi baru
+            cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
+        }
         closePreview(); initPOS(); renderCart();
     }, 1500);
 }
 
-// FITUR HOLD BILL
+// === HOLD BILL ===
 function saveOpenBill() {
     if(cart.length === 0) return alert('Keranjang kosong!');
     const custName = document.getElementById('custName').value.trim();
@@ -224,21 +243,15 @@ function deleteBill(index) {
     if(confirm('Hapus tiket?')) { const openBills = JSON.parse(localStorage.getItem('openBills') || '[]'); openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills)); showOpenBills(); }
 }
 
-// HISTORY KASIR
+// === HISTORY ===
 function showPosHistory() {
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
     const recentSales = sales.slice(-15).reverse();
     const tbody = document.getElementById('posHistoryList');
     if(recentSales.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">Belum ada transaksi</td></tr>'; } 
-    else { tbody.innerHTML = recentSales.map(s => `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 5px;">${s.date}</td><td>${s.customer || 'Umum'}</td><td style="color:#059669; font-weight:bold;">Rp ${s.total.toLocaleString('id-ID')}</td><td><button class="primary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="reprintSale(${s.id})">🖨️</button></td></tr>`).join(''); }
+    else { tbody.innerHTML = recentSales.map(s => `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 5px;">${s.date}</td><td>${s.customer || 'Umum'}</td><td style="color:#059669; font-weight:bold;">Rp ${s.total.toLocaleString('id-ID')}</td><td><button class="primary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="reprintSale(${s.id})">🖨️ Cetak</button></td></tr>`).join(''); }
     document.getElementById('historyModal').style.display = 'flex';
 }
 function closePosHistory() { document.getElementById('historyModal').style.display = 'none'; }
-function reprintSale(saleId) {
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]'); const sale = sales.find(s => s.id === saleId); if(!sale) return;
-    const storeName = localStorage.getItem('storeName') || 'Toko Saya'; const storeLogo = localStorage.getItem('storeLogo'); let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
-    let printHTML = `<div style="text-align: center; font-family: monospace;">${logoHtml}<h3 style="margin:0;">${storeName}</h3><p style="margin:0; font-size:12px;">(COPY) Kasir: ${sale.user}<br>${sale.date}</p></div><div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${sale.customer}</strong></div><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">${sale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;"><tr><td>Subtotal</td><td style="text-align:right;">${sale.subtotal.toLocaleString('id-ID')}</td></tr>${sale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${sale.discount.toLocaleString('id-ID')}</td></tr>` : ''}<tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${sale.total.toLocaleString('id-ID')}</b></td></tr><tr><td>Bayar (${sale.method})</td><td style="text-align:right;">${sale.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembalian</td><td style="text-align:right;">${sale.change.toLocaleString('id-ID')}</td></tr></table><div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>`;
-    const base64html = btoa(unescape(encodeURIComponent(printHTML))); window.location.href = "rawbt:data:text/html;base64," + base64html;
-}
 
 if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', initPOS); }
