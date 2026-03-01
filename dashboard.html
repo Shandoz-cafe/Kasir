@@ -151,19 +151,22 @@
             }
         }
 
-        function verifyOwnerPin() {
+                function verifyOwnerPin() {
             const pinAttempt = document.getElementById('ownerPinEntry').value;
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             const owner = users.find(u => u.role === 'admin');
             
             if(owner && pinAttempt === owner.pin) {
-                // PIN BENAR -> IZINKAN MASUK
+                // KUNCI DIBUKA: Langsung naik pangkat jadi Owner di sesi ini!
+                localStorage.setItem('currentRole', 'admin'); 
                 window.location.href = pendingUrl; 
             } else {
                 alert("PIN Owner Salah! Akses ditolak.");
                 document.getElementById('ownerPinEntry').value = '';
             }
         }
+
+        
 
         function closeSecurity() {
             document.getElementById('secureLock').style.display = 'none';
