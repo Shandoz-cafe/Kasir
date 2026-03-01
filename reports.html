@@ -2,45 +2,108 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buku Keuangan Pintar</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Desain Khusus untuk Hasil Export Laporan */
+        .report-header { text-align: center; margin-bottom: 20px; display: none; }
+        .print-mode .report-header { display: block; }
+        .print-mode { background: white; padding: 30px; border-radius: 0; }
+        .print-mode .hide-on-print { display: none !important; }
+        .print-mode table { border: 1px solid #ddd; }
+        .print-mode table th { background: #eee; color: #333; }
+        .print-summary { display: flex; gap: 15px; margin-bottom: 20px; text-align: center; }
+        .summary-box { flex: 1; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #fafafa; }
+        .summary-box h4 { margin: 0 0 5px 0; font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; }
+        .summary-box h2 { margin: 0; font-size: 1.3rem; }
+    </style>
 </head>
-<body>
+<body class="pos-body" style="overflow-y: auto;">
     <header>
-        <h2>Akuntansi Keuangan</h2>
+        <h2>Akuntansi Keuangan - SHANDOZ</h2>
         <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container">
         
-        <div class="filter-group card" style="padding: 15px;">
-            <strong style="margin-right: 10px;">Filter Laporan:</strong>
-            <button class="primary" onclick="filterReports('hari')">Hari Ini</button>
-            <button class="primary" onclick="filterReports('bulan')">Bulan Ini</button>
-            <button class="primary" onclick="filterReports('tahun')">Tahun Ini</button>
-            <button class="warning" onclick="filterReports('semua')">Semua Waktu</button>
+        <div class="card" style="padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <strong style="color: #1e3c72;">Sortir:</strong>
+                <button class="primary" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('hari')">Hari Ini</button>
+                <button class="primary" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('bulan')">Bulan Ini</button>
+                <button class="primary" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('tahun')">Tahun Ini</button>
+                <button class="warning" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('semua')">Semua</button>
+                
+                <span style="margin: 0 5px; color: #ccc;">|</span>
+                <strong style="color: #1e3c72;">Pilih Tanggal:</strong>
+                <input type="date" id="customDate" style="margin: 0; padding: 6px 10px; width: auto;" onchange="filterByCustomDate()">
+            </div>
             
-            <div style="margin-left: auto; display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
                 <button class="success" onclick="exportLaporan('jpg')">📷 Unduh JPG</button>
                 <button class="danger" onclick="exportLaporan('pdf')">📄 Unduh PDF</button>
             </div>
         </div>
 
-        <div class="summary-grid" id="reportArea">
-            <div class="summary-card" style="background: #3498db;"><h4>Omzet</h4><h2 id="sumOmzet">Rp 0</h2></div>
-            <div class="summary-card" style="background: #f39c12;"><h4>Laba Kotor</h4><h2 id="sumMargin">Rp 0</h2></div>
-            <div class="summary-card" style="background: #e74c3c;"><h4>Pengeluaran</h4><h2 id="sumExpense">Rp 0</h2></div>
-            <div class="summary-card" style="background: #27ae60;"><h4>Laba Bersih</h4><h2 id="sumNet">Rp 0</h2></div>
-        </div>
+        <div id="printArea" class="card">
+            
+            <div class="report-header">
+                <h1 style="margin: 0; color: #1e3c72;">LAPORAN KEUANGAN</h1>
+                <h3 style="margin: 5px 0; color: #333;">SHANDOZ CAFE & COFFEE BAR</h3>
+                <p style="margin: 5px 0; color: #7f8c8d; font-size: 1.1rem;">Periode: <strong id="periodeText">Semua Waktu</strong></p>
+                <hr style="border: 1px dashed #ccc; margin: 15px 0;">
+            </div>
 
-        <div id="printTableArea" style="background: white; padding: 20px; border-radius: 12px; margin-top: 15px;">
-            <h3 style="margin-top:0;">Detail Transaksi (<span id="periodeText">Semua Waktu</span>)</h3>
-            <table>
-                <thead><tr><th>Tanggal</th><th>Kasir</th><th>Omzet</th><th>Laba</th></tr></thead>
-                <tbody id="salesList"></tbody>
-            </table>
+            <div class="print-summary">
+                <div class="summary-box" style="border-bottom: 4px solid #3498db;">
+                    <h4>Omzet Kotor</h4>
+                    <h2 id="sumOmzet" style="color: #3498db;">Rp 0</h2>
+                </div>
+                <div class="summary-box" style="border-bottom: 4px solid #f39c12;">
+                    <h4>Laba Penjualan</h4>
+                    <h2 id="sumMargin" style="color: #f39c12;">Rp 0</h2>
+                </div>
+                <div class="summary-box" style="border-bottom: 4px solid #e74c3c;">
+                    <h4>Pengeluaran</h4>
+                    <h2 id="sumExpense" style="color: #e74c3c;">Rp 0</h2>
+                </div>
+                <div class="summary-box" style="border-bottom: 4px solid #27ae60; background: #f0fdf4;">
+                    <h4 style="color: #27ae60;">LABA BERSIH</h4>
+                    <h2 id="sumNet" style="color: #27ae60;">Rp 0</h2>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 2; min-width: 300px;">
+                    <h3 style="margin-top:0; color: #1e3c72; border-bottom: 2px solid #eee; padding-bottom: 8px;">Riwayat Penjualan</h3>
+                    <table style="font-size: 0.85rem;">
+                        <thead><tr><th>Waktu</th><th>Kasir</th><th>Omzet</th><th>Laba</th></tr></thead>
+                        <tbody id="salesList"></tbody>
+                    </table>
+                </div>
+
+                <div style="flex: 1; min-width: 300px;">
+                    <div class="hide-on-print" style="background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px dashed #e74c3c; margin-bottom: 15px;">
+                        <h4 style="margin-top:0; color:#e74c3c;">Input Pengeluaran</h4>
+                        <input type="text" id="expDesc" placeholder="Keterangan (Contoh: Kopi)" style="padding: 8px; margin-bottom: 8px;">
+                        <input type="number" id="expAmount" placeholder="Nominal (Rp)" style="padding: 8px; margin-bottom: 8px;">
+                        <button class="danger" style="width: 100%; padding: 8px;" onclick="addExpense()">➖ Catat</button>
+                    </div>
+                    
+                    <h3 style="margin-top:0; color: #e74c3c; border-bottom: 2px solid #eee; padding-bottom: 8px;">Riwayat Pengeluaran</h3>
+                    <table style="font-size: 0.85rem;">
+                        <thead><tr><th>Tgl</th><th>Keterangan</th><th>Nominal</th></tr></thead>
+                        <tbody id="expenseList"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="report-header" style="margin-top: 30px; font-size: 0.8rem; color: #aaa;">
+                <p>Dicetak secara otomatis oleh Sistem Kasir SHANDOZ.</p>
+            </div>
         </div>
+        
     </div>
     <script src="auth.js"></script>
     <script>checkAuth(); if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';</script>
