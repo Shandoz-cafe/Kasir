@@ -34,7 +34,7 @@
 
     <script src="auth.js"></script>
     <script>
-        // Setup Akun Default jika kosong
+        // Setup Akun Default
         if (!localStorage.getItem("users")) {
             localStorage.setItem("users", JSON.stringify([
                 { username: "admin", pin: "1234", role: "admin" },
@@ -78,7 +78,6 @@
                     localStorage.setItem('currentUser', validUser.username);
                     localStorage.setItem('currentRole', validUser.role || 'kasir');
                     
-                    // FITUR SHIFT: Rekam waktu login kasir
                     const shiftId = "SHIFT-" + Date.now();
                     localStorage.setItem('currentShift', shiftId);
                     
