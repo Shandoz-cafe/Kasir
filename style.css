@@ -1,128 +1,90 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
+/* === RESET & DASAR === */
 body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; color: #2c3e50; }
 header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 10; position: relative; }
-header h2 { margin: 0; font-size: 1.3rem; letter-spacing: 0.5px; }
+header h2 { margin: 0; font-size: 1.2rem; letter-spacing: 0.5px; }
 
-button { padding: 12px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 1rem; }
+/* === TOMBOL & INPUT === */
+button { padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.95rem; }
 button.primary { background: #2a5298; color: white; box-shadow: 0 4px 10px rgba(42, 82, 152, 0.3); }
 button.success { background: #27ae60; color: white; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
 button.danger { background: #e74c3c; color: white; }
 button.warning { background: #f39c12; color: white; }
 button:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-input, select { padding: 12px; border-radius: 8px; border: 1px solid #dcdde1; margin-bottom: 10px; width: 100%; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 0.95rem; transition: 0.3s; background: #fff; }
+input, select { padding: 10px 12px; border-radius: 8px; border: 1px solid #dcdde1; margin-bottom: 8px; width: 100%; box-sizing: border-box; font-family: 'Poppins', sans-serif; font-size: 0.9rem; }
 input:focus, select:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 8px rgba(42, 82, 152, 0.2); }
 
-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-top: 15px; font-size: 0.95rem; }
-table th, table td { padding: 15px; border-bottom: 1px solid #edf2f7; text-align: left; }
-table th { background: #1e3c72; color: white; font-weight: 500; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; font-size: 0.85rem; }
+table th, table td { padding: 10px; border-bottom: 1px solid #edf2f7; text-align: left; }
+table th { background: #1e3c72; color: white; font-weight: 500; text-transform: uppercase; font-size: 0.8rem; }
 table tr:hover { background: #f8fafc; }
 
-.container { padding: 20px; max-width: 1400px; margin: auto; }
-.card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+/* === DASHBOARD LAYOUT (Dirapikan) === */
+.container { padding: 15px; max-width: 1200px; margin: auto; }
+.card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
 
-.nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-.nav-card { background: white; padding: 25px 15px; border-radius: 15px; text-align: center; text-decoration: none; color: #1e3c72; font-weight: 600; box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #f0f2f5; display: flex; flex-direction: column; align-items: center; font-size: 1rem; }
-.nav-card:hover { transform: translateY(-5px); background: #1e3c72; color: white; border-color: #1e3c72; }
+.dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-left: 4px solid #3498db; }
+.stat-card h4 { margin: 0 0 5px 0; color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; }
+.stat-card h2 { margin: 0; color: #2c3e50; font-size: 1.2rem; }
+
+.nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 10px; }
+.nav-card { background: white; padding: 15px 10px; border-radius: 10px; text-align: center; text-decoration: none; color: #1e3c72; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #f0f2f5; display: flex; flex-direction: column; align-items: center; font-size: 0.9rem; transition: 0.2s; }
+.nav-card:hover { transform: translateY(-3px); border-color: #1e3c72; }
 
 /* ========================================================= */
-/* KHUSUS POS KASIR: FIXED SPLIT-SCREEN (ANTI KETUTUP KEYBOARD) */
+/* KASIR (POS) - MODE HP / PORTRAIT (SCROLL NORMAL BEBAS MENTOK) */
 /* ========================================================= */
-.pos-body {
-    height: 100vh; /* Kunci tinggi seukuran layar pas */
-    overflow: hidden; /* Matikan scroll layar utama */
-    display: flex;
-    flex-direction: column;
-}
+.pos-body { min-height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
+.pos-container { display: flex; flex-direction: column; gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; flex: 1; max-width: 1400px; margin: auto; }
 
-.pos-container {
-    display: flex;
-    flex: 1; /* Ambil sisa layar di bawah header */
-    gap: 15px;
-    padding: 15px;
-    overflow: hidden;
-    max-width: 1600px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-}
+.pos-left, .pos-right { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
-/* --- KIRI: AREA MENU --- */
-.pos-left {
-    flex: 1; /* Fleksibel mengisi sisa ruang */
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    overflow: hidden; /* Agar anak elemennya tidak bocor */
-}
+.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+.filter-bar input, .filter-bar select, .filter-bar button { margin: 0; flex: 1; min-width: 110px; }
 
-.filter-bar { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-shrink: 0; }
-.filter-bar input { flex: 2; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; border: 2px solid #e2e8f0; }
-.filter-bar select { flex: 1; padding: 8px 15px; font-size: 0.9rem; border-radius: 20px; margin: 0; cursor: pointer; border: 2px solid #e2e8f0; }
-
-.product-scroll {
-    flex: 1; /* Mengisi sisa ruang ke bawah */
-    overflow-y: auto; /* Bisa discroll HANYA di bagian menu */
-    padding-right: 5px;
-}
-.product-scroll::-webkit-scrollbar { width: 6px; }
-.product-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding-bottom: 20px; }
-.product-card { background: white; padding: 20px 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid #f0f2f5; transition: 0.2s; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.product-card { background: white; padding: 12px 8px; border-radius: 10px; text-align: center; cursor: pointer; border: 2px solid #f0f2f5; position: relative; transition: 0.2s; }
 .product-card:hover { border-color: #2a5298; transform: scale(1.02); }
-.product-card.empty { opacity: 0.5; cursor: not-allowed; border-color: #e74c3c; }
-.product-card .cat-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f39c12; color: white; font-size: 0.7rem; padding: 3px 10px; border-radius: 10px; font-weight: bold; white-space: nowrap; }
-.product-card h4 { margin: 10px 0 5px 0; font-size: 0.95rem; color: #333; line-height: 1.2; }
-.product-card .price { color: #27ae60; font-weight: 700; font-size: 1.05rem; margin: 0 0 5px 0; }
-.product-card .stock { font-size: 0.75rem; color: #7f8c8d; background: #eee; padding: 2px 8px; border-radius: 8px; display: inline-block; }
+.product-card .cat-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f39c12; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 8px; white-space: nowrap; }
+.product-card h4 { margin: 10px 0 5px 0; font-size: 0.85rem; color: #333; line-height: 1.2; }
+.product-card .price { color: #27ae60; font-weight: 700; font-size: 0.95rem; margin: 0 0 5px 0; }
+.product-card .stock { font-size: 0.7rem; color: #7f8c8d; background: #eee; padding: 2px 6px; border-radius: 5px; }
 
-/* --- KANAN: AREA KERANJANG (DIKUNCI LEBARNYA) --- */
-.pos-right {
-    width: 380px; /* Lebar permanen untuk HP Landscape/Tablet */
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    overflow: hidden;
-    flex-shrink: 0; /* Tidak boleh mengecil ke samping */
-}
-
-/* Area Daftar Keranjang (Bisa discroll mandiri) */
-.cart-scroll {
-    flex: 1; /* Mengisi ruang kosong */
-    overflow-y: auto;
-    padding-right: 5px;
-    border-bottom: 2px dashed #eee;
-    margin-bottom: 10px;
-}
-.cart-scroll::-webkit-scrollbar { width: 4px; }
-.cart-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-/* Area Pembayaran (TERKUNCI DI BAWAH) */
-.payment-section {
-    flex-shrink: 0; /* Area ini TIDAK BOLEH mengecil walau keyboard muncul */
-}
-.payment-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; align-items: center; }
-.payment-total { font-size: 1.3rem; font-weight: 700; color: #e74c3c; border-top: 2px solid #e2e8f0; padding-top: 5px; margin-top: 5px; }
+/* Pembatasan Keranjang di HP agar tidak terlalu memanjang ke bawah */
+.cart-scroll { max-height: 35vh; overflow-y: auto; padding-right: 5px; border-bottom: 2px dashed #eee; margin-bottom: 10px; }
+.payment-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem; align-items: center; }
+.payment-total { font-size: 1.2rem; font-weight: 700; color: #e74c3c; border-top: 2px solid #e2e8f0; padding-top: 8px; margin-top: 8px; }
 
 /* ========================================================= */
-/* MODE HP PORTRAIT (BERDIRI) - JADI ATAS BAWAH ALAMI */
+/* KASIR (POS) - MODE TABLET/PC (LANDSCAPE SPLIT-SCREEN) */
 /* ========================================================= */
-@media (max-width: 768px) and (orientation: portrait) {
-    .pos-body { height: auto; overflow: visible; }
-    .pos-container { flex-direction: column; overflow: visible; }
-    .pos-left, .pos-right { width: 100%; box-sizing: border-box; flex-shrink: 1; }
-    .product-scroll, .cart-scroll { overflow-y: visible; flex: none; }
+@media (min-width: 768px) and (orientation: landscape) {
+    .pos-body { height: 100vh; overflow: hidden; } /* Kunci layar penuh anti scroll luar */
+    .pos-container { flex-direction: row; height: calc(100vh - 65px); overflow: hidden; align-items: stretch; }
+
+    .pos-left { flex: 6; display: flex; flex-direction: column; overflow: hidden; }
+    .product-scroll { flex: 1; overflow-y: auto; padding-right: 5px; }
+    .product-scroll::-webkit-scrollbar { width: 6px; }
+    .product-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+    .pos-right { flex: 4; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; overflow: hidden; }
+    .cart-scroll { flex: 1; max-height: none; overflow-y: auto; } /* Area keranjang mengisi ruang kosong */
+    .cart-scroll::-webkit-scrollbar { width: 4px; }
+    .cart-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
+    .payment-section { flex-shrink: 0; padding-top: 10px; } /* Tombol bayar dipaku mati di bawah */
 }
 
-/* Modals */
+/* === MODAL & POPUP === */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
-.modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; }
+.modal-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 .receipt-preview { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px auto; width: 58mm; text-align: left; font-family: 'Courier New', monospace; font-size: 11px; color: black; }
+
+/* === LAPORAN PRINT DOKUMEN === */
+.print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+.print-table th, .print-table td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
+.print-table th { background-color: #ecf0f1; color: #2c3e50; font-weight: bold; }
+.print-box { border: 1px solid #bdc3c7; padding: 15px; border-radius: 8px; text-align: center; flex: 1; background: #fafafa; }
