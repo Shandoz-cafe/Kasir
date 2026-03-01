@@ -3,47 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Backoffice - SHANDOZ</title>
-    <link rel="stylesheet" href="style.css?v=final2026">
+    <title>Shandoz POS - Dashboard</title>
+    <link rel="stylesheet" href="style.css?v=final3">
 </head>
 <body>
     <header>
-        <h2>⚙️ Backoffice - <span id="userNameDisplay" style="color: #a5d6a7;"></span></h2>
+        <h2><span style="color:#2ecc71;">●</span> Dashboard - <span id="userNameDisplay"></span></h2>
         <button class="danger" onclick="logout()">🛑 Keluar</button>
     </header>
     
     <div class="container">
-        <div class="dash-stats admin-only" style="display:none;" id="quickStats">
-            <div class="stat-box">
-                <h4>Transaksi Hari Ini</h4>
-                <h2 id="todaySales">0</h2>
-            </div>
-            <div class="stat-box">
-                <h4>Omzet Hari Ini</h4>
-                <h2 id="todayRevenue">Rp 0</h2>
-            </div>
-            <div class="stat-box" style="border-top-color: #f44336;">
-                <h4>Pengeluaran</h4>
-                <h2 id="todayExpense" style="color: #f44336;">Rp 0</h2>
-            </div>
-        </div>
-
         <div class="dash-menu">
-            <a href="pos.html" class="menu-card"><span style="font-size: 2rem; margin-bottom: 10px;">🛒</span>Kasir (POS)</a>
-            <a href="product.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">📦</span>Barang</a>
-            <a href="reports.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">📊</span>Laporan</a>
-            <a href="user.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">👥</span>Karyawan</a>
-            <a href="setting.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2rem; margin-bottom: 10px;">⚙️</span>Pengaturan</a>
-        </div>
-
-        <div class="card admin-only" style="display:none;">
-            <h3 style="margin-top:0; color: #212121; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">🕒 Aktivitas Terakhir</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Waktu</th><th>Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total</th></tr></thead>
-                    <tbody id="historyList"></tbody>
-                </table>
-            </div>
+            <a href="pos.html" class="menu-card"><span style="font-size: 2.5rem; margin-bottom: 10px;">🛒</span>KASIR (POS)</a>
+            <a href="product.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2.5rem; margin-bottom: 10px;">📦</span>GUDANG</a>
+            <a href="reports.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2.5rem; margin-bottom: 10px;">📊</span>LAPORAN</a>
+            <a href="setting.html" class="menu-card admin-only" style="display:none;"><span style="font-size: 2.5rem; margin-bottom: 10px;">⚙️</span>PENGATURAN</a>
         </div>
     </div>
     
@@ -53,27 +27,6 @@
         document.getElementById('userNameDisplay').innerText = localStorage.getItem('currentUser');
         if(localStorage.getItem('currentRole') === 'admin') {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
-            document.getElementById('quickStats').style.display = 'grid';
-            
-            const sales = JSON.parse(localStorage.getItem('sales') || '[]');
-            const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
-            const todayStr = new Date().toLocaleDateString('id-ID');
-            
-            const todaySales = sales.filter(s => s.date.includes(todayStr));
-            const todayExpenses = expenses.filter(e => e.date.includes(todayStr));
-            
-            document.getElementById('todaySales').innerText = todaySales.length;
-            document.getElementById('todayRevenue').innerText = "Rp " + todaySales.reduce((sum, s) => sum + s.total, 0).toLocaleString('id-ID');
-            document.getElementById('todayExpense').innerText = "Rp " + todayExpenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString('id-ID');
-
-            const historyTbody = document.getElementById('historyList');
-            const recentSales = sales.slice(-15).reverse();
-            
-            if(recentSales.length === 0) {
-                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#9e9e9e;">Belum ada data</td></tr>';
-            } else {
-                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; background:#eeeeee; padding:2px 6px; border-radius:4px;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || '-'}</td><td>${s.method}</td><td style="font-weight:bold; color:#4caf50;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
-            }
         }
     </script>
 </body>
