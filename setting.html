@@ -1,45 +1,75 @@
-<div class="card admin-only">
-    <h3>🏢 Pengaturan Toko & Printer</h3>
-    <div style="display: flex; flex-direction: column; gap: 15px;">
-        <div>
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Link Logo Struk (URL):</label>
-            <input type="text" id="storeLogoInput" placeholder="https://link-gambar-logo.png" style="padding:12px; font-size:16px;">
-        </div>
-        
-        <div>
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Nama Toko:</label>
-            <input type="text" id="storeNameInput" style="padding:12px; font-size:16px;">
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Shandoz POS</title>
+    <link rel="stylesheet" href="style.css?v=final3">
+</head>
+<body>
+    <header>
+        <h2>⚙️ Pengaturan Sistem</h2>
+        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+    </header>
 
-        <div style="border-top: 1px solid #eee; padding-top: 10px;">
-            <label style="display:block; font-weight:bold; margin-bottom:5px;">Ukuran Kertas:</label>
-            <select id="paperSizeInput" style="padding:12px; font-size:16px;">
-                <option value="58">Thermal 58mm (Kecil)</option>
-                <option value="80">Thermal 80mm (Besar)</option>
+    <div class="container">
+        <div class="card">
+            <h3 style="margin-bottom: 20px; color: #2196f3; border-bottom: 2px solid #eee; padding-bottom: 10px;">🏢 Profil Toko & Struk</h3>
+            
+            <label>Nama Cafe / Toko:</label>
+            <input type="text" id="storeNameInput" placeholder="Contoh: SHANDOZ CAFE">
+            
+            <label>Link Gambar Logo (URL):</label>
+            <input type="text" id="storeLogoInput" placeholder="https://link-gambar.com/logo.png">
+
+            <label>Lebar Kertas Printer Bluetooth:</label>
+            <select id="paperSizeInput">
+                <option value="58">Kertas Kecil (Thermal 58mm)</option>
+                <option value="80">Kertas Besar (Thermal 80mm)</option>
             </select>
+
+            <label>Print Struk Otomatis:</label>
+            <select id="autoPrintInput">
+                <option value="true">Aktif (Langsung Keluar Kertas)</option>
+                <option value="false">Mati (Tampil Preview Saja)</option>
+            </select>
+
+            <button class="success" onclick="saveSettings()" style="width: 100%; padding: 18px; font-size: 16px;">💾 SIMPAN PENGATURAN</button>
         </div>
 
-        <button class="success" onclick="saveAllSettings()" style="padding:15px; font-size:18px;">💾 SIMPAN SEMUA PENGATURAN</button>
+        <div class="card" style="text-align: center; background: linear-gradient(145deg, #ffffff, #f0f0f0); border: 1px solid #ddd;">
+            <h1 style="font-weight: 800; color: #1a1a1a; margin-bottom: 5px;">SHANDOZ <span style="color: #2196f3;">SYSTEMS</span> <span style="font-size: 14px; font-weight: 400; color: #666;">Ltd.</span></h1>
+            <p style="font-size: 11px; color: #888; font-weight: bold; letter-spacing: 2px;">ADVANCED CLOUD POS</p>
+            <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+                <span style="background: #212121; color: white; padding: 6px 12px; font-size: 10px; border-radius: 4px;">ISO 9001:2026</span>
+                <span style="background: #2196f3; color: white; padding: 6px 12px; font-size: 10px; border-radius: 4px;">AES-256 SECURE</span>
+            </div>
+            <p style="font-size: 11px; color: #555; max-width: 400px; margin: 0 auto;">Sistem kasir awan (Cloud POS) terintegrasi yang dirancang untuk stabilitas, kecepatan, dan keamanan data tingkat enterprise.</p>
+            <p style="font-size: 10px; color: #bbb; margin-top: 30px;">&copy; 2026 SHANDOZ SYSTEMS LTD. ALL RIGHTS RESERVED.</p>
+        </div>
     </div>
-</div>
 
-<script>
-function saveAllSettings() {
-    localStorage.setItem('storeLogo', document.getElementById('storeLogoInput').value);
-    localStorage.setItem('storeName', document.getElementById('storeNameInput').value);
-    const pSettings = {
-        paperSize: document.getElementById('paperSizeInput').value,
-        autoPrint: true
-    };
-    localStorage.setItem('printerSettings', JSON.stringify(pSettings));
-    alert('Pengaturan Berhasil Disimpan!');
-}
+    <script src="auth.js"></script>
+    <script>
+        checkAuth();
+        window.onload = function() {
+            document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
+            document.getElementById('storeLogoInput').value = localStorage.getItem('storeLogo') || '';
+            const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
+            document.getElementById('paperSizeInput').value = ps.paperSize;
+            document.getElementById('autoPrintInput').value = ps.autoPrint.toString();
+        }
 
-// Muat data saat buka halaman
-window.onload = function() {
-    document.getElementById('storeLogoInput').value = localStorage.getItem('storeLogo') || '';
-    document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
-    const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58"}');
-    document.getElementById('paperSizeInput').value = ps.paperSize;
-}
-</script>
+        function saveSettings() {
+            localStorage.setItem('storeName', document.getElementById('storeNameInput').value);
+            localStorage.setItem('storeLogo', document.getElementById('storeLogoInput').value);
+            const pSettings = { 
+                paperSize: document.getElementById('paperSizeInput').value, 
+                autoPrint: document.getElementById('autoPrintInput').value === "true" 
+            };
+            localStorage.setItem('printerSettings', JSON.stringify(pSettings));
+            alert('Sukses! Pengaturan sistem telah diperbarui.');
+        }
+    </script>
+</body>
+</html>
