@@ -27,26 +27,13 @@
         <div id="pinSection" style="display:none; margin-top: 30px;">
             <div class="user-avatar" style="border-color: #f39c12; background: rgba(255,255,255,0.2);">👤</div>
             <h3 style="color: white; margin-top: 15px; font-weight: 400;">Masukkan PIN <span id="selectedUserName" style="font-weight:bold; color:#f39c12;"></span></h3>
-            <input type="password" id="loginPin" class="pin-input" maxlength="4" oninput="checkPin()" placeholder="••••" autofocus>
-            <button class="danger" style="margin-top:15px; padding: 10px 30px; border-radius: 20px;" onclick="cancelLogin()">⬅️ Kembali</button>
+            <input type="password" id="loginPin" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="checkPin()" placeholder="••••">
+            <button class="danger" style="margin-top:15px; padding: 10px 30px; border-radius: 20px;" onclick="cancelLogin()">⬅️ Batal</button>
         </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
-        // PERBAIKAN: Memaksa browser menghapus akun lama dan memasukkan sistem PIN
-        let existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
-        
-        // Cek apakah data di HP ini belum punya fitur PIN (masih data jadul)
-        let isOldVersion = existingUsers.length === 0 || existingUsers[0].pin === undefined;
-
-        if (isOldVersion) {
-            localStorage.setItem("users", JSON.stringify([
-                { username: "admin", pin: "1234", role: "admin" },
-                { username: "kasir", pin: "0000", role: "kasir" }
-            ]));
-        }
-
         let selectedUser = null;
         
         function renderLoginUsers() {
@@ -76,7 +63,10 @@
         }
 
         function checkPin() {
-            const pin = document.getElementById('loginPin').value;
+            const pinRaw = document.getElementById('loginPin').value;
+            // Bersihkan spasi kalau nggak sengaja terpencet di HP
+            const pin = pinRaw.trim(); 
+            
             if (pin.length === 4) {
                 const users = JSON.parse(localStorage.getItem('users') || '[]');
                 const validUser = users.find(u => u.username === selectedUser && u.pin === pin);
@@ -89,7 +79,7 @@
                     
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert('PIN Salah!');
+                    alert('PIN Salah! Silakan coba lagi.');
                     document.getElementById('loginPin').value = '';
                 }
             }
