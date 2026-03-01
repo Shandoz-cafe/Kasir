@@ -34,6 +34,16 @@
 
     <script src="auth.js"></script>
     <script>
+        let existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+        let isOldVersion = existingUsers.length === 0 || existingUsers[0].pin === undefined;
+
+        if (isOldVersion) {
+            localStorage.setItem("users", JSON.stringify([
+                { username: "admin", pin: "1234", role: "admin" },
+                { username: "kasir", pin: "0000", role: "kasir" }
+            ]));
+        }
+
         let selectedUser = null;
         
         function renderLoginUsers() {
@@ -64,7 +74,6 @@
 
         function checkPin() {
             const pinRaw = document.getElementById('loginPin').value;
-            // Bersihkan spasi kalau nggak sengaja terpencet di HP
             const pin = pinRaw.trim(); 
             
             if (pin.length === 4) {
@@ -77,7 +86,12 @@
                     const shiftId = "SHIFT-" + Date.now();
                     localStorage.setItem('currentShift', shiftId);
                     
-                    window.location.href = 'dashboard.html';
+                    // CEK ROLE: Admin ke Dashboard, Kasir langsung ke POS
+                    if (validUser.role === 'admin') {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'pos.html';
+                    }
                 } else {
                     alert('PIN Salah! Silakan coba lagi.');
                     document.getElementById('loginPin').value = '';
