@@ -1,63 +1,45 @@
 <div class="card admin-only">
-    <h3>⚙️ Pengaturan Printer Thermal</h3>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
+    <h3>🏢 Pengaturan Toko & Printer</h3>
+    <div style="display: flex; flex-direction: column; gap: 15px;">
         <div>
-            <label>Model Printer:</label>
-            <select id="printerModel">
-                <option value="default">Model Lainnya</option>
-                <option value="epson">Epson</option>
-                <option value="star">Star</option>
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Link Logo Struk (URL):</label>
+            <input type="text" id="storeLogoInput" placeholder="https://link-gambar-logo.png" style="padding:12px; font-size:16px;">
+        </div>
+        
+        <div>
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Nama Toko:</label>
+            <input type="text" id="storeNameInput" style="padding:12px; font-size:16px;">
+        </div>
+
+        <div style="border-top: 1px solid #eee; padding-top: 10px;">
+            <label style="display:block; font-weight:bold; margin-bottom:5px;">Ukuran Kertas:</label>
+            <select id="paperSizeInput" style="padding:12px; font-size:16px;">
+                <option value="58">Thermal 58mm (Kecil)</option>
+                <option value="80">Thermal 80mm (Besar)</option>
             </select>
         </div>
-        <div>
-            <label>Antarmuka (Interface):</label>
-            <select id="printerInterface">
-                <option value="bluetooth">Bluetooth</option>
-                <option value="ethernet">Ethernet / IP</option>
-            </select>
-        </div>
-        <div>
-            <label>Alamat IP / Nama Bluetooth:</label>
-            <input type="text" id="printerAddress" placeholder="Contoh: 192.168.1.100">
-        </div>
-        <div>
-            <label>Lebar Kertas:</label>
-            <select id="paperSize">
-                <option value="58">58 mm</option>
-                <option value="80">80 mm</option>
-            </select>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-            <input type="checkbox" id="autoPrint" style="width: 20px;">
-            <span>Print struk secara otomatis</span>
-        </div>
-        <button class="success" onclick="savePrinterSettings()" style="margin-top: 10px;">💾 Simpan Pengaturan Printer</button>
+
+        <button class="success" onclick="saveAllSettings()" style="padding:15px; font-size:18px;">💾 SIMPAN SEMUA PENGATURAN</button>
     </div>
 </div>
 
 <script>
-// Fungsi Simpan
-function savePrinterSettings() {
-    const printerSettings = {
-        model: document.getElementById('printerModel').value,
-        interface: document.getElementById('printerInterface').value,
-        address: document.getElementById('printerAddress').value,
-        paperSize: document.getElementById('paperSize').value,
-        autoPrint: document.getElementById('autoPrint').checked
+function saveAllSettings() {
+    localStorage.setItem('storeLogo', document.getElementById('storeLogoInput').value);
+    localStorage.setItem('storeName', document.getElementById('storeNameInput').value);
+    const pSettings = {
+        paperSize: document.getElementById('paperSizeInput').value,
+        autoPrint: true
     };
-    localStorage.setItem('printerSettings', JSON.stringify(printerSettings));
-    alert('Pengaturan Printer Berhasil Disimpan!');
+    localStorage.setItem('printerSettings', JSON.stringify(pSettings));
+    alert('Pengaturan Berhasil Disimpan!');
 }
 
-// Fungsi Muat Data Saat Halaman Dibuka
+// Muat data saat buka halaman
 window.onload = function() {
-    const saved = JSON.parse(localStorage.getItem('printerSettings') || '{}');
-    if(saved.model) {
-        document.getElementById('printerModel').value = saved.model;
-        document.getElementById('printerInterface').value = saved.interface;
-        document.getElementById('printerAddress').value = saved.address;
-        document.getElementById('paperSize').value = saved.paperSize;
-        document.getElementById('autoPrint').checked = saved.autoPrint;
-    }
+    document.getElementById('storeLogoInput').value = localStorage.getItem('storeLogo') || '';
+    document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
+    const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58"}');
+    document.getElementById('paperSizeInput').value = ps.paperSize;
 }
 </script>
