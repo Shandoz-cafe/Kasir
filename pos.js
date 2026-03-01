@@ -1,5 +1,5 @@
 let cart = [];
-let subtotal = 0, grandTotal = 0, change = 0;
+let grandTotal = 0, change = 0;
 let activePrintData = null; 
 let isReprintMode = false;  
 
@@ -55,7 +55,7 @@ function renderCart() {
         <div class="cart-item">
             <div style="flex:1;"><b>${item.name}</b><br><small style="color:#666;">${item.qty} x ${item.price.toLocaleString('id-ID')}</small></div>
             <div style="text-align:right;"><b>${item.total.toLocaleString('id-ID')}</b><br>
-            <button class="danger" style="padding:4px 8px; font-size:10px; margin-top:5px; border-radius:4px;" onclick="cart.splice(${i}, 1); renderCart();">X Hapus</button></div>
+            <button class="danger" style="padding:4px 8px; font-size:10px; margin-top:5px; border-radius:4px;" onclick="cart.splice(${i}, 1); renderCart();">X</button></div>
         </div>
     `).join('');
     calculateTotal();
@@ -73,89 +73,70 @@ function calculateTotal() {
 }
 
 function previewCheckout() {
-    if(cart.length === 0) return alert('Keranjang masih kosong!');
+    if(cart.length === 0) return alert('Keranjang Kosong!');
     let cash = parseFloat(document.getElementById('cashInput').value) || 0;
-    if(cash < grandTotal) return alert('Uang kurang!');
+    if(cash < grandTotal) return alert('Uang Pembayaran Kurang!');
 
     isReprintMode = false;
-    activePrintData = { 
-        id: Date.now(), 
-        user: localStorage.getItem('currentUser') || 'Admin', 
-        date: new Date().toLocaleString('id-ID'), 
-        items: [...cart], 
-        total: grandTotal, 
-        cash, 
-        change, 
-        customer: document.getElementById('custName').value.trim() || 'Umum', 
-        method: document.getElementById('payMethod').value 
-    };
+    activePrintData = { id: Date.now(), user: localStorage.getItem('currentUser') || 'Admin', date: new Date().toLocaleString('id-ID'), items: [...cart], total: grandTotal, cash, change, customer: document.getElementById('custName').value.trim() || 'Umum', method: document.getElementById('payMethod').value };
     renderPreviewModal(activePrintData, false);
 }
 
+// BUG HISTORY FIXED: Memanggil ID yang benar
 function reprintSale(saleId) {
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
     const sale = sales.find(s => String(s.id) === String(saleId));
-    if(!sale) return alert('Data transaksi tidak ditemukan');
-    isReprintMode = true; 
-    activePrintData = sale;
+    if(!sale) return alert('Data tidak ditemukan');
+    isReprintMode = true; activePrintData = sale;
     document.getElementById('historyModal').style.display = 'none';
     renderPreviewModal(activePrintData, true);
 }
 
-// === FIX: DESAIN STRUK BAJA (ANTI-MELUBER KANAN & LOGO TAMPIL) ===
+// === FIX: DESAIN STRUK BAJA (ANTI-MELUBER KANAN & LOGO UPLOAD TAMPIL) ===
 function renderPreviewModal(data, isCopy) {
     const settings = getPrinterSettings();
     const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
     const storeLogo = localStorage.getItem('storeLogo');
     
-    // Kuncian Ukuran: 280px untuk 58mm, 380px untuk 80mm
+    // Kunci Lebar Kertas (Fix Gambar 1000324846)
     const maxWidth = settings.paperSize === "80" ? "380px" : "280px";
     
-    // Memanggil Logo
-    let logoHtml = (storeLogo && storeLogo !== "") ? `<div style="text-align:center; margin-bottom:10px;"><img src="${storeLogo}" style="max-width:150px; max-height:80px; object-fit:contain;"></div>` : '';
+    // FIX: Memanggil Logo hasil upload (Base64)
+    let logoHtml = (storeLogo && storeLogo !== "") ? `<div style="text-align:center; margin-bottom:10px;"><img src="${storeLogo}" style="max-width:140px; max-height:80px; object-fit:contain;"></div>` : '';
 
-    // Menerapkan table-layout: fixed agar tidak meluber
+    // Menerapkan table-layout: fixed agar nominal tidak lari ke kanan
     let itemsHTML = data.items.map(i => `
-        <tr><td colspan="2" style="font-weight:bold; padding-top:6px; word-wrap:break-word;">${i.name.toUpperCase()}</td></tr>
-        <tr>
-            <td style="width:55%; padding-bottom:6px;">${i.qty} x ${i.price.toLocaleString('id-ID')}</td>
-            <td style="text-align:right; width:45%; font-weight:bold;">${i.total.toLocaleString('id-ID')}</td>
-        </tr>
+        <tr><td colspan="2" style="font-weight:bold; padding-top:4px;">${i.name.toUpperCase()}</td></tr>
+        <tr><td style="width:60%; padding-bottom:4px;">${i.qty} x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right; width:40%; font-weight:bold;">${i.total.toLocaleString('id-ID')}</td></tr>
     `).join('');
 
     let contentHTML = `
-        <div id="printArea" style="font-family:'Courier New', monospace; font-size:12px; width:${maxWidth}; margin:0 auto; color:black; background:white; padding:15px; box-sizing:border-box;">
+        <div id="printArea" style="font-family:monospace; font-size:12px; width:${maxWidth}; margin:0 auto; color:black; background:white; padding:15px; box-sizing:border-box;">
             ${logoHtml}
             <div style="text-align:center; margin-bottom:10px; line-height:1.2;">
-                <strong style="font-size:18px;">${storeName}</strong><br>
+                <strong style="font-size:16px;">${storeName}</strong><br>
                 ${isCopy ? '(COPY STRUK)<br>' : ''}
             </div>
             
             <div style="text-align:left; margin-bottom:5px;">
-                KASIR : ${data.user}<br>
-                CUST  : ${data.customer}
+                KASIR : ${data.user}<br>CUST  : ${data.customer}
             </div>
 
             <hr style="border-top:1px dashed black; margin:5px 0;">
-            
-            <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:inherit;">
-                ${itemsHTML}
-            </table>
-            
+            <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:inherit;">${itemsHTML}</table>
             <hr style="border-top:1px dashed black; margin:5px 0;">
             
             <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:inherit;">
-                <tr><td style="width:55%;">TOTAL:</td><td style="text-align:right; font-weight:bold; width:45%;">${data.total.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="width:60%;">TOTAL:</td><td style="text-align:right; font-weight:bold; width:40%;">${data.total.toLocaleString('id-ID')}</td></tr>
                 <tr><td>BAYAR (${data.method}):</td><td style="text-align:right;">${data.cash.toLocaleString('id-ID')}</td></tr>
                 <tr><td>KEMBALI:</td><td style="text-align:right;">${data.change.toLocaleString('id-ID')}</td></tr>
             </table>
             
             <hr style="border-top:1px dashed black; margin:5px 0;">
-            
-            <div style="text-align:center; margin-top:15px; font-size:11px;">
-                SOLD ${data.items.length} ITEM(S)<br>${data.date}<br><br>
+            <div style="text-align:center; margin-top:10px;">
+                Total Items: ${data.items.length}<br>${data.date}<br><br>
                 ** TERIMAKASIH **<br>
-                <span style="font-size:9px; color:#555; display:block; margin-top:10px;">SHANDOZ SYSTEMS LTD.</span>
+                <span style="font-size:9px; color:#555; display:block; margin-top:10px;">SHANDOZ SYSTEMS LTD. | CERTIFIED enterprise system</span>
             </div>
         </div>
     `;
@@ -170,7 +151,6 @@ function renderPreviewModal(data, isCopy) {
 
 function confirmAndPrint() {
     if(!activePrintData) return;
-    
     if (!isReprintMode) {
         const products = JSON.parse(localStorage.getItem('products') || '[]');
         activePrintData.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
@@ -179,7 +159,7 @@ function confirmAndPrint() {
         sales.push(activePrintData); localStorage.setItem('sales', JSON.stringify(sales));
     }
     
-    // Tembak HTML struk langsung ke RawBT
+    // Tembak HTML struk Baja langsung ke RawBT
     const printHTML = document.getElementById('receiptPreviewContent').innerHTML;
     window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
 
@@ -198,7 +178,6 @@ function showPosHistory() {
     if(recentSales.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Belum ada transaksi</td></tr>';
     } else {
-        // PERBAIKAN BUG HISTORY: Mengirim parameter ID secara valid
         tbody.innerHTML = recentSales.map(s => `
             <tr>
                 <td style="padding:15px; border-bottom:1px solid #eee;">
@@ -218,5 +197,6 @@ function showPosHistory() {
 
 function closePreview() { document.getElementById('previewModal').style.display = 'none'; activePrintData = null; }
 function closePosHistory() { document.getElementById('historyModal').style.display = 'none'; }
+function handleNav() { window.location.href = 'dashboard.html'; }
 
 document.addEventListener('DOMContentLoaded', initPOS);
