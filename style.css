@@ -1,9 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+/* ========================================================= */
+/* 1. RESET GLOBAL & DASAR */
+/* ========================================================= */
 * { box-sizing: border-box; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
 body { background-color: #f1f5f9; color: #333; overflow-x: hidden; }
 
-header { background: #1e293b; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+header { background: #1e293b; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
 header h2 { font-size: 1.2rem; font-weight: 500; letter-spacing: 0.5px; margin: 0; }
 
 button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
@@ -17,18 +20,60 @@ input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; fo
 input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
 
 table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; font-size: 0.85rem; }
-th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; white-space: nowrap; }
+th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; text-align: left; white-space: nowrap; }
 th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; }
 
 /* ========================================================= */
-/* KASIR (POS) - LAYOUT PINTAR (SUPPORT SEMUA DEVICE) */
+/* 2. DASHBOARD & MENU LAINNYA */
 /* ========================================================= */
-.pos-layout { display: flex; height: calc(100dvh - 55px); background: #f1f5f9; padding: 10px; gap: 10px; width: 100%; overflow: hidden; }
+.container { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
 
-/* KIRI: MENU PRODUK */
-.pos-left { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 10px; padding: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); overflow: hidden; }
+.dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.stat-box { background: #fff; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.stat-box h4 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+.stat-box h2 { font-size: 1.5rem; color: #0f172a; margin: 0; }
+
+.dash-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.menu-card { background: #fff; padding: 20px 10px; border-radius: 8px; text-align: center; text-decoration: none; color: #1e293b; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+.menu-card:hover { border-color: #3b82f6; background: #f8fafc; transform: translateY(-3px); }
+
+.table-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+/* ========================================================= */
+/* 3. LAYOUT MESIN KASIR (POS) ALL-DEVICE */
+/* ========================================================= */
+.pos-layout { 
+    display: flex; 
+    height: calc(100dvh - 60px); 
+    background: #f1f5f9; 
+    padding: 10px; 
+    gap: 10px; 
+    width: 100%; 
+    overflow: hidden; 
+}
+
+/* === POS KIRI (MENU PRODUK) === */
+.pos-left { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    background: white; 
+    border-radius: 10px; 
+    padding: 10px; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+    overflow: hidden; 
+}
 .pos-filter { display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0; }
-.pos-products { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; align-content: start; padding-right: 5px; }
+.pos-products { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+    gap: 10px; 
+    align-content: start; 
+    padding-right: 5px; 
+}
 .pos-products::-webkit-scrollbar { width: 6px; }
 .pos-products::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
 
@@ -40,11 +85,20 @@ th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppe
 .item-price { font-size: 1rem; font-weight: 700; color: #059669; }
 .item-stock { font-size: 0.7rem; color: #94a3b8; display: block; margin-top: 5px; }
 
-/* KANAN: KERANJANG & PEMBAYARAN */
-.pos-right { width: 380px; background: white; border-radius: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 10px rgba(0,0,0,0.03); overflow: hidden; flex-shrink: 0; padding: 10px; }
+/* === POS KANAN (KERANJANG & BAYAR) === */
+.pos-right { 
+    width: 380px; 
+    background: white; 
+    border-radius: 10px; 
+    display: flex; 
+    flex-direction: column; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+    overflow: hidden; 
+    flex-shrink: 0; 
+    padding: 10px; 
+}
 .cart-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; flex-shrink: 0; }
 
-/* INI KUNCI UTAMA: WADAH FLEKSIBEL UNTUK DAFTAR PESANAN & FORM BAYAR */
 .cart-body { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; margin-top: 10px; gap: 10px; }
 
 .cart-list-container { flex-grow: 1; overflow-y: auto; padding-right: 5px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 10px; }
@@ -58,35 +112,45 @@ th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppe
 .cart-item-price { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
 
 .cart-checkout { flex-shrink: 0; overflow-y: auto; padding-right: 5px; }
-.cart-checkout::-webkit-scrollbar { width: 4px; }
-.cart-checkout::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
-
 .checkout-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; color: #475569; }
-.checkout-input { padding: 6px; font-size: 0.85rem; border-radius: 4px; border: 1px solid #cbd5e1; width: 140px; text-align: right; }
+.checkout-input { padding: 6px; font-size: 0.85rem; border-radius: 4px; border: 1px solid #cbd5e1; width: 140px; text-align: right; margin: 0;}
 .checkout-total { font-size: 1.4rem; font-weight: 700; color: #ef4444; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; }
 .checkout-cash { font-size: 1.2rem; font-weight: bold; color: #059669; text-align: center; padding: 10px; width: 100%; margin-top: 10px; border: 2px solid #10b981; }
 
-/* ========================================================= */
-/* MODE TABLET & PC (LANDSCAPE) - KIRI PESANAN, KANAN BAYAR */
-/* ========================================================= */
+/* === RESPONSIVE LAYOUT PINTAR === */
+
+/* 1. Mode Tablet/PC Landscape (Belah Keranjang Kiri-Kanan) */
 @media screen and (min-width: 850px) and (orientation: landscape) {
-    .pos-right { width: 550px; } /* Diperlebar agar cukup untuk 2 kolom */
-    .cart-body { flex-direction: row; } /* UBAH JADI KIRI-KANAN */
+    .pos-right { width: 550px; } 
+    .cart-body { flex-direction: row; } 
     .cart-list-container { flex: 1; border-bottom: none; border-right: 2px dashed #cbd5e1; padding-right: 10px; padding-bottom: 0; }
-    .cart-checkout { width: 230px; padding-left: 5px; } /* Lebar form bayar */
+    .cart-checkout { width: 230px; padding-left: 5px; } 
 }
 
-/* ========================================================= */
-/* MODE HP PORTRAIT (BERDIRI) - SCROLL ALAMI BEBAS MENTOK */
-/* ========================================================= */
-@media screen and (max-width: 768px) {
+/* 2. Mode HP Portrait/Landscape Kecil (Scroll Normal Bebas Mentok) */
+@media screen and (max-width: 849px) {
     .pos-layout { flex-direction: column; overflow-y: auto; height: auto; min-height: 100dvh; }
-    .pos-left { flex: none; height: 55vh; overflow: hidden; } /* Menu di atas */
+    .pos-left { flex: none; height: 60vh; overflow: hidden; } 
     .pos-right { width: 100%; flex: none; height: auto; overflow: visible; box-shadow: none; border-top: 4px solid #cbd5e1; }
     .cart-body { flex-direction: column; overflow: visible; }
     .cart-list-container { max-height: 35vh; overflow-y: auto; }
 }
 
-/* === MODALS === */
+/* ========================================================= */
+/* 4. MODALS & LAPORAN PRINT */
+/* ========================================================= */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
 .modal-box { background: white; padding: 20px; border-radius: 8px; width: 95%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.receipt-preview { background: #fff; padding: 15px; border: 1px solid #ddd; margin: 15px auto; width: 58mm; text-align: left; font-family: 'Courier New', monospace; font-size: 11px; color: black; }
+
+.print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+.print-table th, .print-table td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
+.print-table th { background-color: #ecf0f1; color: #2c3e50; font-weight: bold; }
+.print-box { border: 1px solid #bdc3c7; padding: 15px; border-radius: 8px; text-align: center; flex: 1; background: #fafafa; }
+
+/* === DESAIN LOGIN PAGE === */
+.login-container { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); max-width: 90%; width: 400px; margin: auto; }
+.user-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.user-avatar { width: 80px; height: 80px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; transition: 0.3s; border: 2px solid transparent; margin: 0 auto; }
+.user-avatar:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+.pin-input { font-size: 2rem; text-align: center; letter-spacing: 15px; font-weight: bold; width: 200px; padding: 15px; border-radius: 10px; border: none; margin: 20px auto; display: block; background: rgba(255, 255, 255, 0.9); }
