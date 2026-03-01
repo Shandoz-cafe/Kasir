@@ -3,7 +3,6 @@ let grandTotal = 0, change = 0;
 let activePrintData = null; 
 let isReprintMode = false;  
 
-// Ambil Setting Printer
 const getPrinterSettings = () => JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
 
 function initPOS() {
@@ -31,7 +30,7 @@ function filterAndSortProducts() {
         return `<div class="product-item ${isOut ? 'empty' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
             <span style="font-size:11px; color:#888;">${p.category || 'Umum'}</span>
             <div style="font-weight:bold; margin-top:5px;">${p.name}</div>
-            <div style="color:#2ecc71; font-weight:bold; margin-top:auto;">Rp ${p.price.toLocaleString('id-ID')}</div>
+            <div style="color:#10b981; font-weight:bold; margin-top:auto;">Rp ${p.price.toLocaleString('id-ID')}</div>
         </div>`;
     }).join('');
 }
@@ -55,7 +54,7 @@ function renderCart() {
         <div class="cart-item">
             <div style="flex:1;"><b>${item.name}</b><br><small style="color:#666;">${item.qty} x ${item.price.toLocaleString('id-ID')}</small></div>
             <div style="text-align:right;"><b>${item.total.toLocaleString('id-ID')}</b><br>
-            <button class="danger" style="padding:4px 8px; font-size:10px; margin-top:5px; border-radius:4px;" onclick="cart.splice(${i}, 1); renderCart();">X</button></div>
+            <button class="bg-danger" style="padding:4px 8px; font-size:10px; margin-top:5px; border-radius:4px; color:white; border:none;" onclick="cart.splice(${i}, 1); renderCart();">X Hapus</button></div>
         </div>
     `).join('');
     calculateTotal();
@@ -69,7 +68,7 @@ function calculateTotal() {
     document.getElementById('grandTotalDisplay').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
     const cd = document.getElementById('changeDisplay');
     cd.innerText = `Rp ${Math.max(0, change).toLocaleString('id-ID')}`;
-    cd.style.color = (change < 0 && cash > 0) ? "red" : "#2ecc71";
+    cd.style.color = (change < 0 && cash > 0) ? "red" : "#10b981";
 }
 
 function previewCheckout() {
@@ -82,7 +81,6 @@ function previewCheckout() {
     renderPreviewModal(activePrintData, false);
 }
 
-// BUG HISTORY FIXED: Memanggil ID yang benar
 function reprintSale(saleId) {
     const sales = JSON.parse(localStorage.getItem('sales') || '[]');
     const sale = sales.find(s => String(s.id) === String(saleId));
@@ -92,19 +90,14 @@ function reprintSale(saleId) {
     renderPreviewModal(activePrintData, true);
 }
 
-// === FIX: DESAIN STRUK BAJA (ANTI-MELUBER KANAN & LOGO UPLOAD TAMPIL) ===
 function renderPreviewModal(data, isCopy) {
     const settings = getPrinterSettings();
     const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
     const storeLogo = localStorage.getItem('storeLogo');
     
-    // Kunci Lebar Kertas (Fix Gambar 1000324846)
     const maxWidth = settings.paperSize === "80" ? "380px" : "280px";
-    
-    // FIX: Memanggil Logo hasil upload (Base64)
     let logoHtml = (storeLogo && storeLogo !== "") ? `<div style="text-align:center; margin-bottom:10px;"><img src="${storeLogo}" style="max-width:140px; max-height:80px; object-fit:contain;"></div>` : '';
 
-    // Menerapkan table-layout: fixed agar nominal tidak lari ke kanan
     let itemsHTML = data.items.map(i => `
         <tr><td colspan="2" style="font-weight:bold; padding-top:4px;">${i.name.toUpperCase()}</td></tr>
         <tr><td style="width:60%; padding-bottom:4px;">${i.qty} x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right; width:40%; font-weight:bold;">${i.total.toLocaleString('id-ID')}</td></tr>
@@ -136,7 +129,7 @@ function renderPreviewModal(data, isCopy) {
             <div style="text-align:center; margin-top:10px;">
                 Total Items: ${data.items.length}<br>${data.date}<br><br>
                 ** TERIMAKASIH **<br>
-                <span style="font-size:9px; color:#555; display:block; margin-top:10px;">SHANDOZ SYSTEMS LTD. | CERTIFIED enterprise system</span>
+                <span style="font-size:9px; color:#555; display:block; margin-top:10px;">SHANDOZ SYSTEMS LTD. | CERTIFIED CLOUD POS</span>
             </div>
         </div>
     `;
@@ -144,9 +137,7 @@ function renderPreviewModal(data, isCopy) {
     document.getElementById('receiptPreviewContent').innerHTML = contentHTML;
     document.getElementById('previewModal').style.display = 'flex';
     
-    if(settings.autoPrint && !isCopy && !isReprintMode) {
-        confirmAndPrint();
-    }
+    if(settings.autoPrint && !isCopy && !isReprintMode) { confirmAndPrint(); }
 }
 
 function confirmAndPrint() {
@@ -159,7 +150,6 @@ function confirmAndPrint() {
         sales.push(activePrintData); localStorage.setItem('sales', JSON.stringify(sales));
     }
     
-    // Tembak HTML struk Baja langsung ke RawBT
     const printHTML = document.getElementById('receiptPreviewContent').innerHTML;
     window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
 
@@ -180,14 +170,14 @@ function showPosHistory() {
     } else {
         tbody.innerHTML = recentSales.map(s => `
             <tr>
-                <td style="padding:15px; border-bottom:1px solid #eee;">
+                <td style="padding:15px; border-bottom:1px solid #e2e8f0;">
                     <b>${s.date.split(', ')[1]}</b><br><small style="color:#666;">${s.customer}</small>
                 </td>
-                <td style="padding:15px; border-bottom:1px solid #eee; text-align:right; font-weight:bold; color:#2ecc71;">
+                <td style="padding:15px; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#10b981;">
                     ${s.total.toLocaleString('id-ID')}
                 </td>
-                <td style="padding:15px; border-bottom:1px solid #eee; text-align:center;">
-                    <button class="primary" style="padding:8px 15px;" onclick="reprintSale('${s.id}')">🖨️</button>
+                <td style="padding:15px; border-bottom:1px solid #e2e8f0; text-align:center;">
+                    <button class="bg-primary" style="padding:8px 15px; color:white; border:none; border-radius:8px;" onclick="reprintSale('${s.id}')">🖨️ Cetak</button>
                 </td>
             </tr>
         `).join('');
@@ -197,6 +187,5 @@ function showPosHistory() {
 
 function closePreview() { document.getElementById('previewModal').style.display = 'none'; activePrintData = null; }
 function closePosHistory() { document.getElementById('historyModal').style.display = 'none'; }
-function handleNav() { window.location.href = 'dashboard.html'; }
 
 document.addEventListener('DOMContentLoaded', initPOS);
