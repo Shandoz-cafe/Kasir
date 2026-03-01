@@ -15,7 +15,8 @@
             <input type="text" id="newUsername" placeholder="Nama Panggilan" style="flex:2; min-width:150px; margin:0;">
             <input type="number" id="newPin" placeholder="Buat PIN (4 Angka)" style="flex:1; min-width:150px; margin:0;" maxlength="4" oninput="if(this.value.length > 4) this.value = this.value.slice(0,4);">
             <select id="newRole" style="flex:1; min-width:150px; margin:0;">
-                <option value="kasir">Staff Kasir</option><option value="admin">Owner / Admin</option>
+                <option value="kasir">Staff Kasir</option>
+                <option value="admin">Owner / Admin</option>
             </select>
             <button class="primary" onclick="addUser()">➕ Simpan Staff</button>
         </div>
