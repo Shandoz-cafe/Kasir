@@ -141,30 +141,53 @@ function reprintSale(saleId) {
     renderPreviewModal(activePrintData, true); 
 }
 
+// === FUNGSI DESAIN STRUK (PREVIEW) - DIKUNCI ANTI BERANTAKAN DI APK ===
 function renderPreviewModal(data, isCopy) {
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
+    
+    // Desain Preview menggunakan gaya monospaced murni yang di-lock max-width nya
     let contentHTML = `
-        <div style="text-align: center;"><strong>${storeName}</strong><br><small>${isCopy ? '(COPY) ' : ''}Kasir: ${data.user}<br>${data.date}</small></div>
-        <div style="text-align: left; margin-top:5px;"><small>Pelanggan: <strong>${data.customer}</strong></small></div>
-        <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
-        <table style="width:100%; font-size: 11px;">
-            ${data.items.map(i => `<tr><td colspan="2"><strong>${i.name}</strong></td></tr><tr><td>${i.qty}x ${i.price}</td><td style="text-align:right;">${i.total}</td></tr>`).join('')}
-        </table>
-        <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
-        <table style="width:100%; font-size: 11px;">
-            <tr><td><strong>TOTAL</strong></td><td style="text-align:right;"><strong>Rp ${data.total}</strong></td></tr>
-            <tr><td>${data.method}</td><td style="text-align:right;">${data.cash}</td></tr>
-            <tr><td>Kembali</td><td style="text-align:right;">${data.change}</td></tr>
-        </table>
+        <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #000; width: 100%; max-width: 320px; margin: 0 auto;">
+            <div style="text-align: center;">
+                <strong style="font-size: 16px;">${storeName}</strong><br>
+                ${isCopy ? '(COPY)<br>' : ''}
+                Kasir: ${data.user}<br>
+                ${data.date}
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+            <div style="text-align: left;">Pelanggan: <strong>${data.customer}</strong></div>
+            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+            <table style="width: 100%; font-size: 13px; font-family: inherit; border-collapse: collapse;">
+                ${data.items.map(i => `
+                    <tr><td colspan="2" style="padding: 2px 0;"><strong>${i.name}</strong></td></tr>
+                    <tr>
+                        <td style="padding: 0 0 4px 0;">${i.qty} x ${i.price.toLocaleString('id-ID')}</td>
+                        <td style="text-align: right; padding: 0 0 4px 0;">${i.total.toLocaleString('id-ID')}</td>
+                    </tr>
+                `).join('')}
+            </table>
+            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+            <table style="width: 100%; font-size: 13px; font-family: inherit; border-collapse: collapse;">
+                <tr><td style="padding: 2px 0;"><strong>TOTAL</strong></td><td style="text-align: right;"><strong>Rp ${data.total.toLocaleString('id-ID')}</strong></td></tr>
+                <tr><td style="padding: 2px 0;">Bayar (${data.method})</td><td style="text-align: right;">${data.cash.toLocaleString('id-ID')}</td></tr>
+                <tr><td style="padding: 2px 0;">Kembali</td><td style="text-align: right;">${data.change.toLocaleString('id-ID')}</td></tr>
+            </table>
+            <div style="border-top: 1px dashed #000; margin: 8px 0;"></div>
+            <div style="text-align: center; margin-top: 8px;">Terima Kasih!</div>
+        </div>
     `;
+    
     document.getElementById('receiptPreviewContent').innerHTML = contentHTML;
     document.getElementById('previewModal').style.display = 'flex';
 }
 
 function closePreview() { document.getElementById('previewModal').style.display = 'none'; activePrintData = null; }
 
+// === FUNGSI CETAK KE RAWBT - DESAIN KHUSUS THERMAL 58MM ===
 function confirmAndPrint() {
     if(!activePrintData) return;
+    
+    // Simpan data jika transaksi baru
     if (!isReprintMode) {
         const products = JSON.parse(localStorage.getItem('products') || '[]');
         activePrintData.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
@@ -174,9 +197,41 @@ function confirmAndPrint() {
     }
 
     const storeName = localStorage.getItem('storeName') || 'Toko Saya';
-    let copyTag = isReprintMode ? "(COPY) " : "";
-    let printHTML = `<div style="text-align: center; font-family: monospace;"><h3 style="margin:0;">${storeName}</h3><p style="margin:0; font-size:12px;">${copyTag}Kasir: ${activePrintData.user}<br>${activePrintData.date}</p></div><div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${activePrintData.customer}</strong></div><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">${activePrintData.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}</table><div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div><table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;"><tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${activePrintData.total.toLocaleString('id-ID')}</b></td></tr><tr><td>Bayar (${activePrintData.method})</td><td style="text-align:right;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr><tr><td>Kembalian</td><td style="text-align:right;">${activePrintData.change.toLocaleString('id-ID')}</td></tr></table><div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>`;
+    let copyTag = isReprintMode ? "(COPY)<br>" : "";
+    
+    // Kodingan HTML Mentah yang 100% dipahami RawBT tanpa merusak tabel
+    let printHTML = `
+        <div style="font-family: monospace; font-size: 24px; color: black; width: 100%;">
+            <div style="text-align: center;">
+                <b>${storeName}</b><br>
+                ${copyTag}
+                Kasir: ${activePrintData.user}<br>
+                ${activePrintData.date}
+            </div>
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
+            <div>Pelanggan: <b>${activePrintData.customer}</b></div>
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
+            <table style="width: 100%; font-family: monospace; font-size: 24px;">
+                ${activePrintData.items.map(i => `
+                    <tr><td colspan="2"><b>${i.name}</b></td></tr>
+                    <tr>
+                        <td>${i.qty} x ${i.price.toLocaleString('id-ID')}</td>
+                        <td style="text-align: right;">${i.total.toLocaleString('id-ID')}</td>
+                    </tr>
+                `).join('')}
+            </table>
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
+            <table style="width: 100%; font-family: monospace; font-size: 24px;">
+                <tr><td><b>TOTAL</b></td><td style="text-align: right;"><b>Rp ${activePrintData.total.toLocaleString('id-ID')}</b></td></tr>
+                <tr><td>Bayar</td><td style="text-align: right;">${activePrintData.cash.toLocaleString('id-ID')}</td></tr>
+                <tr><td>Kembali</td><td style="text-align: right;">${activePrintData.change.toLocaleString('id-ID')}</td></tr>
+            </table>
+            <hr style="border-top: 1px dashed black; border-bottom: none; margin: 5px 0;">
+            <div style="text-align: center;">Terima Kasih!</div>
+        </div>
+    `;
 
+    // Lempar ke aplikasi RawBT
     window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
 
     setTimeout(() => { 
@@ -185,7 +240,7 @@ function confirmAndPrint() {
     }, 1500);
 }
 
-// HOLD & HISTORY LOGIC (Sama seperti sebelumnya, disederhanakan)
+// HOLD & HISTORY LOGIC
 function saveOpenBill() {
     if(cart.length === 0) return alert('Keranjang kosong!');
     const custName = document.getElementById('custName').value.trim();
