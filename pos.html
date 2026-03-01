@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesin Kasir Flex</title>
+    <title>Mesin Kasir Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
@@ -19,13 +19,16 @@
     <div class="pos-container">
         <div class="pos-left">
             <div class="filter-bar">
-                <div style="display:flex; flex:1.5; min-width:200px; gap:5px;">
-                    <input type="text" id="barcodeInput" placeholder="📷 Barcode Fisik..." onkeypress="handlePhysicalScanner(event)" style="margin:0; width:100%; border:2px solid #3498db;">
-                    <button class="primary" style="margin:0; border-radius:8px; padding: 0 15px;" onclick="openScanner()">📷</button>
+                <div style="display:flex; flex:1; min-width:150px; gap:5px;">
+                    <input type="text" id="barcodeInput" placeholder="📷 Barcode..." onkeypress="handlePhysicalScanner(event)" style="margin:0; width:100%;">
+                    <button class="primary" style="margin:0; border-radius:20px; padding: 0 15px;" onclick="openScanner()">📷</button>
                 </div>
                 <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." oninput="filterAndSortProducts()" style="flex:2; margin:0;">
                 <select id="filterSelect" onchange="filterAndSortProducts()" style="flex:1; margin:0;">
-                    <optgroup label="Urutkan Abjad"><option value="sort-AZ">Abjad A - Z</option><option value="sort-ZA">Abjad Z - A</option></optgroup>
+                    <optgroup label="Urutkan Abjad">
+                        <option value="sort-AZ">Abjad A - Z</option>
+                        <option value="sort-ZA">Abjad Z - A</option>
+                    </optgroup>
                     <optgroup label="Filter Kategori" id="categoryOptions"></optgroup>
                 </select>
             </div>
@@ -39,8 +42,8 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:2px solid #eee;">
                 <h3 style="margin:0;">🛒 Pesanan</h3>
                 <div>
-                    <button class="warning" style="padding: 6px 12px; font-size:0.85rem;" onclick="saveOpenBill()">⏸️ Hold</button>
-                    <button class="primary" style="padding: 6px 12px; font-size:0.85rem;" onclick="showOpenBills()">📋 Buka Tiket</button>
+                    <button class="warning" style="padding: 6px 10px; font-size:0.8rem;" onclick="saveOpenBill()">⏸️ Hold</button>
+                    <button class="primary" style="padding: 6px 10px; font-size:0.8rem;" onclick="showOpenBills()">📋 Buka Tiket</button>
                 </div>
             </div>
             
@@ -49,35 +52,35 @@
             <div class="payment-section">
                 <div class="payment-row">
                     <span>Pelanggan:</span>
-                    <input type="text" id="custName" placeholder="Nama..." style="width: 140px; padding:6px 10px; font-size:0.85rem; margin:0; border-radius:6px;">
+                    <input type="text" id="custName" placeholder="Nama..." style="width: 140px; padding:6px 10px; margin:0; border-radius:6px; font-size: 0.85rem;">
                 </div>
                 <div class="payment-row">
-                    <span>Bayar via:</span>
-                    <select id="payMethod" style="width: 140px; padding:6px 10px; font-size:0.85rem; margin:0; border-radius:6px;" onchange="handlePaymentMethod()">
+                    <span>Metode:</span>
+                    <select id="payMethod" style="width: 140px; padding:6px 10px; margin:0; border-radius:6px; font-size: 0.85rem;" onchange="handlePaymentMethod()">
                         <option value="Tunai">💵 Tunai</option>
                         <option value="QRIS">📱 QRIS</option>
                         <option value="Debit">💳 Debit</option>
                     </select>
                 </div>
-                <div class="payment-row" style="margin-top:5px; border-top:1px solid #eee; padding-top:5px;">
-                    <span>Subtotal:</span><span id="subtotalDisplay">Rp 0</span>
+                <div class="payment-row" style="margin-top:5px;">
+                    <span>Subtotal:</span><strong id="subtotalDisplay">Rp 0</strong>
                 </div>
                 <div class="payment-row">
                     <span>Diskon (%):</span>
-                    <input type="number" id="discountInput" value="0" min="0" max="100" style="width: 70px; padding:6px; text-align:center; margin:0; border-radius:6px;" oninput="calculateTotal()">
+                    <input type="number" id="discountInput" value="0" min="0" max="100" style="width: 60px; padding:6px; text-align:center; margin:0; border-radius:6px; font-size: 0.85rem;" oninput="calculateTotal()">
                 </div>
                 <div class="payment-row payment-total">
                     <span>TOTAL:</span><span id="grandTotalDisplay">Rp 0</span>
                 </div>
 
                 <div style="margin-top: 10px;">
-                    <input type="number" id="cashInput" placeholder="Uang Tunai (Rp)" style="font-size: 1.2rem; font-weight: bold; color: #27ae60; padding: 12px; text-align:center; margin:0; border-radius:8px; width:100%; box-sizing:border-box;" oninput="calculateTotal()">
+                    <input type="number" id="cashInput" placeholder="Uang Tunai (Rp)" style="font-size: 1.1rem; font-weight: bold; color: #27ae60; padding: 10px; text-align:center; margin:0; border-radius:8px; width:100%; box-sizing:border-box;" oninput="calculateTotal()">
                     <div class="payment-row" style="font-size: 1.1rem; color: #2a5298; font-weight: bold; margin-top: 5px;">
                         <span>Kembali:</span><span id="changeDisplay">Rp 0</span>
                     </div>
                 </div>
                 
-                <button class="success" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px; border-radius:8px;" onclick="previewCheckout()">👀 Preview & Bayar</button>
+                <button class="success" style="width: 100%; padding: 12px; font-size: 1.1rem; margin-top: 8px; border-radius:8px;" onclick="previewCheckout()">👀 Preview & Bayar</button>
             </div>
         </div>
     </div>
@@ -89,7 +92,6 @@
             <button class="danger" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="closeScanner()">Batal</button>
         </div>
     </div>
-
     <div class="modal-overlay" id="previewModal">
         <div class="modal-box">
             <h3 style="margin-top: 0; color: #1e3c72;">Pratinjau Struk</h3>
