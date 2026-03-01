@@ -4,18 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pengaturan - Shandoz POS</title>
-    <link rel="stylesheet" href="style.css?v=final4">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <h2>⚙️ Pengaturan Sistem</h2>
-        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
     </header>
 
     <div class="container">
         
-        <div class="card">
-            <h3 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #eee; padding-bottom: 10px;">👥 Manajemen Pengguna</h3>
+        <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">👥 Manajemen Pengguna</h3>
             
             <div id="usersList" style="margin-bottom: 20px;">
                 </div>
@@ -24,18 +25,18 @@
                 <h4 style="margin-bottom: 10px; color: #1e3a8a;">+ Tambah Profil Kasir</h4>
                 <input type="text" id="newKasirName" placeholder="Nama Kasir (Contoh: Budi)">
                 <input type="number" id="newKasirPin" placeholder="Buat PIN Kasir (4 Angka)" maxlength="4" pattern="\d*">
-                <button class="primary" style="width:100%;" onclick="addKasir()">Simpan Kasir Baru</button>
+                <button class="bg-primary" style="width:100%; padding:15px; color:white; font-size:15px;" onclick="addKasir()">Simpan Kasir Baru</button>
             </div>
 
             <div style="background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px dashed #ef4444;">
                 <h4 style="margin-bottom: 10px; color: #991b1b;">🔑 Ubah PIN Owner</h4>
                 <input type="number" id="newOwnerPin" placeholder="Masukkan PIN Owner Baru" maxlength="4" pattern="\d*">
-                <button class="danger" style="width:100%;" onclick="changeOwnerPin()">Update PIN Owner</button>
+                <button class="bg-danger" style="width:100%; padding:15px; color:white; font-size:15px;" onclick="changeOwnerPin()">Update PIN Owner</button>
             </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-bottom: 20px; color: #10b981; border-bottom: 2px solid #eee; padding-bottom: 10px;">🏢 Profil Toko & Struk</h3>
+        <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; color: #10b981; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">🏢 Profil Toko & Struk</h3>
             
             <label>Nama Cafe / Toko:</label>
             <input type="text" id="storeNameInput" placeholder="Contoh: SHANDOZ CAFE">
@@ -50,21 +51,22 @@
                 <option value="80">Kertas Besar (Thermal 80mm)</option>
             </select>
 
-            <button class="success" onclick="saveStoreSettings()" style="width: 100%; padding: 18px; font-size: 16px;">💾 SIMPAN PENGATURAN TOKO</button>
+            <button class="bg-success" onclick="saveStoreSettings()" style="width: 100%; padding: 18px; font-size: 16px; color:white;">💾 SIMPAN PENGATURAN TOKO</button>
         </div>
 
         <div style="text-align: center; margin-top: 20px; margin-bottom: 30px; opacity: 0.6;">
-            <h4 style="font-weight: 900; letter-spacing: 1px; color: #111827;">SHANDOZ SYSTEMS</h4>
+            <h4 style="font-weight: 900; letter-spacing: 1px; color: #0f172a;">SHANDOZ SYSTEMS</h4>
         </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
         checkAuth();
+        if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
+
         let currentLogoBase64 = null;
 
         window.onload = function() {
-            // Load Store Settings
             document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
             currentLogoBase64 = localStorage.getItem('storeLogo');
             if(currentLogoBase64) {
@@ -73,20 +75,18 @@
             const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
             document.getElementById('paperSizeInput').value = ps.paperSize;
             
-            // Load User List
             renderUserList();
         }
 
-        // --- MANAJEMEN AKUN ---
         function renderUserList() {
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             document.getElementById('usersList').innerHTML = users.map((u, i) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #e5e7eb; padding:15px; margin-bottom:10px; border-radius:12px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:15px; margin-bottom:10px; border-radius:12px;">
                     <div>
                         <b style="font-size:16px;">${u.name}</b> <span style="font-size:10px; background:${u.role === 'admin' ? '#3b82f6' : '#10b981'}; color:white; padding:3px 8px; border-radius:10px; margin-left:5px;">${u.role.toUpperCase()}</span><br>
-                        <small style="color:#6b7280;">PIN Saat Ini: <b>${u.pin}</b></small>
+                        <small style="color:#64748b;">PIN: <b>${u.pin}</b></small>
                     </div>
-                    ${u.role !== 'admin' ? `<button class="danger" style="padding:8px 12px; font-size:12px; border-radius:8px;" onclick="deleteUser(${i})">Hapus</button>` : `<span style="font-size:24px;">👑</span>`}
+                    ${u.role !== 'admin' ? `<button class="bg-danger" style="padding:8px 12px; font-size:12px; color:white;" onclick="deleteUser(${i})">Hapus</button>` : `<span style="font-size:24px;">👑</span>`}
                 </div>
             `).join('');
         }
@@ -131,7 +131,6 @@
             }
         }
 
-        // --- MANAJEMEN TOKO ---
         document.getElementById('storeLogoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(file) {
