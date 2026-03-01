@@ -11,19 +11,30 @@
         <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container">
-        <div class="card" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <input type="text" id="newUsername" placeholder="Nama Panggilan" style="flex:2; min-width:150px; margin:0;">
-            <input type="number" id="newPin" placeholder="Buat PIN (4 Angka)" style="flex:1; min-width:150px; margin:0;" maxlength="4" oninput="if(this.value.length > 4) this.value = this.value.slice(0,4);">
-            <select id="newRole" style="flex:1; min-width:150px; margin:0;">
-                <option value="kasir">Staff Kasir</option>
-                <option value="admin">Owner / Admin</option>
-            </select>
-            <button class="primary" onclick="addUser()">➕ Simpan Staff</button>
+        
+        <div class="card" style="margin-bottom: 20px;">
+            <h3 style="margin-top:0; color:#1e3c72; border-bottom:1px solid #eee; padding-bottom:10px;">Tambah Pengguna Baru</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="newUsername" placeholder="Nama Panggilan" style="flex:2; min-width:150px; margin:0;">
+                <input type="number" id="newPin" placeholder="Buat PIN (4 Angka)" style="flex:1; min-width:150px; margin:0;" maxlength="4" oninput="if(this.value.length > 4) this.value = this.value.slice(0,4);">
+                <select id="newRole" style="flex:1; min-width:150px; margin:0;">
+                    <option value="kasir">Staff Kasir</option>
+                    <option value="admin">Owner / Admin</option>
+                </select>
+                <button class="primary" onclick="addUser()">➕ Simpan Staff</button>
+            </div>
         </div>
-        <table>
-            <thead><tr><th>No</th><th>Nama Staff</th><th>Akses</th><th>PIN (Rahasia)</th><th>Aksi</th></tr></thead>
-            <tbody id="userList"></tbody>
-        </table>
+
+        <div class="card">
+            <h3 style="margin-top:0; color:#1e3c72; border-bottom:1px solid #eee; padding-bottom:10px;">Daftar Pengguna Saat Ini</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>No</th><th>Nama Staff</th><th>Akses</th><th>PIN (Rahasia)</th><th>Aksi Hapus</th></tr></thead>
+                    <tbody id="userList"></tbody>
+                </table>
+            </div>
+        </div>
+        
     </div>
     <script src="auth.js"></script>
     <script>
