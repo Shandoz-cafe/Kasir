@@ -204,3 +204,83 @@ function confirmAndPrint() {
 }
 
 if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', initPOS); }
+
+// ==========================================
+// FITUR OPEN BILL (HOLD & RECALL TIKET)
+// ==========================================
+function saveOpenBill() {
+    if(cart.length === 0) return alert('Keranjang masih kosong!');
+    const custName = document.getElementById('custName').value.trim();
+    if(!custName) return alert('Masukkan NAMA PELANGGAN / NOMOR MEJA sebelum menahan tiket!');
+
+    const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
+    
+    openBills.push({
+        id: "BILL-" + Date.now(),
+        customer: custName,
+        time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        items: cart,
+        total: grandTotal
+    });
+    localStorage.setItem('openBills', JSON.stringify(openBills));
+    
+    // Bersihkan Kasir
+    cart = []; document.getElementById('discountInput').value = 0; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = '';
+    renderCart();
+    alert(`Tiket untuk [ ${custName} ] berhasil disimpan!`);
+}
+
+function showOpenBills() {
+    const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
+    const container = document.getElementById('openBillContent');
+    
+    if(openBills.length === 0) {
+        container.innerHTML = '<p style="color:#7f8c8d; margin-top:20px;">Tidak ada tiket yang menggantung.</p>';
+    } else {
+        container.innerHTML = openBills.map((b, i) => `
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; text-align:left; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                <div>
+                    <strong style="font-size:1.1rem; color:#2c3e50;">Meja/Nama: ${b.customer}</strong> <span style="font-size:0.8rem; color:#7f8c8d; background:#eee; padding:2px 6px; border-radius:5px;">${b.time}</span><br>
+                    <span style="color:#e74c3c; font-weight:bold;">Rp ${b.total.toLocaleString('id-ID')}</span> <small style="color:#7f8c8d;">(${b.items.length} macam pesanan)</small>
+                </div>
+                <div style="display:flex; gap:5px;">
+                    <button class="primary" style="padding:8px 15px;" onclick="recallBill(${i})">Panggil</button>
+                    <button class="danger" style="padding:8px 15px;" onclick="deleteBill(${i})">X</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    document.getElementById('openBillModal').style.display = 'flex';
+}
+
+function closeOpenBillModal() {
+    document.getElementById('openBillModal').style.display = 'none';
+}
+
+function recallBill(index) {
+    if(cart.length > 0) {
+        if(!confirm('Ada pesanan di keranjang saat ini. Timpa pesanan ini?')) return;
+    }
+    const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
+    const bill = openBills[index];
+    
+    cart = bill.items;
+    document.getElementById('custName').value = bill.customer;
+    renderCart();
+    
+    openBills.splice(index, 1);
+    localStorage.setItem('openBills', JSON.stringify(openBills));
+    closeOpenBillModal();
+}
+
+function deleteBill(index) {
+    if(!confirm('Hapus tiket ini secara permanen? Data tidak bisa kembali.')) return;
+    const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
+    openBills.splice(index, 1);
+    localStorage.setItem('openBills', JSON.stringify(openBills));
+    showOpenBills(); // Refresh tampilan modal
+}
+
+// UPDATE PADA FUNGSI confirmAndPrint() LAMA KAMU:
+// Pastikan baris ini diubah untuk memasukkan ID Shift ke riwayat penjualan:
+// pendingSale.shiftId = localStorage.getItem('currentShift') || 'No-Shift';
