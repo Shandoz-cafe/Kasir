@@ -2,16 +2,94 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - POS System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login POS - SHANDOZ</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .user-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .user-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; transition: 0.3s; border: 3px solid transparent; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .user-avatar:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+        .pin-input { font-size: 2.5rem; text-align: center; letter-spacing: 20px; font-weight: bold; width: 250px; padding: 15px; border-radius: 15px; border: none; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none; }
+        .pin-input:focus { border: 3px solid #f39c12; }
+    </style>
 </head>
-<body style="display:flex; justify-content:center; align-items:center; height:100vh; background: linear-gradient(135deg, #1e3c72, #2a5298);">
-    <div class="card" style="width: 320px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
-        <h2 style="margin-bottom: 25px; color:#1e3c72;">Login Kasir</h2>
-        <input type="text" id="loginUser" placeholder="Username">
-        <input type="password" id="loginPass" placeholder="Password">
-        <button class="primary" style="width: 100%; margin-top: 15px; padding: 12px; font-size: 1.1rem;" onclick="login()">Masuk ke Sistem</button>
+<body class="pos-body" style="display:flex; justify-content:center; align-items:center; background: linear-gradient(135deg, #1e3c72, #2a5298);">
+    
+    <div style="text-align: center;">
+        <h1 style="color: white; margin-bottom: 5px; font-size: 2.5rem; letter-spacing: 2px;">SHANDOZ CAFE</h1>
+        <p style="color: #cbd5e1; margin-top: 0;">Point of Sale System</p>
+
+        <div id="loginSection">
+            <h3 style="color: white; margin-top: 30px; font-weight: 400;">Siapa yang bertugas?</h3>
+            <div class="user-grid" id="loginUserList"></div>
+        </div>
+        
+        <div id="pinSection" style="display:none; margin-top: 30px;">
+            <div class="user-avatar" style="border-color: #f39c12; background: rgba(255,255,255,0.2);">👤</div>
+            <h3 style="color: white; margin-top: 15px; font-weight: 400;">Masukkan PIN <span id="selectedUserName" style="font-weight:bold; color:#f39c12;"></span></h3>
+            <input type="password" id="loginPin" class="pin-input" maxlength="4" oninput="checkPin()" placeholder="••••" autofocus>
+            <button class="danger" style="margin-top:15px; padding: 10px 30px; border-radius: 20px;" onclick="cancelLogin()">⬅️ Kembali</button>
+        </div>
     </div>
+
     <script src="auth.js"></script>
+    <script>
+        // Setup Akun Default jika kosong
+        if (!localStorage.getItem("users")) {
+            localStorage.setItem("users", JSON.stringify([
+                { username: "admin", pin: "1234", role: "admin" },
+                { username: "kasir", pin: "0000", role: "kasir" }
+            ]));
+        }
+        let selectedUser = null;
+        
+        function renderLoginUsers() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            document.getElementById('loginUserList').innerHTML = users.map(u => `
+                <div style="text-align:center;">
+                    <div class="user-avatar" onclick="selectUser('${u.username}')">👤</div>
+                    <strong style="display:block; margin-top:10px; color:white; font-size:1.1rem;">${u.username}</strong>
+                    <span style="color:#f39c12; font-size:0.8rem; text-transform:uppercase; font-weight:bold;">${u.role}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectUser(username) {
+            selectedUser = username;
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('pinSection').style.display = 'block';
+            document.getElementById('selectedUserName').innerText = username;
+            setTimeout(() => document.getElementById('loginPin').focus(), 100);
+        }
+
+        function cancelLogin() {
+            selectedUser = null;
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('pinSection').style.display = 'none';
+            document.getElementById('loginPin').value = '';
+        }
+
+        function checkPin() {
+            const pin = document.getElementById('loginPin').value;
+            if (pin.length === 4) {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const validUser = users.find(u => u.username === selectedUser && u.pin === pin);
+                if (validUser) {
+                    localStorage.setItem('currentUser', validUser.username);
+                    localStorage.setItem('currentRole', validUser.role || 'kasir');
+                    
+                    // FITUR SHIFT: Rekam waktu login kasir
+                    const shiftId = "SHIFT-" + Date.now();
+                    localStorage.setItem('currentShift', shiftId);
+                    
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert('PIN Salah!');
+                    document.getElementById('loginPin').value = '';
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', renderLoginUsers);
+    </script>
 </body>
 </html>
