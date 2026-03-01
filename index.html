@@ -2,105 +2,111 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login POS - SHANDOZ</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login - Shandoz POS Enterprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .user-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-        .user-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; transition: 0.3s; border: 3px solid transparent; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
-        .user-avatar:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
-        .pin-input { font-size: 2.5rem; text-align: center; letter-spacing: 20px; font-weight: bold; width: 250px; padding: 15px; border-radius: 15px; border: none; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none; background: rgba(255, 255, 255, 0.9); }
-        .pin-input:focus { border: 3px solid #f39c12; background: #fff; }
-        .login-container { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); max-width: 90%; width: 450px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { 
+            /* Latar belakang mewah ala corporate tech */
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+            height: 100vh; display: flex; justify-content: center; align-items: center; 
+            color: #fff; overflow: hidden;
+        }
+        
+        /* Efek Kaca (Glassmorphism) */
+        .login-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+        }
+        
+        .logo-area { margin-bottom: 30px; }
+        .logo-icon { font-size: 50px; margin-bottom: 10px; display: inline-block; background: -webkit-linear-gradient(#3b82f6, #2ecc71); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-text { font-size: 24px; font-weight: 800; letter-spacing: 2px; }
+        .logo-sub { font-size: 11px; color: #aaa; letter-spacing: 4px; margin-top: -5px; margin-bottom: 20px;}
+
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: #fff; font-size: 14px; outline: none; transition: 0.3s; }
+        input::placeholder { color: rgba(255, 255, 255, 0.5); }
+        input:focus { background: rgba(255, 255, 255, 0.2); box-shadow: 0 0 0 2px #3b82f6; }
+
+        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-login { background: #3b82f6; color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); margin-bottom: 15px; }
+        .btn-login:active { transform: scale(0.95); }
+
+        .divider { display: flex; align-items: center; margin: 20px 0; color: #aaa; font-size: 12px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .divider:not(:empty)::before { margin-right: 15px; }
+        .divider:not(:empty)::after { margin-left: 15px; }
+
+        .btn-google { background: #fff; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 15px;}
+        .btn-google img { width: 20px; }
+        .btn-google:active { transform: scale(0.95); background: #eee; }
+
+        .toggle-form { font-size: 12px; color: #ccc; cursor: pointer; margin-top: 10px; }
+        .toggle-form span { color: #3b82f6; font-weight: 600; }
+        
+        /* Loading Overlay */
+        #loader { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center; color:white; font-weight:bold; }
     </style>
 </head>
-<body class="pos-body" style="display:flex; justify-content:center; align-items:center; background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('background.jpg') no-repeat center center fixed; background-size: cover;">
-    
-    <div class="login-container">
-        <img src="logo.png" alt="SHANDOZ Logo" style="max-width: 180px; max-height: 180px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
-        <p style="color: #e2e8f0; margin-top: 5px; font-weight: 500; letter-spacing: 1px; font-size: 1.1rem;">Point of Sale System</p>
+<body>
 
-        <div id="loginSection">
-            <h3 style="color: white; margin-top: 30px; font-weight: 400; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">Siapa yang bertugas?</h3>
-            <div class="user-grid" id="loginUserList"></div>
+    <div id="loader">Memproses Autentikasi...</div>
+
+    <div class="login-box">
+        <div class="logo-area">
+            <div class="logo-icon">💠</div>
+            <div class="logo-text">SHANDOZ POS</div>
+            <div class="logo-sub">ENTERPRISE EDITION</div>
         </div>
-        
-        <div id="pinSection" style="display:none; margin-top: 30px;">
-            <div class="user-avatar" style="border-color: #f39c12; background: rgba(255,255,255,0.3);">👤</div>
-            <h3 style="color: white; margin-top: 15px; font-weight: 400; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">Masukkan PIN <span id="selectedUserName" style="font-weight:bold; color:#f39c12;"></span></h3>
-            <input type="password" id="loginPin" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="checkPin()" placeholder="••••">
-            <button class="danger" style="margin-top:15px; padding: 10px 30px; border-radius: 20px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="cancelLogin()">⬅️ Batal</button>
+
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Alamat Email">
+            <input type="password" id="loginPass" placeholder="Kata Sandi">
+            <button class="btn-login" onclick="loginWithEmail()">MASUK</button>
+            
+            <div class="divider">ATAU</div>
+            
+            <button class="btn-google" onclick="loginWithGoogle()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                Lanjutkan dengan Google
+            </button>
+            
+            <div class="toggle-form" onclick="toggleView('register')">Belum punya akun? <span>Daftar Gratis</span></div>
+        </div>
+
+        <div id="registerForm" style="display: none;">
+            <input type="text" id="regName" placeholder="Nama Lengkap / Nama Kafe">
+            <input type="email" id="regEmail" placeholder="Alamat Email Valid">
+            <input type="password" id="regPass" placeholder="Buat Kata Sandi (Min. 6 Karakter)">
+            <button class="btn-login" style="background:#2ecc71; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);" onclick="registerWithEmail()">BUAT AKUN</button>
+            <div class="toggle-form" onclick="toggleView('login')">Sudah punya akun? <span>Masuk di sini</span></div>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 10px; color: rgba(255,255,255,0.3);">
+            &copy; 2026 SHANDOZ SYSTEMS LTD.
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <script src="auth.js"></script>
     <script>
-        let existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
-        let isOldVersion = existingUsers.length === 0 || existingUsers[0].pin === undefined;
-
-        if (isOldVersion) {
-            localStorage.setItem("users", JSON.stringify([
-                { username: "admin", pin: "1234", role: "admin" },
-                { username: "kasir", pin: "0000", role: "kasir" }
-            ]));
+        function toggleView(view) {
+            document.getElementById('loginForm').style.display = view === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = view === 'register' ? 'block' : 'none';
         }
-
-        let selectedUser = null;
-        
-        function renderLoginUsers() {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            document.getElementById('loginUserList').innerHTML = users.map(u => `
-                <div style="text-align:center;">
-                    <div class="user-avatar" onclick="selectUser('${u.username}')">👤</div>
-                    <strong style="display:block; margin-top:10px; color:white; font-size:1.1rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.6);">${u.username}</strong>
-                    <span style="color:#f39c12; font-size:0.8rem; text-transform:uppercase; font-weight:bold; background:rgba(0,0,0,0.4); padding:2px 8px; border-radius:10px; margin-top:3px; display:inline-block;">${u.role}</span>
-                </div>
-            `).join('');
-        }
-
-        function selectUser(username) {
-            selectedUser = username;
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('pinSection').style.display = 'block';
-            document.getElementById('selectedUserName').innerText = username;
-            setTimeout(() => document.getElementById('loginPin').focus(), 100);
-        }
-
-        function cancelLogin() {
-            selectedUser = null;
-            document.getElementById('loginSection').style.display = 'block';
-            document.getElementById('pinSection').style.display = 'none';
-            document.getElementById('loginPin').value = '';
-        }
-
-        function checkPin() {
-            const pinRaw = document.getElementById('loginPin').value;
-            const pin = pinRaw.trim(); 
-            
-            if (pin.length === 4) {
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
-                const validUser = users.find(u => u.username === selectedUser && u.pin === pin);
-                if (validUser) {
-                    localStorage.setItem('currentUser', validUser.username);
-                    localStorage.setItem('currentRole', validUser.role || 'kasir');
-                    
-                    // NAMA SHIFT BERDASARKAN NAMA PENGGUNA & JAM LOGIN
-                    const waktuMulai = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                    const shiftId = "Shift: " + validUser.username + " (" + waktuMulai + ")";
-                    localStorage.setItem('currentShift', shiftId);
-                    
-                    if (validUser.role === 'admin') {
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        window.location.href = 'pos.html';
-                    }
-                } else {
-                    alert('PIN Salah! Silakan coba lagi.');
-                    document.getElementById('loginPin').value = '';
-                }
-            }
-        }
-        document.addEventListener('DOMContentLoaded', renderLoginUsers);
     </script>
 </body>
 </html>
