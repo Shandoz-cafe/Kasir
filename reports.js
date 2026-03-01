@@ -9,96 +9,215 @@ function filterByCustomDate() {
     const [y, m, d] = dateVal.split('-');
     const dateText = new Date(y, parseInt(m)-1, d).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     document.getElementById('periodeTextUI').innerText = dateText;
+    document.getElementById('docPeriodeText').innerText = dateText;
     loadFinanceReports();
 }
 
 function filterReports(type) {
     currentFilter = type; document.getElementById('customDate').value = '';
-    const labels = { 'hari': 'Hari Ini', 'bulan': 'Bulan Ini', 'semua': 'Semua Waktu' };
+    const labels = { 'hari': 'Hari Ini', 'bulan': 'Bulan Ini', 'tahun': 'Tahun Ini', 'semua': 'Semua Waktu' };
     document.getElementById('periodeTextUI').innerText = labels[type];
+    document.getElementById('docPeriodeText').innerText = labels[type];
     loadFinanceReports();
 }
 
 function matchDate(dateString) {
     if(currentFilter === 'semua') return true;
     const [datePart] = dateString.split(', ');
-    
     if(currentFilter === 'hari') return datePart === new Date().toLocaleDateString('id-ID');
-    
     if(currentFilter === 'bulan') {
         const now = new Date(); const parts = datePart.split('/');
         return parseInt(parts[1]) === (now.getMonth() + 1) && parseInt(parts[2]) === now.getFullYear();
     }
-    
+    if(currentFilter === 'tahun') return parseInt(datePart.split('/')[2]) === new Date().getFullYear();
     if(currentFilter === 'custom') {
-        const [y, m, d] = customDateValue.split('-');
-        return datePart === `${parseInt(d)}/${parseInt(m)}/${y}`;
+        const [cy, cm, cd] = customDateValue.split('-');
+        return datePart === new Date(cy, parseInt(cm)-1, cd).toLocaleDateString('id-ID');
     }
     return true;
 }
 
 function loadFinanceReports() {
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
-    let totalOmzet = 0;
-    let totalQty = 0;
+    const allSales = JSON.parse(localStorage.getItem('sales') || '[]');
+    const allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
     
-    // Data untuk Chart
-    const dailyOmzet = {};
+    const sales = allSales.filter(s => matchDate(s.date));
+    const expenses = allExpenses.filter(e => matchDate(e.date));
 
-    sales.forEach(sale => {
-        if(matchDate(sale.date)) {
-            totalOmzet += sale.total;
-            sale.items.forEach(item => { totalQty += item.qty; });
-            
-            // Rekap harian untuk grafik
-            const dateOnly = sale.date.split(',')[0].trim();
-            if(!dailyOmzet[dateOnly]) dailyOmzet[dateOnly] = 0;
-            dailyOmzet[dateOnly] += sale.total;
+    let totalOmzet = 0, totalLabaKotor = 0;
+    let itemAnalytics = {}; 
+    let chartData = {}; 
+
+    let docSalesHTML = ''; 
+    
+    sales.forEach(s => {
+        totalOmzet += s.total; 
+        totalLabaKotor += (s.netProfit || 0);
+        
+        // --- LOGIKA GRAFIK PINTAR BERDASARKAN FILTER WAKTU ---
+        let parts = s.date.split(', ');
+        let datePart = parts[0];
+        let timePart = parts[1] || "00:00:00";
+        let labelKey = datePart;
+
+        if (currentFilter === 'hari' || currentFilter === 'custom') {
+            labelKey = timePart.substring(0, 2) + ":00"; // Urut Berdasarkan Jam
+        } else if (currentFilter === 'bulan') {
+            labelKey = datePart; // Urut Berdasarkan Tanggal
+        } else if (currentFilter === 'tahun') {
+            let dParts = datePart.split('/');
+            let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+            labelKey = monthNames[parseInt(dParts[1]) - 1] + " " + dParts[2]; // Urut Berdasarkan Bulan
         }
+        
+        if(!chartData[labelKey]) chartData[labelKey] = 0;
+        chartData[labelKey] += s.total;
+
+        s.items.forEach(item => {
+            if(!itemAnalytics[item.name]) itemAnalytics[item.name] = { qty: 0, total: 0 };
+            itemAnalytics[item.name].qty += item.qty;
+            itemAnalytics[item.name].total += item.total;
+        });
+
+        docSalesHTML += `<tr>
+            <td>${s.date}</td>
+            <td>${s.shiftId || s.user}</td>
+            <td style="text-align:right;">Rp ${s.total.toLocaleString('id-ID')}</td>
+            <td style="text-align:right; color:#27ae60;">Rp ${(s.netProfit||0).toLocaleString('id-ID')}</td>
+        </tr>`;
     });
 
-    // Menampilkan Angka
-    document.getElementById('reportTotalOmzet').innerText = 'Rp ' + totalOmzet.toLocaleString('id-ID');
-    document.getElementById('reportTotalQty').innerText = totalQty + ' Pcs';
+    let sortedItems = Object.keys(itemAnalytics).map(key => {
+        return { name: key, qty: itemAnalytics[key].qty, total: itemAnalytics[key].total };
+    }).sort((a, b) => b.qty - a.qty); 
 
-    // Menampilkan Grafik
-    renderChart(dailyOmzet);
-}
+    let uiTopHTML = '', docTopHTML = '';
+    if(sortedItems.length === 0) {
+        uiTopHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">Belum ada data penjualan</td></tr>';
+        docTopHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada data pada periode ini</td></tr>';
+    } else {
+        sortedItems.forEach(item => {
+            uiTopHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
+                <td style="padding: 10px 5px;"><strong>${item.name}</strong></td>
+                <td style="text-align:center;">${item.qty}</td>
+                <td style="text-align:right; color:#27ae60; font-weight:bold;">Rp ${item.total.toLocaleString('id-ID')}</td>
+            </tr>`;
+            docTopHTML += `<tr>
+                <td>${item.name}</td>
+                <td style="text-align:center;">${item.qty} Item</td>
+                <td style="text-align:right;">Rp ${item.total.toLocaleString('id-ID')}</td>
+            </tr>`;
+        });
+    }
+    document.getElementById('uiTopItems').innerHTML = uiTopHTML;
+    document.getElementById('docTopItems').innerHTML = docTopHTML;
+    document.getElementById('docSalesLog').innerHTML = docSalesHTML || '<tr><td colspan="4" style="text-align:center;">Tidak ada transaksi.</td></tr>';
 
-function renderChart(dailyData) {
-    const ctx = document.getElementById('financeChart');
-    if(!ctx) return;
+    let totalPengeluaran = 0;
+    let uiExpHTML = '', docExpHTML = '';
+    if(expenses.length === 0) {
+        uiExpHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">Belum ada biaya tercatat</td></tr>';
+        docExpHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada pengeluaran.</td></tr>';
+    } else {
+        expenses.forEach(e => {
+            totalPengeluaran += e.amount;
+            uiExpHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
+                <td style="padding: 10px 5px;">${e.date.split(', ')[0]}</td>
+                <td>${e.desc}</td>
+                <td style="text-align:right; color:#e74c3c; font-weight:bold;">Rp ${e.amount.toLocaleString('id-ID')}</td>
+            </tr>`;
+            docExpHTML += `<tr>
+                <td>${e.date.split(', ')[0]}</td>
+                <td>${e.desc}</td>
+                <td style="text-align:right; color:#e74c3c;">Rp ${e.amount.toLocaleString('id-ID')}</td>
+            </tr>`;
+        });
+    }
+    document.getElementById('uiExpenseList').innerHTML = uiExpHTML;
+    document.getElementById('docExpenseLog').innerHTML = docExpHTML;
+
+    const labaBersih = totalLabaKotor - totalPengeluaran;
     
-    if(myChart) myChart.destroy(); // Hapus grafik lama sebelum menggambar yang baru
-    
-    const labels = Object.keys(dailyData);
-    const data = Object.values(dailyData);
+    document.getElementById('uiOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+    document.getElementById('uiMargin').innerText = `Rp ${totalLabaKotor.toLocaleString('id-ID')}`;
+    document.getElementById('uiExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
+    document.getElementById('uiNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
+    document.getElementById('docOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+    document.getElementById('docMargin').innerText = `Rp ${totalLabaKotor.toLocaleString('id-ID')}`;
+    document.getElementById('docExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
+    document.getElementById('docNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
+
+    // === MENGGAMBAR GRAFIK BATANG (BAR CHART) MEWAH ===
+    const labels = Object.keys(chartData).sort(); 
+    const dataOmzet = labels.map(label => chartData[label]);
+
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    if(myChart) myChart.destroy(); 
+    
     myChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'bar', // Berubah dari garis (line) ke batang (bar)
         data: {
-            labels: labels,
+            labels: labels.length > 0 ? labels : ['Belum ada data'],
             datasets: [{
-                label: 'Omzet (Rp)',
-                data: data,
-                backgroundColor: '#3b82f6',
-                borderRadius: 6
+                label: 'Penjualan Kotor (Rp)',
+                data: dataOmzet.length > 0 ? dataOmzet : [0],
+                backgroundColor: 'rgba(52, 152, 219, 0.8)', // Warna Biru Elegan
+                borderColor: '#2980b9',
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true }
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { callback: function(value) { return 'Rp ' + (value/1000) + 'k'; } } 
+                } 
             }
         }
     });
 }
 
-function downloadPDF() {
-    // Membuka menu print bawaan HP/Browser (Bisa disimpan sebagai PDF)
-    window.print();
+function addExpense() {
+    const desc = document.getElementById('expDesc').value.trim();
+    const amount = parseFloat(document.getElementById('expAmount').value);
+    if(!desc || isNaN(amount)) return alert('Isi keterangan dan nominal!');
+    const expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    expenses.push({ id: Date.now(), date: new Date().toLocaleString('id-ID'), desc: desc, amount: amount });
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = '';
+    loadFinanceReports();
 }
 
-document.addEventListener('DOMContentLoaded', () => loadFinanceReports());
+function exportLaporan(format) {
+    document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
+    
+    if (format === 'pdf') {
+        // PDF ASLI: Menggunakan fitur Print bawaan browser/HP
+        window.print();
+    } else if (format === 'jpg') {
+        // JPG MENGGUNAKAN HTML2CANVAS
+        const printLayer = document.getElementById('printLayer');
+        printLayer.style.position = 'relative';
+        printLayer.style.left = '0';
+        printLayer.style.visibility = 'visible';
+        
+        html2canvas(document.getElementById('exportDocument'), { scale: 2, useCORS: true }).then(canvas => {
+            printLayer.style.position = 'absolute';
+            printLayer.style.left = '-9999px';
+            printLayer.style.visibility = 'hidden';
+            
+            let fileNameDate = document.getElementById('docPeriodeText').innerText.replace(/[^a-zA-Z0-9]/g, '_');
+            const link = document.createElement('a');
+            link.download = `Laporan_Shandoz_${fileNameDate}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 1.0);
+            link.click();
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => { filterReports('semua'); });
