@@ -1,96 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-
-/* === RESET GLOBAL === */
 * { box-sizing: border-box; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
-body { background-color: #f5f5f5; color: #212121; overflow-x: hidden; }
+body { background-color: #f4f6f8; color: #1a1a1a; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
 a { text-decoration: none; }
 
-/* === HEADER UMUM === */
-header { background: #212121; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
-header h2 { font-size: 1.2rem; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 10px; }
+/* HEADER & BUTTONS */
+header { background: #1a1a1a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+header h2 { font-size: 1.2rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+button { padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-flex; align-items: center; justify-content: center; gap: 5px;}
+button:active { transform: scale(0.95); }
+.primary { background: #2196f3; color: white; } .success { background: #2ecc71; color: white; }
+.danger { background: #e74c3c; color: white; } .warning { background: #f39c12; color: white; }
 
-/* === BUTTONS & INPUT === */
-button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
-button:active { transform: scale(0.97); }
-.primary { background: #2196f3; color: white; } .primary:hover { background: #1e88e5; }
-.success { background: #4caf50; color: white; } .success:hover { background: #43a047; }
-.danger { background: #f44336; color: white; } .danger:hover { background: #e53935; }
-.warning { background: #ff9800; color: white; } .warning:hover { background: #fb8c00; }
+/* INPUT FORM BESAR KHUSUS HP */
+input, select { width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; background: #fff; outline: none; margin-bottom: 15px; transition: 0.3s; color: #333; }
+input:focus, select:focus { border-color: #2196f3; box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2); }
+label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #444; }
 
-input, select { padding: 10px 12px; border: 1px solid #bdbdbd; border-radius: 4px; font-size: 0.95rem; width: 100%; outline: none; background: #fff; color: #212121; }
-input:focus, select:focus { border-color: #4caf50; border-width: 2px; padding: 9px 11px; }
+/* CARDS & DASHBOARD */
+.container { padding: 15px; max-width: 1000px; margin: 0 auto; width: 100%; }
+.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
+.dash-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.menu-card { background: #fff; padding: 25px 15px; border-radius: 10px; text-align: center; color: #1a1a1a; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 2px solid transparent; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+.menu-card:active { border-color: #2196f3; background: #f0f8ff; }
 
-/* === DASHBOARD LAYOUT === */
-.container { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
-.card { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 20px; }
+/* POS KASIR LAYOUT */
+.pos-layout { display: flex; flex-direction: column; height: calc(100vh - 60px); }
+.pos-left { flex: 1; overflow-y: auto; padding: 10px; background: #eaeff3; }
+.pos-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding-bottom: 20px; }
+.product-item { background: #fff; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border: 2px solid transparent;}
+.product-item:active { border-color: #2196f3; background: #f0f8ff; }
+.product-item.empty { opacity: 0.5; cursor: not-allowed; }
+.pos-right { background: #fff; border-top: 1px solid #ddd; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 50; flex-shrink: 0;}
+.cart-list-container { max-height: 22vh; overflow-y: auto; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; }
+.btn-charge { width: 100%; padding: 18px; font-size: 20px; background: #2ecc71; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-top: 10px;}
 
-.dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.stat-box { background: #fff; padding: 20px; border-radius: 6px; border-top: 4px solid #4caf50; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-.stat-box h4 { font-size: 0.85rem; color: #757575; margin-bottom: 5px; text-transform: uppercase; }
-.stat-box h2 { font-size: 1.8rem; color: #212121; margin: 0; }
-
-.dash-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.menu-card { background: #fff; padding: 25px 15px; border-radius: 6px; text-align: center; color: #212121; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.12); border: 1px solid transparent; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center;}
-.menu-card:hover { border-color: #4caf50; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transform: translateY(-3px); }
-
-.table-responsive { width: 100%; overflow-x: auto; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-th, td { padding: 12px 15px; border-bottom: 1px solid #eeeeee; text-align: left; font-size: 0.9rem; }
-th { background: #fafafa; color: #757575; font-weight: 500; text-transform: uppercase; }
-
-/* ========================================================= */
-/* KASIR (POS) - LOYVERSE CLONE (ANTI MENTOK) */
-/* ========================================================= */
-.pos-layout { display: flex; height: calc(100vh - 60px); background: #f5f5f5; width: 100%; overflow: hidden; }
-
-/* --- KIRI: MENU PRODUK --- */
-.pos-left { flex: 1; display: flex; flex-direction: column; background: #eceff1; overflow: hidden; padding: 10px; }
-.pos-filter { display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0; }
-.pos-products { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; align-content: start; padding-right: 5px; padding-bottom: 20px; }
-.pos-products::-webkit-scrollbar { width: 6px; }
-.pos-products::-webkit-scrollbar-thumb { background: #cfd8dc; border-radius: 10px; }
-
-.product-item { background: #fff; border-radius: 6px; padding: 15px 10px; text-align: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: 0.1s; display: flex; flex-direction: column; justify-content: space-between; height: 120px; border: 2px solid transparent;}
-.product-item:active { transform: scale(0.96); border-color: #4caf50; }
-.product-item.empty { opacity: 0.4; cursor: not-allowed; }
-.item-name { font-size: 0.9rem; font-weight: 500; color: #212121; line-height: 1.2; margin-bottom: auto;}
-.item-price { font-size: 1rem; font-weight: 700; color: #4caf50; margin-top: 5px; }
-
-/* --- KANAN: KERANJANG (TETAP & BISA DI-SCROLL) --- */
-.pos-right { width: 380px; background: #fff; display: flex; flex-direction: column; border-left: 1px solid #e0e0e0; box-shadow: -2px 0 5px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 10; }
-.cart-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eeeeee; background: #fff; flex-shrink: 0; }
-.cart-header h3 { margin: 0; font-size: 1.1rem; color: #212121; }
-
-.cart-list-container { flex-grow: 1; overflow-y: auto; background: #fafafa; padding: 10px 15px; }
-.cart-list-container::-webkit-scrollbar { width: 4px; }
-.cart-list-container::-webkit-scrollbar-thumb { background: #bdbdbd; border-radius: 10px; }
-
-.cart-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #e0e0e0; }
-.cart-item-name { font-size: 0.95rem; font-weight: 500; color: #212121; display: block; margin-bottom: 2px;}
-.cart-item-qty { font-size: 0.85rem; color: #757575; }
-.cart-item-price { font-size: 1rem; font-weight: 700; color: #212121; }
-
-.cart-checkout { background: #fff; border-top: 1px solid #e0e0e0; flex-shrink: 0; padding: 15px; }
-.checkout-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9rem; color: #616161; }
-.checkout-input { padding: 8px; border: none; border-bottom: 1px solid #bdbdbd; border-radius: 0; width: 140px; text-align: right; font-size: 0.95rem; }
-.checkout-input:focus { border-bottom: 2px solid #4caf50; }
-
-.btn-charge { background: #4caf50; color: white; width: 100%; padding: 18px; font-size: 1.3rem; font-weight: bold; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3); }
-.btn-charge:hover { background: #43a047; }
-
-/* === RESPONSIVE HP & TABLET KECIL === */
-@media screen and (max-width: 800px) {
-    .pos-layout { flex-direction: column; overflow-y: auto; height: auto; min-height: 100vh; }
-    .pos-left { flex: none; min-height: 50vh; overflow: visible; } 
-    .pos-products { overflow: visible; }
-    .pos-right { width: 100%; flex: none; border-left: none; border-top: 4px solid #e0e0e0; height: auto; }
-    .cart-list-container { max-height: 35vh; } /* Membatasi tinggi daftar agar tombol bayar selalu terlihat di layar HP */
-}
-
-/* === MODALS === */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-.modal-box { background: white; border-radius: 6px; width: 95%; max-width: 450px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-.modal-header { background: #f5f5f5; padding: 15px 20px; border-bottom: 1px solid #e0e0e0; }
-.modal-header h3 { margin: 0; color: #212121; }
-.modal-body { padding: 20px; }
-.receipt-preview { background: #fff; padding: 15px; border: 1px dashed #bdbdbd; text-align: left; font-family: monospace; font-size: 12px; color: black; margin-bottom: 15px; }
+/* MODAL FIX ANTI-KETUMPUK */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 99999; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(3px); }
+.modal-box { background: white; border-radius: 12px; width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.modal-header { padding: 15px 20px; border-bottom: 1px solid #eee; background: #f9f9f9; }
+.modal-body { padding: 20px; overflow-y: auto; flex-grow: 1; }
