@@ -17,7 +17,6 @@
     </header>
     
     <div class="pos-layout">
-        
         <div class="pos-left">
             <div class="pos-filter">
                 <button class="primary" style="padding:0 15px;" onclick="openScanner()">📷 Scan</button>
@@ -27,58 +26,56 @@
                     <optgroup label="Kategori" id="categoryOptions"></optgroup>
                 </select>
             </div>
-            
-            <div class="pos-products" id="productsContainer">
-                </div>
+            <div class="pos-products" id="productsContainer"></div>
         </div>
 
         <div class="pos-right">
             <div class="cart-header">
-                <h3 style="margin:0; font-size:1rem; color:#1e293b;">🛒 Tiket Pesanan</h3>
+                <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">🛒 Pesanan</h3>
                 <div>
                     <button class="warning" style="padding: 6px 10px;" onclick="saveOpenBill()">⏸️ Hold</button>
                     <button class="primary" style="padding: 6px 10px;" onclick="showOpenBills()">📋 Buka</button>
                 </div>
             </div>
             
-            <div class="cart-list" id="cartItems">
-                </div>
-            
-            <div class="cart-checkout">
-                <div class="checkout-row">
-                    <span>Pelanggan:</span>
-                    <input type="text" id="custName" class="checkout-input" placeholder="Nama (Opsional)" style="text-align: left;">
-                </div>
-                <div class="checkout-row">
-                    <span>Metode:</span>
-                    <select id="payMethod" class="checkout-input" onchange="handlePaymentMethod()" style="text-align: left;">
-                        <option value="Tunai">💵 Tunai</option>
-                        <option value="QRIS">📱 QRIS</option>
-                        <option value="Debit">💳 Debit</option>
-                    </select>
-                </div>
-                <div class="checkout-row">
-                    <span>Subtotal:</span>
-                    <strong id="subtotalDisplay" style="color:#1e293b;">Rp 0</strong>
-                </div>
-                <div class="checkout-row">
-                    <span>Diskon (%):</span>
-                    <input type="number" id="discountInput" class="checkout-input" value="0" min="0" max="100" oninput="calculateTotal()">
-                </div>
+            <div class="cart-body">
                 
-                <div class="checkout-total">
-                    <span>TOTAL</span>
-                    <span id="grandTotalDisplay">Rp 0</span>
-                </div>
+                <div class="cart-list-container" id="cartItems"></div>
+                
+                <div class="cart-checkout">
+                    <div class="checkout-row">
+                        <span>Pelanggan:</span>
+                        <input type="text" id="custName" class="checkout-input" placeholder="Opsional">
+                    </div>
+                    <div class="checkout-row">
+                        <span>Metode:</span>
+                        <select id="payMethod" class="checkout-input" onchange="handlePaymentMethod()">
+                            <option value="Tunai">💵 Tunai</option>
+                            <option value="QRIS">📱 QRIS</option>
+                            <option value="Debit">💳 Debit</option>
+                        </select>
+                    </div>
+                    <div class="checkout-row">
+                        <span>Subtotal:</span>
+                        <strong id="subtotalDisplay" style="color:#1e293b;">Rp 0</strong>
+                    </div>
+                    <div class="checkout-row">
+                        <span>Diskon (%):</span>
+                        <input type="number" id="discountInput" class="checkout-input" value="0" min="0" max="100" oninput="calculateTotal()">
+                    </div>
+                    
+                    <div class="checkout-total">
+                        <span>TOTAL</span>
+                        <span id="grandTotalDisplay">Rp 0</span>
+                    </div>
 
-                <div style="margin-top: 10px;">
                     <input type="number" id="cashInput" class="checkout-cash" placeholder="Uang Tunai (Rp)" oninput="calculateTotal()">
                     <div class="checkout-row" style="margin-top: 8px; font-size: 1rem; font-weight: bold; color: #0f172a;">
                         <span>Kembali:</span><span id="changeDisplay">Rp 0</span>
                     </div>
+                    
+                    <button class="success" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px; font-weight:bold;" onclick="previewCheckout()">BAYAR SEKARANG</button>
                 </div>
-                
-                <button class="success" style="width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 10px; font-weight:bold;" onclick="previewCheckout()">BAYAR SEKARANG</button>
             </div>
         </div>
     </div>
@@ -86,9 +83,18 @@
     <div class="modal-overlay" id="scannerModal">
         <div class="modal-box"><h3 style="margin-top: 0; color: #1e3c72;">Scan Barcode</h3><div id="reader" style="width: 100%; margin: auto;"></div><button class="danger" style="width: 100%; margin-top: 15px;" onclick="closeScanner()">Batal</button></div>
     </div>
+    
     <div class="modal-overlay" id="previewModal">
-        <div class="modal-box"><h3 style="margin-top: 0; color: #1e3c72;">Struk Transaksi</h3><div class="receipt-preview" id="receiptPreviewContent" style="background:#fff; padding:15px; border:1px solid #ddd; text-align:left; font-family:monospace; font-size:12px;"></div><div style="display: flex; gap: 10px; margin-top: 15px;"><button class="danger" style="flex: 1;" onclick="closePreview()">Batal</button><button class="primary" style="flex: 2; font-size: 1.1rem;" onclick="confirmAndPrint()">🖨️ Cetak Struk</button></div></div>
+        <div class="modal-box">
+            <h3 style="margin-top: 0; color: #1e3c72;" id="previewTitle">Pratinjau Struk</h3>
+            <div class="receipt-preview" id="receiptPreviewContent" style="background:#fff; padding:15px; border:1px solid #ddd; text-align:left; font-family:monospace; font-size:12px;"></div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="danger" style="flex: 1;" onclick="closePreview()">Batal</button>
+                <button class="primary" style="flex: 2; font-size: 1.1rem;" onclick="confirmAndPrint()">🖨️ Cetak Struk</button>
+            </div>
+        </div>
     </div>
+
     <div class="modal-overlay" id="openBillModal">
         <div class="modal-box" style="width: 500px;"><h3 style="margin-top: 0; color: #1e3c72; border-bottom: 1px solid #eee; padding-bottom: 10px;">Tiket Tertunda (Hold)</h3><div id="openBillContent" style="max-height: 50vh; overflow-y: auto;"></div><button class="danger" style="width: 100%; margin-top: 15px;" onclick="closeOpenBillModal()">Tutup</button></div>
     </div>
