@@ -30,7 +30,14 @@
         </div>
 
         <div class="pos-right">
-            <h3 style="margin:0 0 10px 0; padding-bottom:10px; border-bottom:2px solid #eee;">🛒 Pesanan</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:2px solid #eee;">
+                <h3 style="margin:0;">🛒 Pesanan</h3>
+                <div>
+                    <button class="warning" style="padding: 6px 12px; font-size:0.85rem;" onclick="saveOpenBill()">⏸️ Hold Tiket</button>
+                    <button class="primary" style="padding: 6px 12px; font-size:0.85rem;" onclick="showOpenBills()">📋 Buka Tiket</button>
+                </div>
+            </div>
+
             
             <div class="cart-scroll" id="cartItems"></div>
             
