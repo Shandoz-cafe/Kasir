@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pilih Akun - Shandoz POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #111827; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        h1 { margin-bottom: 30px; font-weight: 600; letter-spacing: 1px; text-align: center;}
+        
+        .profile-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 600px; padding: 20px; }
+        .profile-card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; text-align: center; width: 140px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+        .profile-card:hover, .profile-card:active { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); transform: translateY(-5px); }
+        .avatar { font-size: 50px; margin-bottom: 10px; }
+        .name { font-size: 14px; font-weight: 600; }
+        .role-badge { font-size: 10px; background: #3b82f6; padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block;}
+        .role-cashier { background: #10b981; }
+
+        /* Modal PIN */
+        .pin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        .pin-display { font-size: 30px; letter-spacing: 10px; margin-bottom: 20px; height: 40px; }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .numpad button { width: 70px; height: 70px; border-radius: 50%; border: none; background: rgba(255,255,255,0.1); color: white; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .numpad button:active { background: rgba(255,255,255,0.3); }
+        .btn-cancel { margin-top: 30px; color: #ef4444; cursor: pointer; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <h1>Siapa yang sedang menggunakan kasir?</h1>
+    <div class="profile-container" id="profileList">
+        </div>
+
+    <div class="pin-modal" id="pinModal">
+        <h2 id="pinTitle" style="margin-bottom: 5px;">Masukkan PIN</h2>
+        <p style="color: #aaa; font-size: 12px; margin-bottom: 20px;">PIN Default Owner: 1234</p>
+        <div class="pin-display" id="pinDisplay">_ _ _ _</div>
+        <div class="numpad">
+            <button onclick="pressPin(1)">1</button><button onclick="pressPin(2)">2</button><button onclick="pressPin(3)">3</button>
+            <button onclick="pressPin(4)">4</button><button onclick="pressPin(5)">5</button><button onclick="pressPin(6)">6</button>
+            <button onclick="pressPin(7)">7</button><button onclick="pressPin(8)">8</button><button onclick="pressPin(9)">9</button>
+            <button onclick="pressPin('C')" style="background: rgba(239,68,68,0.2); color: #ef4444;">C</button>
+            <button onclick="pressPin(0)">0</button>
+            <button onclick="submitPin()" style="background: rgba(16,185,129,0.2); color: #10b981;">OK</button>
+        </div>
+        <div class="btn-cancel" onclick="closePinModal()">Batal</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        checkAuth(); // Mulai sinkronisasi
+
+        let activeProfile = null;
+        let typedPin = "";
+
+        function renderProfiles() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            document.getElementById('profileList').innerHTML = users.map(u => `
+                <div class="profile-card" onclick="openPinModal('${u.id}')">
+                    <div class="avatar">${u.role === 'admin' ? '👑' : '🧑‍🍳'}</div>
+                    <div class="name">${u.name}</div>
+                    <div class="role-badge ${u.role === 'cashier' ? 'role-cashier' : ''}">${u.role.toUpperCase()}</div>
+                </div>
+            `).join('');
+        }
+
+        function openPinModal(userId) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            activeProfile = users.find(u => u.id === userId);
+            typedPin = "";
+            updatePinDisplay();
+            document.getElementById('pinTitle').innerText = "PIN " + activeProfile.name;
+            document.getElementById('pinModal').style.display = 'flex';
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').style.display = 'none';
+        }
+
+        function pressPin(num) {
+            if(num === 'C') { typedPin = ""; } 
+            else if(typedPin.length < 4) { typedPin += num; }
+            updatePinDisplay();
+        }
+
+        function updatePinDisplay() {
+            let display = "";
+            for(let i=0; i<4; i++) { display += i < typedPin.length ? "● " : "_ "; }
+            document.getElementById('pinDisplay').innerText = display;
+        }
+
+        function submitPin() {
+            if(typedPin === activeProfile.pin) {
+                // PIN BENAR! Simpan Sesi dan masuk Dashboard
+                localStorage.setItem('currentUser', activeProfile.name);
+                localStorage.setItem('currentRole', activeProfile.role);
+                window.location.href = 'dashboard.html';
+            } else {
+                alert("PIN SALAH!");
+                typedPin = ""; updatePinDisplay();
+            }
+        }
+    </script>
+</body>
+</html>
