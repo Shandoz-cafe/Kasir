@@ -49,7 +49,6 @@ function loginWithEmail() {
 }
 
 function handleSuccessfulLogin(user) {
-    // Simpan Nama Asli dari Google / Form Pendaftaran
     localStorage.setItem('currentUser', user.displayName || user.email.split('@')[0]);
     localStorage.setItem('userUid', user.uid); 
     window.location.href = 'profiles.html';
@@ -62,12 +61,12 @@ function mulaiSinkronisasiCloud() {
 
     userRef.once('value').then((snapshot) => {
         if (!snapshot.val()) {
-            // FIX: Tarik nama asli, dan set PIN jadi "SETUP" agar dipaksa bikin PIN
             const ownerName = localStorage.getItem('currentUser') || "Owner";
             userRef.set({
                 users: [{id: 'owner_1', name: ownerName, role: "admin", pin: "SETUP"}],
                 products: JSON.parse(localStorage.getItem('products') || '[]'),
-                sales: JSON.parse(localStorage.getItem('sales') || '[]')
+                sales: JSON.parse(localStorage.getItem('sales') || '[]'),
+                settings: JSON.parse(localStorage.getItem('settings') || '{}')
             });
         }
         
@@ -77,6 +76,14 @@ function mulaiSinkronisasiCloud() {
             localStorage.setItem('users', JSON.stringify(data.users || []));
             localStorage.setItem('products', JSON.stringify(data.products || []));
             localStorage.setItem('sales', JSON.stringify(data.sales || []));
+            
+            // SINKRONISASI PENGATURAN LOGO DAN TOKO
+            if(data.settings && Object.keys(data.settings).length > 0) {
+                localStorage.setItem('settings', JSON.stringify(data.settings));
+                if(data.settings.storeName) localStorage.setItem('storeName', data.settings.storeName);
+                if(data.settings.storeLogo) localStorage.setItem('storeLogo', data.settings.storeLogo);
+                if(data.settings.paperSize) localStorage.setItem('printerSettings', JSON.stringify({paperSize: data.settings.paperSize, autoPrint: true}));
+            }
             
             if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
             if(typeof initDashboardData === 'function') initDashboardData();
@@ -89,8 +96,9 @@ function mulaiSinkronisasiCloud() {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        if (!isSyncingFromCloud && ['products', 'sales', 'users'].includes(key)) {
-            userRef.child(key).set(JSON.parse(value));
+        // Tangkap settings agar ikut terbang ke Cloud
+        if (!isSyncingFromCloud && ['products', 'sales', 'users', 'settings'].includes(key)) {
+            try { userRef.child(key).set(JSON.parse(value)); } catch(e) {}
         }
     };
 }
