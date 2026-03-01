@@ -1,72 +1,162 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
-* { box-sizing: border-box; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
-body { background-color: #f4f7fa; color: #1a1a1a; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-a { text-decoration: none; }
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Shandoz POS</title>
+    <link rel="stylesheet" href="style.css?v=final4">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CSS KHUSUS MODAL KEAMANAN (DIJAMIN TIDAK HANCUR) */
+        .sec-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.9); z-index:99999; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        .sec-box { background:#fff; width:90%; max-width:340px; border-radius:20px; padding:30px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
+        .sec-input { width:100%; text-align:center; font-size:28px; letter-spacing:10px; padding:15px; border:2px solid #e5e7eb; border-radius:12px; margin:20px 0; outline:none; transition:0.3s; font-weight:bold;}
+        .sec-input:focus { border-color:#3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,0.2); }
+        .sec-btn { width:100%; padding:15px; border-radius:12px; font-weight:bold; border:none; cursor:pointer; margin-bottom:10px; font-size:16px; transition:0.2s;}
+        .sec-btn:active { transform:scale(0.95); }
+        .btn-unlock { background:#3b82f6; color:#fff; }
+        .btn-cancel { background:#f3f4f6; color:#ef4444; }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h2><span style="color:#10b981;">●</span> Dashboard</h2>
+        <div style="display: flex; gap: 8px;">
+            <button class="warning" onclick="window.location.href='profiles.html'" style="padding: 8px 12px; font-size: 12px;">👥 Ganti Profil</button>
+            <button class="danger" onclick="logout()" style="padding: 8px 12px; font-size: 12px;">🛑 Keluar</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="welcome-card">
+            <h3>Halo, <span id="userNameDisplay">Admin</span>! 👋</h3>
+            <p>Selamat datang di Shandoz Command Center. Semua sistem beroperasi dengan normal.</p>
+        </div>
 
-/* HEADER & BUTTONS */
-header { background: #111827; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-header h2 { font-size: 1.2rem; font-weight: 500; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;}
-button { padding: 12px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 5px;}
-button:active { transform: scale(0.95); }
-.primary { background: #3b82f6; color: white; } .success { background: #10b981; color: white; }
-.danger { background: #ef4444; color: white; } .warning { background: #f59e0b; color: white; }
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Pendapatan Hari Ini</div>
+                <div class="stat-value" id="todayIncome">Rp 0</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-title">Total Transaksi</div>
+                <div class="stat-value" id="todayOrders">0 Tiket</div>
+            </div>
+        </div>
 
-/* INPUT FORM */
-input, select { width: 100%; padding: 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 15px; background: #fff; outline: none; margin-bottom: 15px; transition: 0.3s; color: #333; }
-input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #374151; }
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4>📊 Tren Penjualan (7 Hari Terakhir)</h4>
+            </div>
+            <div style="position: relative; height: 200px; width: 100%;">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
 
-/* KARTU & LAYOUT UMUM */
-.container { padding: 15px; max-width: 1000px; margin: 0 auto; width: 100%; }
-.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); margin-bottom: 20px; border: 1px solid #e5e7eb; }
+        <h4 style="margin-bottom: 10px; color: #374151; font-weight: 700; margin-left: 5px;">Aplikasi Utama</h4>
+        <div class="dash-menu">
+            <a href="pos.html" class="menu-card">
+                <span class="icon">🛒</span> KASIR (POS)
+            </a>
+            <a href="javascript:void(0)" onclick="checkAccess('product.html')" class="menu-card">
+                <span class="icon">📦</span> GUDANG INVENTORY
+            </a>
+            <a href="javascript:void(0)" onclick="checkAccess('reports.html')" class="menu-card">
+                <span class="icon">📈</span> ANALISA LAPORAN
+            </a>
+            <a href="javascript:void(0)" onclick="checkAccess('setting.html')" class="menu-card">
+                <span class="icon">⚙️</span> PENGATURAN SISTEM
+            </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 30px; opacity: 0.6;">
+            <h4 style="font-weight: 900; letter-spacing: 1px; color: #111827; margin-bottom: 2px;">SHANDOZ <span style="color: #3b82f6;">SYSTEMS</span></h4>
+            <p style="font-size: 10px; font-weight: bold;">v3.0.2 ENTERPRISE EDITION</p>
+        </div>
+    </div>
 
-/* =========================================
-   UI BARU KHUSUS DASHBOARD (PREMIUM)
-   ========================================= */
-.welcome-card { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
-.welcome-card h3 { font-size: 22px; margin-bottom: 5px; font-weight: 700;}
-.welcome-card p { opacity: 0.8; font-size: 13px; margin-bottom: 15px; }
+    <div class="sec-modal" id="secureLock">
+        <div class="sec-box">
+            <h2 style="margin-bottom: 5px; color: #111827;">🔒 Akses Ditolak</h2>
+            <p style="font-size: 13px; color: #6b7280;">Menu ini khusus Owner. Masukkan PIN Owner untuk melanjutkan.</p>
+            <input type="password" id="ownerPinEntry" class="sec-input" placeholder="••••" maxlength="4" pattern="\d*">
+            <button class="sec-btn btn-unlock" onclick="verifyOwnerPin()">Buka Akses</button>
+            <button class="sec-btn btn-cancel" onclick="document.getElementById('secureLock').style.display='none'">Batal</button>
+        </div>
+    </div>
+    
+    <script src="auth.js"></script>
+    <script>
+        checkAuth();
+        
+        const currentUser = localStorage.getItem('currentUser') || 'Admin';
+        const currentRole = localStorage.getItem('currentRole') || 'cashier';
+        document.getElementById('userNameDisplay').innerText = currentUser.toUpperCase();
 
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-.stat-card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;}
-.stat-card::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: #3b82f6; border-radius: 4px 0 0 4px;}
-.stat-card.green::before { background: #10b981; }
-.stat-title { font-size: 12px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.stat-value { font-size: 20px; font-weight: 900; color: #111827; }
+        // SISTEM KUNCI MENU
+        let pendingUrl = "";
+        function checkAccess(url) {
+            if(currentRole === 'admin') {
+                window.location.href = url; // Owner langsung lewat
+            } else {
+                pendingUrl = url;
+                document.getElementById('ownerPinEntry').value = '';
+                document.getElementById('secureLock').style.display = 'flex'; // Kasir dihadang
+                setTimeout(() => document.getElementById('ownerPinEntry').focus(), 100);
+            }
+        }
 
-.chart-card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; margin-bottom: 20px; }
-.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6;}
-.chart-header h4 { font-size: 15px; color: #374151; font-weight: 700; }
+        function verifyOwnerPin() {
+            const pinAttempt = document.getElementById('ownerPinEntry').value;
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const owner = users.find(u => u.role === 'admin');
+            
+            if(owner && pinAttempt === owner.pin) {
+                window.location.href = pendingUrl; // Pin Benar, masuk!
+            } else {
+                alert("PIN Salah! Akses ditolak.");
+                document.getElementById('ownerPinEntry').value = '';
+            }
+        }
 
-.dash-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
-.menu-card { background: #fff; padding: 25px 15px; border-radius: 16px; text-align: center; color: #374151; font-weight: 700; font-size: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;}
-.menu-card .icon { font-size: 36px; margin-bottom: 5px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-.menu-card:active { border-color: #3b82f6; transform: translateY(2px); box-shadow: 0 2px 4px -1px rgba(0,0,0,0.05); }
-.menu-card:active .icon { transform: scale(1.1); }
+        // MESIN GRAFIK
+        function initDashboardData() {
+            const salesData = JSON.parse(localStorage.getItem('sales') || '[]');
+            const todayStr = new Date().toLocaleDateString('id-ID');
+            let todayIncome = 0; let todayOrders = 0;
+            const last7Days = {};
+            
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                last7Days[d.toLocaleDateString('id-ID')] = 0; 
+            }
 
-/* =========================================
-   POS KASIR LAYOUT (TETAP AMAN)
-   ========================================= */
-.pos-layout { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
-.pos-left { flex: 1; padding: 10px; background: #eaeff3; }
-.pos-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding-bottom: 20px; }
-.product-item { background: #fff; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 110px; border: 2px solid transparent;}
-.product-item:active { border-color: #3b82f6; background: #eff6ff; }
-.pos-right { background: #fff; border-top: 1px solid #ddd; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 50; }
-.cart-list-container { max-height: 22vh; overflow-y: auto; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
-.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; }
-.btn-charge { width: 100%; padding: 18px; font-size: 20px; background: #10b981; color: white; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-top: 10px;}
+            salesData.forEach(sale => {
+                const saleDate = sale.date.split(',')[0].trim();
+                if(saleDate === todayStr) { todayIncome += sale.total; todayOrders++; }
+                if(last7Days[saleDate] !== undefined) { last7Days[saleDate] += sale.total; }
+            });
 
-@media (min-width: 650px) {
-    .pos-layout { flex-direction: row; height: calc(100vh - 60px); overflow: hidden; }
-    .pos-left { flex: 2; overflow-y: auto; }
-    .pos-right { flex: 1; max-width: 400px; overflow-y: auto; border-left: 1px solid #ddd; border-top: none; }
-    .cart-list-container { max-height: 40vh; }
-    .dash-menu { grid-template-columns: repeat(4, 1fr); }
-}
+            document.getElementById('todayIncome').innerText = 'Rp ' + todayIncome.toLocaleString('id-ID');
+            document.getElementById('todayOrders').innerText = todayOrders + ' Tiket';
 
-/* MODAL FIX */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 99999; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(3px); }
-.modal-box { background: white; border-radius: 16px; width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-.modal-header { padding: 15px 20px; border-bottom: 1px solid #f3f4f6; background: #fff; }
-.modal-body { padding: 20px; overflow-y: auto; flex-grow: 1; }
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(last7Days).map(date => date.substring(0, 5)),
+                    datasets: [{
+                        label: 'Pendapatan (Rp)', data: Object.values(last7Days),
+                        borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3, pointBackgroundColor: '#10b981', pointBorderColor: '#fff',
+                        pointBorderWidth: 2, pointRadius: 5, fill: true, tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', initDashboardData);
+    </script>
+</body>
+</html>
