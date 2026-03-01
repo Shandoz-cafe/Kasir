@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesin Kasir</title>
+    <title>Mesin Kasir Flex</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="pos-body">
@@ -21,23 +21,23 @@
                         <option value="sort-AZ">Abjad A - Z</option>
                         <option value="sort-ZA">Abjad Z - A</option>
                     </optgroup>
-                    <optgroup label="Filter Kategori" id="categoryOptions">
-                        </optgroup>
+                    <optgroup label="Filter Kategori" id="categoryOptions"></optgroup>
                 </select>
             </div>
             
-            <div class="product-grid" id="productsContainer"></div>
+            <div class="product-scroll">
+                <div class="product-grid" id="productsContainer"></div>
+            </div>
         </div>
 
         <div class="pos-right">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:2px solid #eee;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:2px solid #eee;">
                 <h3 style="margin:0;">🛒 Pesanan</h3>
                 <div>
                     <button class="warning" style="padding: 6px 12px; font-size:0.85rem;" onclick="saveOpenBill()">⏸️ Hold Tiket</button>
                     <button class="primary" style="padding: 6px 12px; font-size:0.85rem;" onclick="showOpenBills()">📋 Buka Tiket</button>
                 </div>
             </div>
-
             
             <div class="cart-scroll" id="cartItems"></div>
             
@@ -88,14 +88,13 @@
         </div>
     </div>
 
-        <div class="modal-overlay" id="openBillModal">
+    <div class="modal-overlay" id="openBillModal">
         <div class="modal-box" style="width: 500px; max-width: 95%;">
-            <h3 style="margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eee; padding-bottom: 10px;">Daftar Tiket Belum Dibayar (Open Bill)</h3>
+            <h3 style="margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eee; padding-bottom: 10px;">Daftar Tiket (Hold)</h3>
             <div id="openBillContent" style="min-height: 100px; max-height: 50vh; overflow-y: auto;"></div>
             <button class="danger" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="closeOpenBillModal()">Tutup</button>
         </div>
-        </div>
-    
+    </div>
 
     <script src="auth.js"></script><script>checkAuth();</script><script src="pos.js"></script>
 </body>
