@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Shandoz POS</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS DITANAM LANGSUNG AGAR TIDAK HANCUR OLEH CACHE HP */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f0f4f8; color: #1e293b; -webkit-tap-highlight-color: transparent; }
+        a { text-decoration: none; }
+        
+        header { background: #0f172a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        header h2 { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; letter-spacing: 1px;}
+        
+        button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        button:active { transform: scale(0.95); }
+        .btn-head { padding: 8px 12px; font-size: 12px; }
+        .bg-warning { background: #f59e0b; color: white; }
+        .bg-danger { background: #ef4444; color: white; }
+
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        
+        .welcome-card { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); }
+        .welcome-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+        .welcome-card p { opacity: 0.8; font-size: 12px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #3b82f6; }
+        .stat-card.green { border-left-color: #10b981; }
+        .stat-title { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 20px; font-weight: 800; color: #0f172a; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; }
+        .menu-card { background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .menu-card .icon { font-size: 35px; margin-bottom: 10px; }
+        .menu-card .title { font-size: 13px; font-weight: 700; color: #334155; }
+        .menu-card:active { transform: translateY(3px); box-shadow: none; border-color: #3b82f6; }
+
+        /* MODAL KEAMANAN YANG BENAR & GAGAH */
+        .sec-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); z-index:99999; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        .sec-box { background:#fff; width:90%; max-width:350px; border-radius:24px; padding:30px; text-align:center; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); }
+        .sec-icon { font-size: 40px; margin-bottom: 10px; }
+        .sec-title { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+        .sec-desc { font-size: 12px; color: #64748b; margin-bottom: 20px; }
+        .sec-input { width:100%; text-align:center; font-size:32px; letter-spacing:15px; padding:15px; border:2px solid #e2e8f0; border-radius:12px; outline:none; font-weight:800; color: #3b82f6; background: #f8fafc; transition: 0.3s; margin-bottom: 20px;}
+        .sec-input:focus { border-color:#3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,0.2); }
+        .sec-btn { width:100%; padding:16px; border-radius:12px; font-size:15px; font-weight:700; margin-bottom:10px; border: none; cursor: pointer; }
+        .btn-unlock { background:#3b82f6; color:#fff; }
+        .btn-cancel { background:#f1f5f9; color:#ef4444; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2><span style="color:#10b981;">●</span> Sistem Operasi</h2>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-head bg-warning" onclick="window.location.href='profiles.html'">👥 Ganti Profil</button>
+            <button class="btn-head bg-danger" onclick="logout()">🛑 Keluar</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="welcome-card">
+            <h3>Halo, <span id="userNameDisplay">Admin</span>! 👋</h3>
+            <p id="roleDisplay">Selamat datang di Shandoz Command Center. Semua sistem online.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Pendapatan Hari Ini</div>
+                <div class="stat-value" id="todayIncome">Rp 0</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-title">Transaksi</div>
+                <div class="stat-value" id="todayOrders">0</div>
+            </div>
+        </div>
+
+        <h4 style="margin-bottom: 15px; color: #334155; font-weight: 700;">Aplikasi Utama</h4>
+        
+        <div class="menu-grid">
+            <a href="pos.html" class="menu-card">
+                <span class="icon">🛒</span>
+                <span class="title">KASIR (POS)</span>
+            </a>
+            <a href="javascript:void(0)" onclick="checkAccess('product.html')" class="menu-card">
+                <span class="icon">📦</span>
+                <span class="title">GUDANG / MENU</span>
+            </a>
+            <a href="javascript:void(0)" onclick="checkAccess('reports.html')" class="menu-card">
+                <span class="icon">📈</span>
+                <span class="title">LAPORAN KEUANGAN</span>
+            </a>
+            <a href="javascript:void(0)" onclick="checkAccess('setting.html')" class="menu-card">
+                <span class="icon">⚙️</span>
+                <span class="title">PENGATURAN TOKO</span>
+            </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; opacity: 0.5;">
+            <h4 style="font-weight: 900; letter-spacing: 2px; color: #0f172a;">SHANDOZ SYSTEMS</h4>
+            <p style="font-size: 10px; font-weight: bold;">v4.0 ENTERPRISE CLOUD</p>
+        </div>
+    </div>
+
+    <div class="sec-modal" id="secureLock">
+        <div class="sec-box">
+            <div class="sec-icon">🔒</div>
+            <div class="sec-title">Akses Ditolak</div>
+            <div class="sec-desc">Menu ini hanya untuk Owner. Kasir tidak memiliki akses.<br>Masukkan PIN Owner untuk membuka.</div>
+            
+            <input type="password" id="ownerPinEntry" class="sec-input" placeholder="••••" maxlength="4" pattern="\d*">
+            
+            <button class="sec-btn btn-unlock" onclick="verifyOwnerPin()">Buka Akses</button>
+            <button class="sec-btn btn-cancel" onclick="closeSecurity()">Batal</button>
+        </div>
+    </div>
+    
+    <script src="auth.js"></script>
+    <script>
+        checkAuth();
+        
+        // SET NAMA & JABATAN
+        const currentUser = localStorage.getItem('currentUser') || 'User';
+        const currentRole = localStorage.getItem('currentRole') || 'cashier';
+        document.getElementById('userNameDisplay').innerText = currentUser.toUpperCase();
+        
+        if(currentRole === 'admin') {
+            document.getElementById('roleDisplay').innerText = "Akses Owner Aktif. Anda memiliki kendali penuh.";
+        } else {
+            document.getElementById('roleDisplay').innerText = "Akses Kasir Aktif. Silakan layani pelanggan.";
+        }
+
+        // FUNGSI PENGAMAN MENU
+        let pendingUrl = "";
+        
+        function checkAccess(url) {
+            if(currentRole === 'admin') {
+                // JIKA OWNER YANG KLIK, LANGSUNG MASUK TANPA PIN
+                window.location.href = url; 
+            } else {
+                // JIKA KASIR YANG KLIK, MUNCULKAN KOTAK PIN
+                pendingUrl = url;
+                document.getElementById('ownerPinEntry').value = '';
+                document.getElementById('secureLock').style.display = 'flex'; 
+                setTimeout(() => document.getElementById('ownerPinEntry').focus(), 100);
+            }
+        }
+
+        function verifyOwnerPin() {
+            const pinAttempt = document.getElementById('ownerPinEntry').value;
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const owner = users.find(u => u.role === 'admin');
+            
+            if(owner && pinAttempt === owner.pin) {
+                // PIN BENAR -> IZINKAN MASUK
+                window.location.href = pendingUrl; 
+            } else {
+                alert("PIN Owner Salah! Akses ditolak.");
+                document.getElementById('ownerPinEntry').value = '';
+            }
+        }
+
+        function closeSecurity() {
+            document.getElementById('secureLock').style.display = 'none';
+        }
+
+        // MESIN HITUNG HARI INI
+        function initDashboardData() {
+            const salesData = JSON.parse(localStorage.getItem('sales') || '[]');
+            const todayStr = new Date().toLocaleDateString('id-ID');
+            let todayIncome = 0; let todayOrders = 0;
+            
+            salesData.forEach(sale => {
+                const saleDate = sale.date.split(',')[0].trim();
+                if(saleDate === todayStr) { todayIncome += sale.total; todayOrders++; }
+            });
+
+            document.getElementById('todayIncome').innerText = 'Rp ' + todayIncome.toLocaleString('id-ID');
+            document.getElementById('todayOrders').innerText = todayOrders;
+        }
+        
+        document.addEventListener('DOMContentLoaded', initDashboardData);
+    </script>
+</body>
+</html>
