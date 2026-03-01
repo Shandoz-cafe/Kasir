@@ -1,85 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Settings - Shandoz POS</title>
-    <link rel="stylesheet" href="style.css?v=final3">
-</head>
-<body>
-    <header>
-        <h2>⚙️ Pengaturan Sistem</h2>
-        <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
-    </header>
-
-    <div class="container">
         <div class="card">
-            <h3 style="margin-bottom: 20px; color: #2196f3; border-bottom: 2px solid #eee; padding-bottom: 10px;">🏢 Profil Toko & Struk Baja</h3>
+            <h3 style="margin-bottom: 20px; color: #10b981; border-bottom: 2px solid #eee; padding-bottom: 10px;">👥 Manajemen Akun (Owner & Kasir)</h3>
             
-            <label>Nama Cafe / Toko:</label>
-            <input type="text" id="storeNameInput" placeholder="Contoh: SHANDOZ CAFE">
-            
-            <label>Gambar Logo Struk:</label>
-            <input type="file" id="storeLogoInput" accept="image/*">
-            <div id="logoPreview" style="max-height: 80px; margin-bottom: 15px;"></div>
+            <div id="usersList" style="margin-bottom: 20px;">
+                </div>
 
-            <label>Lebar Kertas Printer Bluetooth:</label>
-            <select id="paperSizeInput">
-                <option value="58">Kertas Kecil (Thermal 58mm)</option>
-                <option value="80">Kertas Besar (Thermal 80mm)</option>
-            </select>
-
-            <button class="success" onclick="saveSettings()" style="width: 100%; padding: 18px; font-size: 16px;">💾 SIMPAN SEMUA PENGATURAN</button>
-        </div>
-
-        <div class="card" style="text-align: center; background: linear-gradient(145deg, #ffffff, #f0f0f0); border: 1px solid #ddd;">
-            <h1 style="font-weight: 800; color: #1a1a1a; margin-bottom: 5px;">SHANDOZ <span style="color: #2196f3;">SYSTEMS</span> <span style="font-size: 14px; font-weight: 400; color: #666;">Ltd.</span></h1>
-            <p style="font-size: 11px; color: #888; font-weight: bold; letter-spacing: 2px;">ADVANCED CLOUD POS</p>
-            <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
-                <span style="background: #212121; color: white; padding: 6px 12px; font-size: 10px; border-radius: 4px;">ISO 9001:2026</span>
-                <span style="background: #2196f3; color: white; padding: 6px 12px; font-size: 10px; border-radius: 4px;">AES-256 SECURE</span>
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #ccc;">
+                <h4 style="margin-bottom: 10px;">Tambah Akun Kasir Baru</h4>
+                <input type="text" id="newKasirName" placeholder="Nama Kasir (Contoh: Budi)">
+                <input type="number" id="newKasirPin" placeholder="Buat PIN Kasir (4 Angka)" maxlength="4">
+                <button class="primary" style="width:100%;" onclick="addKasir()">+ Tambah Kasir</button>
             </div>
-            <p style="font-size: 11px; color: #555; max-width: 400px; margin: 0 auto;">Sistem kasir awan (Cloud POS) terintegrasi yang dirancang untuk stabilitas, kecepatan, dan keamanan data tingkat enterprise.</p>
-            <p style="font-size: 10px; color: #bbb; margin-top: 30px;">&copy; 2026 SHANDOZ SYSTEMS LTD. ALL RIGHTS RESERVED.</p>
         </div>
-    </div>
 
-    <script src="auth.js"></script>
-    <script>
-        checkAuth();
-        let currentLogoBase64 = null;
+<script>
+    function renderUserList() {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        document.getElementById('usersList').innerHTML = users.map((u, i) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:6px;">
+                <div>
+                    <b>${u.name}</b> <span style="font-size:10px; background:#e0e0e0; padding:2px 5px; border-radius:4px;">${u.role.toUpperCase()}</span><br>
+                    <small>PIN: ${u.pin}</small>
+                </div>
+                ${u.role !== 'admin' ? `<button class="danger" style="padding:5px 10px; font-size:12px;" onclick="deleteUser(${i})">Hapus</button>` : `<small style="color:#2196f3;">(Akun Utama)</small>`}
+            </div>
+        `).join('');
+    }
 
-        window.onload = function() {
-            document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
-            currentLogoBase64 = localStorage.getItem('storeLogo');
-            if(currentLogoBase64) {
-                document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
-            }
-            const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
-            document.getElementById('paperSizeInput').value = ps.paperSize;
+    function addKasir() {
+        const name = document.getElementById('newKasirName').value;
+        const pin = document.getElementById('newKasirPin').value;
+        if(!name || pin.length !== 4) return alert("Nama harus diisi & PIN wajib 4 angka!");
+        
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        users.push({ id: 'kasir_'+Date.now(), name: name, role: 'cashier', pin: pin });
+        localStorage.setItem('users', JSON.stringify(users)); // Otomatis tersinkron ke Firebase
+        
+        document.getElementById('newKasirName').value = '';
+        document.getElementById('newKasirPin').value = '';
+        renderUserList();
+    }
+
+    function deleteUser(index) {
+        if(confirm("Hapus akun kasir ini?")) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            users.splice(index, 1);
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUserList();
         }
-
-        // Handle File Upload
-        document.getElementById('storeLogoInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    currentLogoBase64 = event.target.result;
-                    document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function saveSettings() {
-            localStorage.setItem('storeName', document.getElementById('storeNameInput').value);
-            localStorage.setItem('storeLogo', currentLogoBase64); // Simpan Base64
-            const pSettings = { paperSize: document.getElementById('paperSizeInput').value, autoPrint: true };
-            localStorage.setItem('printerSettings', JSON.stringify(pSettings));
-            alert('Sukses! Pengaturan enterprise telah diperbarui.');
-            window.location.reload();
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
