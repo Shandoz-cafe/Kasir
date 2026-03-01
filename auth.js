@@ -31,6 +31,7 @@ function registerWithEmail() {
     const pass = document.getElementById('regPass').value;
     if(!name || !email || !pass) return alert("Harap isi semua kolom!");
     if(pass.length < 6) return alert("Sandi minimal 6 karakter!");
+    
     showLoader(true);
     auth.createUserWithEmailAndPassword(email, pass).then((userCred) => {
         userCred.user.updateProfile({ displayName: name }).then(() => handleSuccessfulLogin(userCred.user));
@@ -41,14 +42,16 @@ function loginWithEmail() {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPass').value;
     if(!email || !pass) return alert("Masukkan Email dan Sandi!");
+    
     showLoader(true);
     auth.signInWithEmailAndPassword(email, pass).then((userCred) => handleSuccessfulLogin(userCred.user))
         .catch((error) => { showLoader(false); alert("Gagal Login: Email atau sandi salah."); });
 }
 
 function handleSuccessfulLogin(user) {
+    // Simpan Nama Asli dari Google / Form Pendaftaran
+    localStorage.setItem('currentUser', user.displayName || user.email.split('@')[0]);
     localStorage.setItem('userUid', user.uid); 
-    // ARAHKAN KE LAYAR PILIH AKUN (NETFLIX STYLE)
     window.location.href = 'profiles.html';
 }
 
@@ -59,9 +62,10 @@ function mulaiSinkronisasiCloud() {
 
     userRef.once('value').then((snapshot) => {
         if (!snapshot.val()) {
-            // JIKA AKUN BARU, BUATKAN PIN DEFAULT OWNER: 1234
+            // FIX: Tarik nama asli, dan set PIN jadi "SETUP" agar dipaksa bikin PIN
+            const ownerName = localStorage.getItem('currentUser') || "Owner";
             userRef.set({
-                users: [{id: 'owner_1', name: "Owner / Admin", role: "admin", pin: "1234"}],
+                users: [{id: 'owner_1', name: ownerName, role: "admin", pin: "SETUP"}],
                 products: JSON.parse(localStorage.getItem('products') || '[]'),
                 sales: JSON.parse(localStorage.getItem('sales') || '[]')
             });
@@ -103,7 +107,6 @@ function checkAuth() {
         window.location.href = 'index.html';
     } else {
         mulaiSinkronisasiCloud();
-        // Cegah masuk dashboard jika belum masukin PIN Profil
         if(!localStorage.getItem('currentRole') && !window.location.href.includes('profiles.html')) {
             window.location.href = 'profiles.html';
         }
