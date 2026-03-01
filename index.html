@@ -11,29 +11,13 @@
         .user-avatar:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
         .pin-input { font-size: 2.5rem; text-align: center; letter-spacing: 20px; font-weight: bold; width: 250px; padding: 15px; border-radius: 15px; border: none; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none; background: rgba(255, 255, 255, 0.9); }
         .pin-input:focus { border: 3px solid #f39c12; background: #fff; }
-        
-        /* Efek Kaca (Glassmorphism) agar tulisan tetap jelas di atas background gambar */
-        .login-container {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            max-width: 90%;
-            width: 450px;
-        }
+        .login-container { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); max-width: 90%; width: 450px; }
     </style>
 </head>
-
 <body class="pos-body" style="display:flex; justify-content:center; align-items:center; background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('background.jpg') no-repeat center center fixed; background-size: cover;">
     
     <div class="login-container">
-        
         <img src="logo.png" alt="SHANDOZ Logo" style="max-width: 180px; max-height: 180px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
-        
         <p style="color: #e2e8f0; margin-top: 5px; font-weight: 500; letter-spacing: 1px; font-size: 1.1rem;">Point of Sale System</p>
 
         <div id="loginSection">
@@ -100,7 +84,9 @@
                     localStorage.setItem('currentUser', validUser.username);
                     localStorage.setItem('currentRole', validUser.role || 'kasir');
                     
-                    const shiftId = "SHIFT-" + Date.now();
+                    // NAMA SHIFT BERDASARKAN NAMA PENGGUNA & JAM LOGIN
+                    const waktuMulai = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    const shiftId = "Shift: " + validUser.username + " (" + waktuMulai + ")";
                     localStorage.setItem('currentShift', shiftId);
                     
                     if (validUser.role === 'admin') {
