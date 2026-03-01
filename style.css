@@ -1,74 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-/* === RESET GLOBAL === */
 * { box-sizing: border-box; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; }
-body { background-color: #f4f6f8; color: #333; overflow-x: hidden; }
+body { background-color: #f1f5f9; color: #333; overflow-x: hidden; }
 
-/* === HEADER UMUM === */
 header { background: #1e293b; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
-header h2 { font-size: 1.2rem; font-weight: 500; letter-spacing: 0.5px; }
+header h2 { font-size: 1.2rem; font-weight: 500; letter-spacing: 0.5px; margin: 0; }
 
-/* === BUTTONS & INPUTS === */
-button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
-button:active { transform: scale(0.98); }
+button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+button:active { transform: scale(0.96); }
 .primary { background: #3b82f6; color: white; } .primary:hover { background: #2563eb; }
 .success { background: #10b981; color: white; } .success:hover { background: #059669; }
 .danger { background: #ef4444; color: white; } .danger:hover { background: #dc2626; }
 .warning { background: #f59e0b; color: white; } .warning:hover { background: #d97706; }
 
-input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem; width: 100%; background: #fff; color: #333; outline: none; }
+input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; width: 100%; background: #fff; outline: none; }
 input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
 
-/* === DASHBOARD LAYOUT === */
-.container { padding: 15px; max-width: 1200px; margin: 0 auto; width: 100%; }
-.dash-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.stat-box { background: #fff; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.stat-box h4 { font-size: 0.8rem; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-.stat-box h2 { font-size: 1.5rem; color: #0f172a; }
-
-.dash-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.menu-card { background: #fff; padding: 20px 10px; border-radius: 8px; text-align: center; text-decoration: none; color: #1e293b; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid #e2e8f0; }
-.menu-card:hover { border-color: #3b82f6; background: #f8fafc; }
-
-.table-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-th, td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 0.85rem; }
+table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; font-size: 0.85rem; }
+th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; white-space: nowrap; }
 th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; }
 
 /* ========================================================= */
 /* KASIR (POS) - LAYOUT PINTAR (SUPPORT SEMUA DEVICE) */
 /* ========================================================= */
-.pos-layout { 
-    display: flex; 
-    height: calc(100dvh - 55px); /* Menggunakan 100dvh agar aman dari bar HP */
-    background: #f1f5f9; 
-    overflow: hidden; 
-    width: 100%; 
-}
+.pos-layout { display: flex; height: calc(100dvh - 55px); background: #f1f5f9; padding: 10px; gap: 10px; width: 100%; overflow: hidden; }
 
-/* AREA KIRI: MENU PRODUK */
-.pos-left { 
-    flex: 1; /* Mengisi ruang sisa */
-    display: flex; 
-    flex-direction: column; 
-    padding: 10px; 
-    height: 100%; 
-    overflow: hidden; 
-}
+/* KIRI: MENU PRODUK */
+.pos-left { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 10px; padding: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); overflow: hidden; }
 .pos-filter { display: flex; gap: 8px; margin-bottom: 10px; flex-shrink: 0; }
-.pos-products { 
-    flex-grow: 1; 
-    overflow-y: auto; /* Scroll khusus untuk menu */
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-    gap: 10px; 
-    align-content: start; 
-    padding-bottom: 20px; 
-}
-.pos-products::-webkit-scrollbar { width: 5px; }
+.pos-products { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; align-content: start; padding-right: 5px; }
+.pos-products::-webkit-scrollbar { width: 6px; }
 .pos-products::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
 
-.product-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center; cursor: pointer; transition: 0.1s; position: relative; }
+.product-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: 0.1s; position: relative; }
 .product-item:active { transform: scale(0.95); background: #f8fafc; border-color:#3b82f6; }
 .product-item.empty { opacity: 0.4; cursor: not-allowed; }
 .item-cat { font-size: 0.65rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; position: absolute; top: 5px; right: 5px; }
@@ -76,60 +40,53 @@ th { background: #f8fafc; color: #475569; font-weight: 600; text-transform: uppe
 .item-price { font-size: 1rem; font-weight: 700; color: #059669; }
 .item-stock { font-size: 0.7rem; color: #94a3b8; display: block; margin-top: 5px; }
 
-/* AREA KANAN: KERANJANG (STRUKTUR ANTI-MENTOK) */
-.pos-right { 
-    width: 380px; /* Lebar tetap untuk Tablet/PC */
-    background: #fff; 
-    border-left: 1px solid #cbd5e1; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-    flex-shrink: 0; /* Mencegah kolom tertekan */
-    box-shadow: -4px 0 15px rgba(0,0,0,0.03); 
-}
+/* KANAN: KERANJANG & PEMBAYARAN */
+.pos-right { width: 380px; background: white; border-radius: 10px; display: flex; flex-direction: column; box-shadow: 0 2px 10px rgba(0,0,0,0.03); overflow: hidden; flex-shrink: 0; padding: 10px; }
+.cart-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; flex-shrink: 0; }
 
-/* Bagian Atas Keranjang (Tombol Hold) */
-.cart-header { padding: 10px 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+/* INI KUNCI UTAMA: WADAH FLEKSIBEL UNTUK DAFTAR PESANAN & FORM BAYAR */
+.cart-body { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; margin-top: 10px; gap: 10px; }
 
-/* Bagian Tengah (Daftar Pesanan) */
-.cart-list { 
-    flex-grow: 1; /* Mengisi ruang tengah */
-    overflow-y: auto; /* Bisa di-scroll jika item banyak */
-    padding: 10px; 
-    background: #fff; 
-}
-.cart-list::-webkit-scrollbar { width: 4px; }
-.cart-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+.cart-list-container { flex-grow: 1; overflow-y: auto; padding-right: 5px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 10px; }
+.cart-list-container::-webkit-scrollbar { width: 4px; }
+.cart-list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
 
-.cart-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed #cbd5e1; }
+.cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .cart-item-info { line-height: 1.3; }
 .cart-item-name { font-size: 0.9rem; font-weight: 500; color: #1e293b; }
 .cart-item-qty { font-size: 0.8rem; color: #64748b; }
 .cart-item-price { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
 
-/* Bagian Bawah (Checkout Panel) */
-.cart-checkout { 
-    background: #f8fafc; 
-    padding: 15px; 
-    border-top: 2px solid #e2e8f0; 
-    flex-shrink: 0; /* TERKUNCI: Tidak akan tertekan oleh daftar pesanan */
-    max-height: 60%; /* Batas maksimal jika di landscape HP */
-    overflow-y: auto; /* Bisa discroll mandiri jika layar HP landscape sangat pendek */
-}
+.cart-checkout { flex-shrink: 0; overflow-y: auto; padding-right: 5px; }
+.cart-checkout::-webkit-scrollbar { width: 4px; }
+.cart-checkout::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+
 .checkout-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; color: #475569; }
-.checkout-input { padding: 6px; font-size: 0.85rem; border-radius: 4px; border: 1px solid #cbd5e1; width: 130px; text-align: right; }
+.checkout-input { padding: 6px; font-size: 0.85rem; border-radius: 4px; border: 1px solid #cbd5e1; width: 140px; text-align: right; }
 .checkout-total { font-size: 1.4rem; font-weight: 700; color: #ef4444; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; }
 .checkout-cash { font-size: 1.2rem; font-weight: bold; color: #059669; text-align: center; padding: 10px; width: 100%; margin-top: 10px; border: 2px solid #10b981; }
 
-/* RESPONSIVE UNTUK HP (PORTRAIT & LANDSCAPE) */
-@media screen and (max-width: 800px) {
-    .pos-layout { flex-direction: column; overflow-y: auto; } /* Lepas kuncian, biarkan scroll alami ke bawah */
-    .pos-left { flex: none; height: 50vh; overflow: hidden; padding: 10px 5px; } /* Setengah layar atas untuk menu */
-    .pos-right { width: 100%; flex: none; height: auto; border-left: none; border-top: 3px solid #cbd5e1; overflow: visible; }
-    .cart-list { min-height: 150px; max-height: 250px; overflow-y: auto; } /* Batasi tinggi daftar agar tombol checkout terlihat */
-    .cart-checkout { max-height: none; overflow: visible; }
+/* ========================================================= */
+/* MODE TABLET & PC (LANDSCAPE) - KIRI PESANAN, KANAN BAYAR */
+/* ========================================================= */
+@media screen and (min-width: 850px) and (orientation: landscape) {
+    .pos-right { width: 550px; } /* Diperlebar agar cukup untuk 2 kolom */
+    .cart-body { flex-direction: row; } /* UBAH JADI KIRI-KANAN */
+    .cart-list-container { flex: 1; border-bottom: none; border-right: 2px dashed #cbd5e1; padding-right: 10px; padding-bottom: 0; }
+    .cart-checkout { width: 230px; padding-left: 5px; } /* Lebar form bayar */
 }
 
-/* Modals */
+/* ========================================================= */
+/* MODE HP PORTRAIT (BERDIRI) - SCROLL ALAMI BEBAS MENTOK */
+/* ========================================================= */
+@media screen and (max-width: 768px) {
+    .pos-layout { flex-direction: column; overflow-y: auto; height: auto; min-height: 100dvh; }
+    .pos-left { flex: none; height: 55vh; overflow: hidden; } /* Menu di atas */
+    .pos-right { width: 100%; flex: none; height: auto; overflow: visible; box-shadow: none; border-top: 4px solid #cbd5e1; }
+    .cart-body { flex-direction: column; overflow: visible; }
+    .cart-list-container { max-height: 35vh; overflow-y: auto; }
+}
+
+/* === MODALS === */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-.modal-box { background: white; padding: 25px; border-radius: 8px; width: 95%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-box { background: white; padding: 20px; border-radius: 8px; width: 95%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
