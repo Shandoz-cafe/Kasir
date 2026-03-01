@@ -8,7 +8,7 @@
 <body>
     <header>
         <h2>SHANDOZ POS - <span id="userNameDisplay"></span></h2>
-        <button class="danger" onclick="logout()">Logout</button>
+        <button class="danger" onclick="logout()">🛑 Tutup Shift & Logout</button>
     </header>
     <div class="container">
         <h3 style="margin-top:0;">Menu Utama</h3>
@@ -19,13 +19,33 @@
             <a href="user.html" class="nav-card admin-only" style="display:none;">👥 <br>Akses Staff</a>
             <a href="setting.html" class="nav-card admin-only" style="display:none;">⚙️ <br>Setup Printer</a>
         </div>
+
+        <div class="card admin-only" style="display:none; margin-top: 30px;">
+            <h3 style="margin-top:0; color:#1e3c72; border-bottom:2px solid #eee; padding-bottom:10px;">🕒 History Cetak Struk (10 Transaksi Terakhir)</h3>
+            <table style="font-size:0.9rem;">
+                <thead><tr><th>Waktu</th><th>ID Shift / Kasir</th><th>Pelanggan</th><th>Metode</th><th>Total (Rp)</th></tr></thead>
+                <tbody id="historyList"></tbody>
+            </table>
+        </div>
     </div>
+    
     <script src="auth.js"></script>
     <script>
         checkAuth();
         document.getElementById('userNameDisplay').innerText = localStorage.getItem('currentUser');
         if(localStorage.getItem('currentRole') === 'admin') {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+            
+            // Load History Struk ke Tabel
+            const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+            const historyTbody = document.getElementById('historyList');
+            const recentSales = sales.slice(-10).reverse(); // Ambil 10 terakhir, balik urutannya (terbaru di atas)
+            
+            if(recentSales.length === 0) {
+                historyTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#7f8c8d;">Belum ada riwayat transaksi</td></tr>';
+            } else {
+                historyTbody.innerHTML = recentSales.map(s => `<tr><td>${s.date}</td><td><span style="font-size:0.75rem; color:#7f8c8d;">${s.shiftId || '-'}</span><br><strong>${s.user}</strong></td><td>${s.customer || 'Umum'}</td><td>${s.method}</td><td style="font-weight:bold; color:#27ae60;">Rp ${s.total.toLocaleString('id-ID')}</td></tr>`).join('');
+            }
         }
     </script>
 </body>
