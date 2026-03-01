@@ -7,28 +7,45 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .user-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-        .user-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; transition: 0.3s; border: 3px solid transparent; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .user-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; cursor: pointer; transition: 0.3s; border: 3px solid transparent; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
         .user-avatar:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
-        .pin-input { font-size: 2.5rem; text-align: center; letter-spacing: 20px; font-weight: bold; width: 250px; padding: 15px; border-radius: 15px; border: none; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none; }
-        .pin-input:focus { border: 3px solid #f39c12; }
+        .pin-input { font-size: 2.5rem; text-align: center; letter-spacing: 20px; font-weight: bold; width: 250px; padding: 15px; border-radius: 15px; border: none; margin: 20px auto; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.1); outline: none; background: rgba(255, 255, 255, 0.9); }
+        .pin-input:focus { border: 3px solid #f39c12; background: #fff; }
+        
+        /* Efek Kaca (Glassmorphism) agar tulisan tetap jelas di atas background gambar */
+        .login-container {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 90%;
+            width: 450px;
+        }
     </style>
 </head>
-<body class="pos-body" style="display:flex; justify-content:center; align-items:center; background: linear-gradient(135deg, #1e3c72, #2a5298);">
+
+<body class="pos-body" style="display:flex; justify-content:center; align-items:center; background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('background.jpg') no-repeat center center fixed; background-size: cover;">
     
-    <div style="text-align: center;">
-        <h1 style="color: white; margin-bottom: 5px; font-size: 2.5rem; letter-spacing: 2px;">SHANDOZ CAFE</h1>
-        <p style="color: #cbd5e1; margin-top: 0;">Point of Sale System</p>
+    <div class="login-container">
+        
+        <img src="logo.png" alt="SHANDOZ Logo" style="max-width: 180px; max-height: 180px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+        
+        <p style="color: #e2e8f0; margin-top: 5px; font-weight: 500; letter-spacing: 1px; font-size: 1.1rem;">Point of Sale System</p>
 
         <div id="loginSection">
-            <h3 style="color: white; margin-top: 30px; font-weight: 400;">Siapa yang bertugas?</h3>
+            <h3 style="color: white; margin-top: 30px; font-weight: 400; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">Siapa yang bertugas?</h3>
             <div class="user-grid" id="loginUserList"></div>
         </div>
         
         <div id="pinSection" style="display:none; margin-top: 30px;">
-            <div class="user-avatar" style="border-color: #f39c12; background: rgba(255,255,255,0.2);">👤</div>
-            <h3 style="color: white; margin-top: 15px; font-weight: 400;">Masukkan PIN <span id="selectedUserName" style="font-weight:bold; color:#f39c12;"></span></h3>
+            <div class="user-avatar" style="border-color: #f39c12; background: rgba(255,255,255,0.3);">👤</div>
+            <h3 style="color: white; margin-top: 15px; font-weight: 400; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">Masukkan PIN <span id="selectedUserName" style="font-weight:bold; color:#f39c12;"></span></h3>
             <input type="password" id="loginPin" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" oninput="checkPin()" placeholder="••••">
-            <button class="danger" style="margin-top:15px; padding: 10px 30px; border-radius: 20px;" onclick="cancelLogin()">⬅️ Batal</button>
+            <button class="danger" style="margin-top:15px; padding: 10px 30px; border-radius: 20px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);" onclick="cancelLogin()">⬅️ Batal</button>
         </div>
     </div>
 
@@ -51,8 +68,8 @@
             document.getElementById('loginUserList').innerHTML = users.map(u => `
                 <div style="text-align:center;">
                     <div class="user-avatar" onclick="selectUser('${u.username}')">👤</div>
-                    <strong style="display:block; margin-top:10px; color:white; font-size:1.1rem;">${u.username}</strong>
-                    <span style="color:#f39c12; font-size:0.8rem; text-transform:uppercase; font-weight:bold;">${u.role}</span>
+                    <strong style="display:block; margin-top:10px; color:white; font-size:1.1rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.6);">${u.username}</strong>
+                    <span style="color:#f39c12; font-size:0.8rem; text-transform:uppercase; font-weight:bold; background:rgba(0,0,0,0.4); padding:2px 8px; border-radius:10px; margin-top:3px; display:inline-block;">${u.role}</span>
                 </div>
             `).join('');
         }
@@ -86,7 +103,6 @@
                     const shiftId = "SHIFT-" + Date.now();
                     localStorage.setItem('currentShift', shiftId);
                     
-                    // CEK ROLE: Admin ke Dashboard, Kasir langsung ke POS
                     if (validUser.role === 'admin') {
                         window.location.href = 'dashboard.html';
                     } else {
