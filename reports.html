@@ -3,141 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buku Keuangan Pintar</title>
+    <title>Laporan & Analitik - SHANDOZ</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="pos-body" style="overflow-y: auto;">
-    <header>
-        <h2>Akuntansi Keuangan</h2>
+<body class="pos-body" style="overflow-y: auto; background: #f0f2f5;">
+    <header style="background: #27ae60;"> <h2>📊 Laporan & Analitik</h2>
         <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     
     <div class="container">
-        <div class="card" style="padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between;">
+        <div class="card" style="padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; border-left: 5px solid #27ae60;">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <strong style="color: #1e3c72;">Sortir:</strong>
-                <button class="primary" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('hari')">Hari Ini</button>
-                <button class="primary" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('bulan')">Bulan Ini</button>
-                <button class="primary" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('tahun')">Tahun Ini</button>
-                <button class="warning" style="padding: 8px 12px; font-size: 0.9rem;" onclick="filterReports('semua')">Semua</button>
+                <button class="primary" style="padding: 8px 12px; background: #2c3e50;" onclick="filterReports('hari')">Hari Ini</button>
+                <button class="primary" style="padding: 8px 12px; background: #2c3e50;" onclick="filterReports('bulan')">Bulan Ini</button>
+                <button class="primary" style="padding: 8px 12px; background: #2c3e50;" onclick="filterReports('tahun')">Tahun Ini</button>
+                <button class="warning" style="padding: 8px 12px;" onclick="filterReports('semua')">Semua Waktu</button>
                 
                 <span style="margin: 0 5px; color: #ccc;">|</span>
-                <strong style="color: #1e3c72;">Tanggal Bebas:</strong>
+                <strong style="color: #2c3e50;">Pilih Tanggal:</strong>
                 <input type="date" id="customDate" style="margin: 0; padding: 6px 10px; width: auto; border-radius: 8px; border: 1px solid #ccc;" onchange="filterByCustomDate()">
             </div>
             
             <div style="display: flex; gap: 10px;">
-                <button class="success" onclick="exportLaporan('jpg')">📷 Cetak Laporan JPG</button>
-                <button class="danger" onclick="exportLaporan('pdf')">📄 Cetak Laporan PDF</button>
+                <button class="success" onclick="exportLaporan('pdf')">📄 Ekspor PDF</button>
             </div>
         </div>
 
-        <h3 style="color: #1e3c72; text-align: center; margin-bottom: 20px;">Laporan Periode: <span id="periodeTextUI">Semua Waktu</span></h3>
+        <h3 style="color: #2c3e50; text-align: center; margin-bottom: 20px;">Ringkasan Penjualan: <span id="periodeTextUI" style="color: #27ae60;">Semua Waktu</span></h3>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-            <div class="card" style="text-align: center; border-bottom: 4px solid #3498db;">
-                <h4 style="margin:0 0 5px 0; color:#7f8c8d;">Total Pemasukan (Omzet)</h4>
-                <h2 id="uiOmzet" style="margin:0; color:#3498db;">Rp 0</h2>
+            <div class="card" style="text-align: left; border-top: 4px solid #3498db;">
+                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-weight: normal;">Penjualan Kotor</h4>
+                <h2 id="uiOmzet" style="margin:0; color:#2c3e50; font-size: 1.8rem;">Rp 0</h2>
             </div>
-            <div class="card" style="text-align: center; border-bottom: 4px solid #f39c12;">
-                <h4 style="margin:0 0 5px 0; color:#7f8c8d;">Laba Kotor (Margin)</h4>
-                <h2 id="uiMargin" style="margin:0; color:#f39c12;">Rp 0</h2>
+            <div class="card" style="text-align: left; border-top: 4px solid #f39c12;">
+                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-weight: normal;">Laba Kotor</h4>
+                <h2 id="uiMargin" style="margin:0; color:#2c3e50; font-size: 1.8rem;">Rp 0</h2>
             </div>
-            <div class="card" style="text-align: center; border-bottom: 4px solid #e74c3c;">
-                <h4 style="margin:0 0 5px 0; color:#7f8c8d;">Beban Pengeluaran</h4>
-                <h2 id="uiExpense" style="margin:0; color:#e74c3c;">Rp 0</h2>
+            <div class="card" style="text-align: left; border-top: 4px solid #e74c3c;">
+                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-weight: normal;">Total Pengeluaran</h4>
+                <h2 id="uiExpense" style="margin:0; color:#2c3e50; font-size: 1.8rem;">Rp 0</h2>
             </div>
-            <div class="card" style="text-align: center; border-bottom: 4px solid #27ae60; background:#f0fdf4;">
-                <h4 style="margin:0 0 5px 0; color:#27ae60;">LABA BERSIH (MASUK KANTONG)</h4>
-                <h2 id="uiNet" style="margin:0; color:#27ae60;">Rp 0</h2>
+            <div class="card" style="text-align: left; border-top: 4px solid #27ae60; background: #f9fff9;">
+                <h4 style="margin:0 0 5px 0; color:#27ae60; font-weight: bold;">Laba Bersih</h4>
+                <h2 id="uiNet" style="margin:0; color:#27ae60; font-size: 1.8rem;">Rp 0</h2>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px;">
+            <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">📈 Grafik Tren Penjualan</h3>
+            <div style="width: 100%; height: 300px;">
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
 
         <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div class="card" style="flex: 2; min-width: 300px; overflow-x: auto;">
-                <h3 style="margin-top:0; color: #1e3c72; border-bottom: 2px solid #eee; padding-bottom: 8px;">Riwayat Penjualan</h3>
-                <table style="font-size: 0.85rem; width: 100%; min-width: 400px;">
-                    <thead><tr><th>Waktu</th><th>Kasir</th><th>Omzet</th><th>Laba</th></tr></thead>
-                    <tbody id="uiSalesList"></tbody>
-                </table>
+            <div class="card" style="flex: 1; min-width: 300px;">
+                <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 8px;">🏆 Penjualan Berdasarkan Barang</h3>
+                <div style="overflow-x: auto;">
+                    <table style="font-size: 0.9rem; width: 100%;">
+                        <thead><tr><th>Nama Menu</th><th style="text-align:center;">Item Terjual</th><th style="text-align:right;">Total Omzet</th></tr></thead>
+                        <tbody id="topItemsList"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="card" style="flex: 1; min-width: 300px;">
                 <div style="background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px dashed #e74c3c; margin-bottom: 15px;">
-                    <h4 style="margin-top:0; color:#e74c3c;">Input Pengeluaran / Kulakan</h4>
-                    <input type="text" id="expDesc" placeholder="Contoh: Beli Sirup" style="padding: 8px; margin-bottom: 8px;">
+                    <h4 style="margin-top:0; color:#e74c3c;">Input Biaya Shift/Toko</h4>
+                    <input type="text" id="expDesc" placeholder="Keterangan (Contoh: Es Batu)" style="padding: 8px; margin-bottom: 8px;">
                     <input type="number" id="expAmount" placeholder="Nominal (Rp)" style="padding: 8px; margin-bottom: 8px;">
                     <button class="danger" style="width: 100%; padding: 8px;" onclick="addExpense()">➖ Catat Pengeluaran</button>
                 </div>
                 
-                <h3 style="margin-top:0; color: #e74c3c; border-bottom: 2px solid #eee; padding-bottom: 8px;">Riwayat Pengeluaran</h3>
+                <h3 style="margin-top:0; color: #e74c3c; border-bottom: 1px solid #eee; padding-bottom: 8px;">Riwayat Pengeluaran</h3>
                 <div style="overflow-x: auto;">
-                    <table style="font-size: 0.85rem; width: 100%;">
-                        <thead><tr><th>Tgl</th><th>Keterangan</th><th>Nominal</th></tr></thead>
+                    <table style="font-size: 0.9rem; width: 100%;">
+                        <thead><tr><th>Tanggal</th><th>Keterangan</th><th style="text-align:right;">Nominal</th></tr></thead>
                         <tbody id="uiExpenseList"></tbody>
                     </table>
                 </div>
             </div>
         </div>
+
     </div>
 
-    <div style="overflow: hidden; height: 0; width: 0;">
+    <div style="overflow: hidden; height: 0; width: 0;" id="printLayer">
         <div id="exportDocument" style="width: 800px; background: white; padding: 40px; color: black; font-family: Arial, sans-serif;">
-            <div style="text-align: center; border-bottom: 3px solid #1e3c72; margin-bottom: 20px; padding-bottom: 15px;">
-                <h1 style="margin: 0; color: #1e3c72; font-size: 28px;">LAPORAN KEUANGAN</h1>
+            <div style="text-align: center; border-bottom: 3px solid #27ae60; margin-bottom: 20px; padding-bottom: 15px;">
+                <h1 style="margin: 0; color: #2c3e50; font-size: 28px;">RINGKASAN PENJUALAN</h1>
                 <h2 style="margin: 5px 0; color: #333; font-size: 20px;">SHANDOZ CAFE & COFFEE BAR</h2>
-                <p style="margin: 5px 0 0 0; color: #555; font-size: 14px;">Periode: <strong id="docPeriodeText"></strong></p>
+                <p style="margin: 5px 0 0 0; color: #555; font-size: 14px;">Periode Laporan: <strong id="docPeriodeText"></strong></p>
             </div>
-
-            <div style="display: flex; gap: 15px; margin-bottom: 30px; text-align: center;">
-                <div style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #f9f9f9;">
-                    <div style="font-size: 12px; color: #555; text-transform: uppercase;">Omzet Kotor</div>
-                    <div id="docOmzet" style="font-size: 20px; font-weight: bold; color: #3498db; margin-top: 5px;"></div>
-                </div>
-                <div style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #f9f9f9;">
-                    <div style="font-size: 12px; color: #555; text-transform: uppercase;">Laba Kotor</div>
-                    <div id="docMargin" style="font-size: 20px; font-weight: bold; color: #f39c12; margin-top: 5px;"></div>
-                </div>
-                <div style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #f9f9f9;">
-                    <div style="font-size: 12px; color: #555; text-transform: uppercase;">Pengeluaran</div>
-                    <div id="docExpense" style="font-size: 20px; font-weight: bold; color: #e74c3c; margin-top: 5px;"></div>
-                </div>
-                <div style="flex: 1; border: 2px solid #27ae60; padding: 15px; border-radius: 8px; background: #f0fdf4;">
-                    <div style="font-size: 12px; color: #27ae60; text-transform: uppercase; font-weight: bold;">Laba Bersih</div>
-                    <div id="docNet" style="font-size: 22px; font-weight: bold; color: #27ae60; margin-top: 5px;"></div>
-                </div>
-            </div>
-
-            <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; color: #333;">Rincian Pemasukan Kasir</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13px;">
-                <thead>
-                    <tr style="background: #1e3c72; color: white;">
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Waktu & Tanggal</th>
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Nama Kasir</th>
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Omzet</th>
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Laba</th>
-                    </tr>
-                </thead>
-                <tbody id="docSalesList"></tbody>
-            </table>
-
-            <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px; color: #e74c3c;">Rincian Pengeluaran Operasional</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                <thead>
-                    <tr style="background: #e74c3c; color: white;">
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Tanggal</th>
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Keterangan Item</th>
-                        <th style="padding: 10px; border: 1px solid #ddd; text-align: right;">Nominal</th>
-                    </tr>
-                </thead>
-                <tbody id="docExpenseList"></tbody>
-            </table>
-
-            <div style="margin-top: 40px; text-align: right; font-size: 12px; color: #777; font-style: italic;">
-                Dicetak otomatis oleh Sistem Kasir SHANDOZ pada <span id="docPrintDate"></span>
-            </div>
+            <div id="pdfContentArea"></div>
         </div>
     </div>
 
