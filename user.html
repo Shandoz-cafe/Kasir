@@ -7,23 +7,27 @@
 </head>
 <body>
     <header>
-        <h2>Manajemen Staff</h2>
+        <h2>Manajemen Staff & PIN</h2>
         <button class="warning" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     <div class="container">
         <div class="card" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <input type="text" id="newUsername" placeholder="Username Baru" style="flex:1; min-width:150px; margin:0;">
-            <input type="password" id="newPassword" placeholder="Password" style="flex:1; min-width:150px; margin:0;">
+            <input type="text" id="newUsername" placeholder="Nama Panggilan" style="flex:2; min-width:150px; margin:0;">
+            <input type="number" id="newPin" placeholder="Buat PIN (4 Angka)" style="flex:1; min-width:150px; margin:0;" maxlength="4" oninput="if(this.value.length > 4) this.value = this.value.slice(0,4);">
             <select id="newRole" style="flex:1; min-width:150px; margin:0;">
                 <option value="kasir">Staff Kasir</option><option value="admin">Owner / Admin</option>
             </select>
-            <button class="primary" onclick="addUser()">Simpan Staff</button>
+            <button class="primary" onclick="addUser()">➕ Simpan Staff</button>
         </div>
         <table>
-            <thead><tr><th>No</th><th>Username</th><th>Tingkat Akses</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>No</th><th>Nama Staff</th><th>Akses</th><th>PIN (Rahasia)</th><th>Aksi</th></tr></thead>
             <tbody id="userList"></tbody>
         </table>
     </div>
-    <script src="auth.js"></script><script>checkAuth(); if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';</script><script src="user.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        checkAuth(); if(localStorage.getItem('currentRole') !== 'admin') window.location.href = 'dashboard.html';
+    </script>
+    <script src="user.js"></script>
 </body>
 </html>
