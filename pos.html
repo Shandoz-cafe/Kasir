@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mesin Kasir Flex</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body class="pos-body">
     <header>
@@ -18,12 +19,13 @@
     <div class="pos-container">
         <div class="pos-left">
             <div class="filter-bar">
-                <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." oninput="filterAndSortProducts()">
-                <select id="filterSelect" onchange="filterAndSortProducts()">
-                    <optgroup label="Urutkan Abjad">
-                        <option value="sort-AZ">Abjad A - Z</option>
-                        <option value="sort-ZA">Abjad Z - A</option>
-                    </optgroup>
+                <div style="display:flex; flex:1.5; min-width:200px; gap:5px;">
+                    <input type="text" id="barcodeInput" placeholder="📷 Barcode Fisik..." onkeypress="handlePhysicalScanner(event)" style="margin:0; width:100%; border:2px solid #3498db;">
+                    <button class="primary" style="margin:0; border-radius:8px; padding: 0 15px;" onclick="openScanner()">📷</button>
+                </div>
+                <input type="text" id="searchInput" placeholder="🔍 Cari nama menu..." oninput="filterAndSortProducts()" style="flex:2; margin:0;">
+                <select id="filterSelect" onchange="filterAndSortProducts()" style="flex:1; margin:0;">
+                    <optgroup label="Urutkan Abjad"><option value="sort-AZ">Abjad A - Z</option><option value="sort-ZA">Abjad Z - A</option></optgroup>
                     <optgroup label="Filter Kategori" id="categoryOptions"></optgroup>
                 </select>
             </div>
@@ -80,6 +82,14 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="scannerModal">
+        <div class="modal-box">
+            <h3 style="margin-top: 0; color: #1e3c72;">Arahkan Kamera ke Barcode</h3>
+            <div id="reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+            <button class="danger" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="closeScanner()">Batal</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="previewModal">
         <div class="modal-box">
             <h3 style="margin-top: 0; color: #1e3c72;">Pratinjau Struk</h3>
@@ -90,7 +100,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal-overlay" id="openBillModal">
         <div class="modal-box" style="width: 500px; max-width: 95%;">
             <h3 style="margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eee; padding-bottom: 10px;">Daftar Tiket (Hold)</h3>
@@ -98,7 +107,6 @@
             <button class="danger" style="width: 100%; margin-top: 15px; padding: 12px;" onclick="closeOpenBillModal()">Tutup</button>
         </div>
     </div>
-
     <div class="modal-overlay" id="historyModal">
         <div class="modal-box" style="width: 600px; max-width: 95%;">
             <h3 style="margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eee; padding-bottom: 10px;">🕒 Riwayat Transaksi Terbaru</h3>
