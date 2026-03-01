@@ -3,6 +3,20 @@ let subtotal = 0, grandTotal = 0, change = 0, totalProfit = 0, discountNominal =
 let pendingSale = null;
 
 function initPOS() {
+    // Tampilkan nama Kasir/Admin di Header
+    document.getElementById('kasirNameDisplay').innerText = localStorage.getItem('currentUser');
+    
+    // Sesuaikan tombol navigasi berdasarkan akses
+    const role = localStorage.getItem('currentRole');
+    const navBtn = document.getElementById('navButton');
+    if (role === 'admin') {
+        navBtn.innerText = '⬅️ Dashboard';
+        navBtn.className = 'warning';
+    } else {
+        navBtn.innerText = '🛑 Tutup Kasir (Logout)';
+        navBtn.className = 'danger';
+    }
+
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     let categories = [...new Set(products.map(p => p.category || 'Umum'))];
     categories.sort((a, b) => a.localeCompare(b)); 
@@ -15,6 +29,18 @@ function initPOS() {
     filterAndSortProducts();
 }
 
+function handleNav() {
+    const role = localStorage.getItem('currentRole');
+    if (role === 'admin') {
+        window.location.href = 'dashboard.html';
+    } else {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('currentRole');
+        localStorage.removeItem('currentShift');
+        window.location.href = 'index.html';
+    }
+}
+
 function filterAndSortProducts() {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     const searchQuery = document.getElementById('searchInput').value.toLowerCase();
@@ -24,15 +50,10 @@ function filterAndSortProducts() {
 
     if (filterValue.startsWith('cat-')) {
         const selectedCat = filterValue.replace('cat-', '');
-        if (selectedCat !== 'Semua') {
-            filtered = filtered.filter(p => (p.category || 'Umum') === selectedCat);
-        }
+        if (selectedCat !== 'Semua') { filtered = filtered.filter(p => (p.category || 'Umum') === selectedCat); }
         filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (filterValue === 'sort-AZ') {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (filterValue === 'sort-ZA') {
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-    }
+    } else if (filterValue === 'sort-AZ') { filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (filterValue === 'sort-ZA') { filtered.sort((a, b) => b.name.localeCompare(a.name)); }
 
     document.getElementById('productsContainer').innerHTML = filtered.map(p => {
         const isOut = p.stock < 1;
@@ -242,6 +263,66 @@ function deleteBill(index) {
     const openBills = JSON.parse(localStorage.getItem('openBills') || '[]');
     openBills.splice(index, 1); localStorage.setItem('openBills', JSON.stringify(openBills));
     showOpenBills();
+}
+
+// === HISTORY & REPRINT KHUSUS KASIR ===
+function showPosHistory() {
+    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    const recentSales = sales.slice(-15).reverse(); // 15 Transaksi terakhir
+    const tbody = document.getElementById('posHistoryList');
+
+    if(recentSales.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#7f8c8d;">Belum ada transaksi hari ini</td></tr>';
+    } else {
+        tbody.innerHTML = recentSales.map(s => `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px 5px;">${s.date}</td>
+                <td>${s.customer || 'Umum'}</td>
+                <td style="color:#27ae60; font-weight:bold;">Rp ${s.total.toLocaleString('id-ID')}</td>
+                <td><button class="primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="reprintSale(${s.id})">🖨️ Cetak</button></td>
+            </tr>
+        `).join('');
+    }
+    document.getElementById('historyModal').style.display = 'flex';
+}
+
+function closePosHistory() {
+    document.getElementById('historyModal').style.display = 'none';
+}
+
+function reprintSale(saleId) {
+    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    const sale = sales.find(s => s.id === saleId);
+    if(!sale) return alert('Data tidak ditemukan!');
+
+    const storeName = localStorage.getItem('storeName') || 'Toko Saya';
+    const storeLogo = localStorage.getItem('storeLogo');
+    let logoHtml = storeLogo ? `<img src="${storeLogo}" style="width: 50%; max-width: 150px; margin-bottom: 10px;">` : '';
+    
+    let printHTML = `
+    <div style="text-align: center; font-family: monospace;">
+        ${logoHtml}
+        <h3 style="margin:0;">${storeName}</h3>
+        <p style="margin:0; font-size:12px;">(COPY) Kasir: ${sale.user}<br>${sale.date}</p>
+    </div>
+    <div style="text-align: left; font-family: monospace; font-size:12px; margin-top:5px;">Pelanggan: <strong>${sale.customer}</strong></div>
+    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
+    <table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">
+        ${sale.items.map(i => `<tr><td colspan="2"><b>${i.name}</b></td></tr><tr><td>${i.qty}x ${i.price.toLocaleString('id-ID')}</td><td style="text-align:right;">${i.total.toLocaleString('id-ID')}</td></tr>`).join('')}
+    </table>
+    <div style="border-bottom: 1px dashed #000; margin: 5px 0;"></div>
+    <table style="width:100%; font-family: monospace; font-size: 12px; border-collapse: collapse;">
+        <tr><td>Subtotal</td><td style="text-align:right;">${sale.subtotal.toLocaleString('id-ID')}</td></tr>
+        ${sale.discount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${sale.discount.toLocaleString('id-ID')}</td></tr>` : ''}
+        <tr><td><b>TOTAL</b></td><td style="text-align:right;"><b>Rp ${sale.total.toLocaleString('id-ID')}</b></td></tr>
+        <tr><td>Bayar (${sale.method})</td><td style="text-align:right;">${sale.cash.toLocaleString('id-ID')}</td></tr>
+        <tr><td>Kembalian</td><td style="text-align:right;">${sale.change.toLocaleString('id-ID')}</td></tr>
+    </table>
+    <div style="text-align: center; font-family: monospace; font-size: 12px; margin-top:15px;">Terima Kasih!</div>
+    `;
+
+    const base64html = btoa(unescape(encodeURIComponent(printHTML)));
+    window.location.href = "rawbt:data:text/html;base64," + base64html;
 }
 
 if(document.getElementById('productsContainer')) { document.addEventListener('DOMContentLoaded', initPOS); }
