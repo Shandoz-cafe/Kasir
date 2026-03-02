@@ -32,14 +32,25 @@ function loginWithEmail() {
         .catch((error) => { showLoader(false); alert("Gagal Login: " + error.message); });
 }
 
+// === UPDATE: PENAMBAHAN EMAIL SAMBUTAN & VERIFIKASI ===
 function registerWithEmail() {
     const name = document.getElementById('regName').value;
     const email = document.getElementById('regEmail').value;
     const pass = document.getElementById('regPass').value;
     if(!name || !email || !pass) return alert("Harap isi semua kolom!");
+    
     showLoader(true);
     auth.createUserWithEmailAndPassword(email, pass).then((userCred) => {
-        userCred.user.updateProfile({ displayName: name }).then(() => handleSuccessfulLogin(userCred.user));
+        userCred.user.updateProfile({ displayName: name }).then(() => {
+            // FIREBASE OTOMATIS NGIRIM EMAIL SAMBUTAN & LINK VERIFIKASI
+            userCred.user.sendEmailVerification().then(() => {
+                alert("Pendaftaran Berhasil! Email sambutan & link verifikasi telah dikirim ke " + email + ".");
+                handleSuccessfulLogin(userCred.user);
+            }).catch(e => {
+                console.log("Gagal kirim email sambutan", e);
+                handleSuccessfulLogin(userCred.user);
+            });
+        });
     }).catch((error) => { showLoader(false); alert("Gagal Daftar: " + error.message); });
 }
 
@@ -48,6 +59,29 @@ function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).then((result) => handleSuccessfulLogin(result.user))
         .catch((error) => { showLoader(false); alert("Gagal Login Google: " + error.message); });
+}
+
+// === FUNGSI BARU: MINTA GANTI PASSWORD VIA EMAIL ===
+function requestPasswordReset() {
+    // Kalau dia lagi di dalam aplikasi (sudah login)
+    const currentUser = auth.currentUser;
+    let emailTarget = currentUser ? currentUser.email : null;
+    
+    // Kalau dia lagi di luar (halaman depan) atau ga kedeteksi
+    if (!emailTarget) {
+        emailTarget = prompt("Masukkan Email akun Shandoz POS Anda untuk mereset Password:");
+    } else {
+        const confirmReset = confirm("Kirim link ganti sandi ke email Anda (" + emailTarget + ") ?");
+        if(!confirmReset) return;
+    }
+
+    if(!emailTarget) return;
+
+    auth.sendPasswordResetEmail(emailTarget).then(() => {
+        alert("🔒 Berhasil! Tautan aman untuk mengganti password telah dikirim ke " + emailTarget + ". Silakan cek kotak masuk atau folder spam Anda.");
+    }).catch(err => {
+        alert("Gagal mengirim email: " + err.message);
+    });
 }
 
 function handleSuccessfulLogin(user) {
@@ -65,7 +99,7 @@ function logout() {
     }
 }
 
-// === MESIN SINKRONISASI CLOUD (ANTI-CORRUPT FIREBASE) ===
+// === MESIN SINKRONISASI CLOUD ===
 function mulaiSinkronisasiCloud() {
     const uid = localStorage.getItem('userUid');
     if (!uid) return;
@@ -75,20 +109,18 @@ function mulaiSinkronisasiCloud() {
         isSyncingFromCloud = true; 
         const data = snap.val() || {};
 
-        // 1. OTOMATIS BIKIN PROFIL OWNER JIKA AKUN BARU DAFTAR
         let usersData = data.users;
         if (!usersData || usersData === '[]' || (Array.isArray(usersData) && usersData.length === 0)) {
             const ownerName = localStorage.getItem('currentUser') || "Owner";
             const defaultArray = [{ id: 'owner_1', name: ownerName, role: 'admin', pin: 'SETUP' }];
             usersData = JSON.stringify(defaultArray);
-            userRef.child('users').set(usersData); // Tembak langsung ke awan!
+            userRef.child('users').set(usersData); 
         }
 
         const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
         
         cloudKeys.forEach(key => {
             let val = (key === 'users' && !data.users) ? usersData : data[key];
-            
             if (val !== undefined) {
                 if (typeof val === 'object') {
                     if (['products', 'sales', 'users', 'expenses'].includes(key) && !Array.isArray(val)) {
