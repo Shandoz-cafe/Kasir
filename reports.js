@@ -54,20 +54,19 @@ function loadFinanceReports() {
         totalOmzet += s.total; 
         totalLabaKotor += (s.netProfit || 0);
         
-        // --- LOGIKA GRAFIK PINTAR BERDASARKAN FILTER WAKTU ---
         let parts = s.date.split(', ');
         let datePart = parts[0];
         let timePart = parts[1] || "00:00:00";
         let labelKey = datePart;
 
         if (currentFilter === 'hari' || currentFilter === 'custom') {
-            labelKey = timePart.substring(0, 2) + ":00"; // Urut Berdasarkan Jam
+            labelKey = timePart.substring(0, 2) + ":00"; // Menjadi Jam
         } else if (currentFilter === 'bulan') {
-            labelKey = datePart; // Urut Berdasarkan Tanggal
+            labelKey = datePart; // Menjadi Tanggal
         } else if (currentFilter === 'tahun') {
             let dParts = datePart.split('/');
             let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-            labelKey = monthNames[parseInt(dParts[1]) - 1] + " " + dParts[2]; // Urut Berdasarkan Bulan
+            labelKey = monthNames[parseInt(dParts[1]) - 1] + " " + dParts[2]; // Menjadi Bulan
         }
         
         if(!chartData[labelKey]) chartData[labelKey] = 0;
@@ -81,7 +80,7 @@ function loadFinanceReports() {
 
         docSalesHTML += `<tr>
             <td>${s.date}</td>
-            <td>${s.shiftId || s.user}</td>
+            <td>${s.user || 'Admin'}</td>
             <td style="text-align:right;">Rp ${s.total.toLocaleString('id-ID')}</td>
             <td style="text-align:right; color:#27ae60;">Rp ${(s.netProfit||0).toLocaleString('id-ID')}</td>
         </tr>`;
@@ -98,9 +97,9 @@ function loadFinanceReports() {
     } else {
         sortedItems.forEach(item => {
             uiTopHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
-                <td style="padding: 10px 5px;"><strong>${item.name}</strong></td>
-                <td style="text-align:center;">${item.qty}</td>
-                <td style="text-align:right; color:#27ae60; font-weight:bold;">Rp ${item.total.toLocaleString('id-ID')}</td>
+                <td style="padding: 8px;"><strong>${item.name}</strong></td>
+                <td style="text-align:center; padding: 8px;">${item.qty}</td>
+                <td style="text-align:right; color:#27ae60; font-weight:bold; padding: 8px;">Rp ${item.total.toLocaleString('id-ID')}</td>
             </tr>`;
             docTopHTML += `<tr>
                 <td>${item.name}</td>
@@ -122,9 +121,9 @@ function loadFinanceReports() {
         expenses.forEach(e => {
             totalPengeluaran += e.amount;
             uiExpHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
-                <td style="padding: 10px 5px;">${e.date.split(', ')[0]}</td>
-                <td>${e.desc}</td>
-                <td style="text-align:right; color:#e74c3c; font-weight:bold;">Rp ${e.amount.toLocaleString('id-ID')}</td>
+                <td style="padding: 8px;">${e.date.split(', ')[0]}</td>
+                <td style="padding: 8px;">${e.desc}</td>
+                <td style="text-align:right; color:#e74c3c; font-weight:bold; padding: 8px;">Rp ${e.amount.toLocaleString('id-ID')}</td>
             </tr>`;
             docExpHTML += `<tr>
                 <td>${e.date.split(', ')[0]}</td>
@@ -148,7 +147,7 @@ function loadFinanceReports() {
     document.getElementById('docExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
     document.getElementById('docNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
-    // === MENGGAMBAR GRAFIK BATANG (BAR CHART) MEWAH ===
+    // === MENGGAMBAR GRAFIK BATANG (BAR) MEWAH ===
     const labels = Object.keys(chartData).sort(); 
     const dataOmzet = labels.map(label => chartData[label]);
 
@@ -156,13 +155,13 @@ function loadFinanceReports() {
     if(myChart) myChart.destroy(); 
     
     myChart = new Chart(ctx, {
-        type: 'bar', // Berubah dari garis (line) ke batang (bar)
+        type: 'bar', 
         data: {
             labels: labels.length > 0 ? labels : ['Belum ada data'],
             datasets: [{
                 label: 'Penjualan Kotor (Rp)',
                 data: dataOmzet.length > 0 ? dataOmzet : [0],
-                backgroundColor: 'rgba(52, 152, 219, 0.8)', // Warna Biru Elegan
+                backgroundColor: 'rgba(52, 152, 219, 0.8)',
                 borderColor: '#2980b9',
                 borderWidth: 1,
                 borderRadius: 4
@@ -172,12 +171,7 @@ function loadFinanceReports() {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { 
-                y: { 
-                    beginAtZero: true, 
-                    ticks: { callback: function(value) { return 'Rp ' + (value/1000) + 'k'; } } 
-                } 
-            }
+            scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return 'Rp ' + (value/1000) + 'k'; } } } }
         }
     });
 }
@@ -194,26 +188,23 @@ function addExpense() {
 }
 
 function exportLaporan(format) {
-    document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
-    
     if (format === 'pdf') {
-        // PDF ASLI: Menggunakan fitur Print bawaan browser/HP
+        // PDF MENGGUNAKAN SISTEM BAWAAN DEVICE (JAUH LEBIH RAPI & BISA DICOPY TEKSNYA)
+        document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
         window.print();
     } else if (format === 'jpg') {
-        // JPG MENGGUNAKAN HTML2CANVAS
-        const printLayer = document.getElementById('printLayer');
-        printLayer.style.position = 'relative';
-        printLayer.style.left = '0';
-        printLayer.style.visibility = 'visible';
+        // JPG MENGAMBIL SCREENSHOT TAMPILAN DASHBOARD BERWARNA SECARA LANGSUNG
+        const controlPanel = document.getElementById('controlPanel');
+        controlPanel.style.display = 'none'; // Sembunyikan tombol biar gak ikutan ke-foto
         
-        html2canvas(document.getElementById('exportDocument'), { scale: 2, useCORS: true }).then(canvas => {
-            printLayer.style.position = 'absolute';
-            printLayer.style.left = '-9999px';
-            printLayer.style.visibility = 'hidden';
+        const uiContainer = document.getElementById('uiContainer');
+        
+        html2canvas(uiContainer, { scale: 2, useCORS: true, backgroundColor: '#f0f2f5' }).then(canvas => {
+            controlPanel.style.display = 'flex'; // Munculkan lagi tombolnya
             
-            let fileNameDate = document.getElementById('docPeriodeText').innerText.replace(/[^a-zA-Z0-9]/g, '_');
+            let fileNameDate = document.getElementById('periodeTextUI').innerText.replace(/[^a-zA-Z0-9]/g, '_');
             const link = document.createElement('a');
-            link.download = `Laporan_Shandoz_${fileNameDate}.jpg`;
+            link.download = `Visual_Laporan_${fileNameDate}.jpg`;
             link.href = canvas.toDataURL('image/jpeg', 1.0);
             link.click();
         });
