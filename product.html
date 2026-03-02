@@ -50,14 +50,24 @@
             <button class="bg-danger" style="width: 100%; margin-top: 15px; padding: 12px; color: white;" onclick="closeScanner()">Batal</button>
         </div>
     </div>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="auth.js"></script>
     
-        <script src="auth.js"></script>
     <script>
-        checkAuth(); // Baris kuncian dihapus!
+        checkAuth(); 
+        
+        // OTOMATIS SEMBUNYIKAN FORM TAMBAH JIKA YANG LOGIN ADALAH KASIR
+        window.onload = function() {
+            const role = localStorage.getItem('currentRole') || 'cashier';
+            if(role !== 'admin') {
+                document.querySelectorAll('.card')[0].style.display = 'none';
+            }
+        }
     </script>
+    
     <script src="product.js"></script>
 </body>
 </html>
