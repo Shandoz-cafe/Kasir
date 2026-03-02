@@ -12,20 +12,20 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-let isSyncingFromCloud = false; // KUNCI PENGAMAN BIAR DATA GA ILANG
+let isSyncingFromCloud = false;
 
-// === 2. FUNGSI LOADING ===
+// === LEM SUPER FIREBASE: Paksa akun nempel permanen di memori HP! ===
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
 function showLoader(show) {
     const loader = document.getElementById('loader');
     if(loader) loader.style.display = show ? 'flex' : 'none';
 }
 
-// === 3. FUNGSI LOGIN (PASTI RESPON!) ===
 function loginWithEmail() {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPass').value;
     if(!email || !pass) return alert("Masukkan Email dan Sandi!");
-
     showLoader(true);
     auth.signInWithEmailAndPassword(email, pass)
         .then((userCred) => handleSuccessfulLogin(userCred.user))
@@ -37,7 +37,6 @@ function registerWithEmail() {
     const email = document.getElementById('regEmail').value;
     const pass = document.getElementById('regPass').value;
     if(!name || !email || !pass) return alert("Harap isi semua kolom!");
-
     showLoader(true);
     auth.createUserWithEmailAndPassword(email, pass).then((userCred) => {
         userCred.user.updateProfile({ displayName: name }).then(() => handleSuccessfulLogin(userCred.user));
@@ -47,79 +46,93 @@ function registerWithEmail() {
 function loginWithGoogle() {
     showLoader(true);
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .then((result) => handleSuccessfulLogin(result.user))
+    auth.signInWithPopup(provider).then((result) => handleSuccessfulLogin(result.user))
         .catch((error) => { showLoader(false); alert("Gagal Login Google: " + error.message); });
 }
 
 function handleSuccessfulLogin(user) {
     localStorage.setItem('currentUser', user.displayName || user.email.split('@')[0]);
     localStorage.setItem('userUid', user.uid);
-    window.location.href = 'profiles.html'; // LANGSUNG PAKSA PINDAH!
+    window.location.replace('profiles.html'); 
 }
 
 function logout() {
-    if(confirm("Keluar dari sistem?")) {
+    if(confirm("Keluar dari sistem secara permanen?")) {
         auth.signOut().then(() => {
             localStorage.clear();
-            window.location.href = 'index.html';
+            window.location.replace('index.html');
         });
     }
 }
 
-// === 4. MESIN SINKRONISASI CLOUD (REAL-TIME) ===
+// === MESIN SINKRONISASI CLOUD (SAPU JAGAT) ===
 function mulaiSinkronisasiCloud() {
     const uid = localStorage.getItem('userUid');
     if (!uid) return;
-
     const userRef = db.ref('ShandozPOS/' + uid);
 
-    userRef.once('value').then((snapshot) => {
-        if (!snapshot.val()) {
-            const ownerName = localStorage.getItem('currentUser') || "Owner";
-            userRef.set({
-                users: [{id: 'owner_1', name: ownerName, role: "admin", pin: "SETUP"}],
-                products: JSON.parse(localStorage.getItem('products') || '[]'),
-                sales: JSON.parse(localStorage.getItem('sales') || '[]')
-            });
-        }
+    userRef.on('value', (snap) => {
+        isSyncingFromCloud = true; 
+        const data = snap.val() || {};
 
-        // DENGARKAN PERUBAHAN DARI AWAN
-        userRef.on('value', (snap) => {
-            isSyncingFromCloud = true; 
-            const data = snap.val() || {};
+        if (!data.products) localStorage.setItem('products', '[]');
+        if (!data.sales) localStorage.setItem('sales', '[]');
+        if (!data.users) localStorage.setItem('users', '[]');
 
-            localStorage.setItem('users', JSON.stringify(data.users || []));
-            localStorage.setItem('products', JSON.stringify(data.products || []));
-            localStorage.setItem('sales', JSON.stringify(data.sales || []));
-            if (data.storeName) localStorage.setItem('storeName', data.storeName);
-            if (data.storeLogo) localStorage.setItem('storeLogo', data.storeLogo);
-
-            // REFRESH LAYAR OTOMATIS
-            if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
-            if(typeof initDashboardData === 'function') initDashboardData();
-            if(typeof renderProfiles === 'function') renderProfiles();
-
-            isSyncingFromCloud = false; 
+        Object.keys(data).forEach(key => {
+            let val = data[key];
+            if (typeof val === 'object') {
+                localStorage.setItem(key, JSON.stringify(val));
+            } else {
+                localStorage.setItem(key, val);
+            }
         });
+
+        if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
+        if(typeof initDashboardData === 'function') initDashboardData();
+        if(typeof renderProfiles === 'function') renderProfiles();
+        if(typeof loadSalesData === 'function') loadSalesData();
+
+        isSyncingFromCloud = false; 
     });
 
-    // KIRIM KE AWAN SETIAP KASIR NGETIK
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        if (!isSyncingFromCloud && ['products', 'sales', 'users', 'storeName', 'storeLogo'].includes(key)) {
+        const cloudKeys = [
+            'products', 'sales', 'users', 'storeName', 'storeLogo', 'settings', 
+            'expenses', 'pengeluaran', 'history', 'transactions', 'transaksi', 
+            'laporan', 'printerSettings', 'orders'
+        ];
+        
+        if (!isSyncingFromCloud && cloudKeys.includes(key)) {
             try {
-                const dataToSave = (key === 'storeName' || key === 'storeLogo') ? value : JSON.parse(value);
+                let dataToSave;
+                try { dataToSave = JSON.parse(value); } catch(e) { dataToSave = value; } 
                 userRef.child(key).set(dataToSave).catch(e => console.error(e));
-            } catch(e) { console.error("Format error", e); }
+            } catch(e) { console.error("Sync Error", e); }
         }
     };
 }
 
-// === 5. FUNGSI CEK OTENTIKASI SAAT HALAMAN DIBUKA ===
+// === FUNGSI CEK OTENTIKASI & JURUS BYPASS INSTAN ===
 function checkAuth() {
-    const isIndex = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/Kasir/') || window.location.pathname === '/' || window.location.pathname.includes('index');
+    const path = window.location.pathname;
+    const isIndex = path.endsWith('index.html') || path.endsWith('/Kasir/') || path === '/' || path.includes('index');
+    const savedUid = localStorage.getItem('userUid');
+
+    // 1. JURUS BYPASS INSTAN: Kalau buka APK dan akun masih nempel, langsung lempar ke Profil!
+    if (isIndex && savedUid) {
+        localStorage.removeItem('currentRole'); // Paksa Kasir masukin PIN lagi!
+        window.location.replace('profiles.html');
+        return;
+    }
+
+    // 2. JURUS TENDANG INSTAN: Kalau nekat buka menu tanpa login
+    if (!isIndex && !savedUid) {
+        window.location.replace('index.html');
+        return;
+    }
 
     auth.onAuthStateChanged((user) => {
         if (user) {
@@ -127,12 +140,18 @@ function checkAuth() {
             mulaiSinkronisasiCloud();
 
             if (isIndex) {
-                window.location.href = 'profiles.html';
+                localStorage.removeItem('currentRole');
+                window.location.replace('profiles.html');
             } else if (!localStorage.getItem('currentRole') && !window.location.href.includes('profiles.html')) {
-                window.location.href = 'profiles.html';
+                window.location.replace('profiles.html');
             }
         } else {
-            if (!isIndex) window.location.href = 'index.html';
+            if (savedUid) localStorage.clear(); // Bersihkan sisa kotoran kalau sesi Google expired
+            if (!isIndex) window.location.replace('index.html');
         }
     });
 }
+
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) checkAuth();
+});
