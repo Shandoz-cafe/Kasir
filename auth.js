@@ -61,25 +61,30 @@ function loginWithGoogle() {
         .catch((error) => { showLoader(false); alert("Gagal Login Google: " + error.message); });
 }
 
-// === FUNGSI BARU: MINTA GANTI PASSWORD VIA EMAIL ===
+// === FUNGSI BARU: MINTA GANTI PASSWORD VIA EMAIL (ANTI-GHOSTING) ===
 function requestPasswordReset() {
-    // Kalau dia lagi di dalam aplikasi (sudah login)
-    const currentUser = auth.currentUser;
-    let emailTarget = currentUser ? currentUser.email : null;
-    
-    // Kalau dia lagi di luar (halaman depan) atau ga kedeteksi
+    // 1. Coba intip apakah Bos sudah ngetik email di kolom login
+    const loginInput = document.getElementById('loginEmail');
+    let emailTarget = loginInput ? loginInput.value.trim() : "";
+
+    // 2. Kalau kolom isiannya kosong, paksa Bos ketik manual
     if (!emailTarget) {
-        emailTarget = prompt("Masukkan Email akun Shandoz POS Anda untuk mereset Password:");
+        emailTarget = prompt("Masukkan Alamat Email akun Anda untuk mereset kata sandi:");
     } else {
-        const confirmReset = confirm("Kirim link ganti sandi ke email Anda (" + emailTarget + ") ?");
-        if(!confirmReset) return;
+        // Kalau udah ngetik di kolom login, konfirmasi dulu biar ga salah kirim
+        const confirmReset = confirm("Kirim link ganti sandi ke email: " + emailTarget + " ?");
+        if (!confirmReset) return;
     }
 
-    if(!emailTarget) return;
+    // Kalau Bos klik Batal atau ngosongin isian, hentikan proses
+    if (!emailTarget) return;
 
+    showLoader(true);
     auth.sendPasswordResetEmail(emailTarget).then(() => {
-        alert("🔒 Berhasil! Tautan aman untuk mengganti password telah dikirim ke " + emailTarget + ". Silakan cek kotak masuk atau folder spam Anda.");
+        showLoader(false);
+        alert("🔒 Berhasil! Tautan aman untuk mengganti kata sandi telah dikirim ke " + emailTarget + ". Silakan cek kotak masuk atau folder spam Anda.");
     }).catch(err => {
+        showLoader(false);
         alert("Gagal mengirim email: " + err.message);
     });
 }
