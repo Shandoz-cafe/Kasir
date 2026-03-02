@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan & Analitik - SHANDOZ</title>
+    <title>Laporan Keuangan - SHANDOZ</title>
     <link rel="stylesheet" href="style.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -11,17 +11,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-        .print-table th, .print-table td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
-        .print-table th { background-color: #ecf0f1; color: #2c3e50; font-weight: bold; }
-        .print-box { border: 1px solid #bdc3c7; padding: 15px; border-radius: 8px; text-align: center; flex: 1; background: #fafafa; }
-        
         #printLayer { display: none; }
         
-        /* MAGIC CSS UNTUK PRINT PDF ASLI BAWAAN SISTEM */
+        /* MAGIC CSS: MENGUBAH WEB JADI KERTAS DOKUMEN RESMI SAAT DICETAK */
         @media print {
-            @page { size: A4 portrait; margin: 10mm; }
-            body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { size: A4 portrait; margin: 15mm; }
+            body { background: white; margin: 0; padding: 0; }
             body * { visibility: hidden; }
             #printLayer, #printLayer * { visibility: visible; }
             #printLayer { display: block; position: absolute; left: 0; top: 0; width: 100%; }
@@ -31,7 +26,7 @@
 </head>
 <body class="pos-body" style="background: #f0f2f5;">
     <header style="background: #27ae60;">
-        <h2>📊 Laporan & Analitik</h2>
+        <h2>📊 Laporan Keuangan</h2>
         <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
     
@@ -49,8 +44,8 @@
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button class="bg-primary" style="background:#3b82f6; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('jpg')">📷 JPG</button>
-                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('pdf')">📄 PDF</button>
-                <button class="bg-success" style="background:#10b981; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('excel')">📊 EXCEL</button>
+                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('pdf')">📄 DOKUMEN PDF</button>
+                <button class="bg-success" style="background:#10b981; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('excel')">📊 DATA EXCEL</button>
             </div>
         </div>
 
@@ -113,53 +108,66 @@
     </div>
 
     <div id="printLayer">
-        <div id="exportDocument" style="width: 100%; max-width: 800px; background: white; padding: 20px; color: black; font-family: Arial, sans-serif; margin: 0 auto;">
-            <div style="text-align: center; border-bottom: 3px solid #27ae60; margin-bottom: 20px; padding-bottom: 15px;">
-                <h1 style="margin: 0; color: #2c3e50; font-size: 26px; text-transform: uppercase;">LAPORAN KEUANGAN LENGKAP</h1>
-                <h2 style="margin: 5px 0; color: #333; font-size: 18px;">SHANDOZ CAFE & COFFEE BAR</h2>
-                <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 14px;">Periode: <strong id="docPeriodeText"></strong></p>
+        <div style="width: 100%; padding: 0; color: black; font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; background: white;">
+            
+            <div style="text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px;">
+                <h1 style="margin: 0; font-size: 18pt; text-transform: uppercase; font-weight: bold;" id="docStoreName">SHANDOZ CAFE & COFFEE BAR</h1>
+                <h2 style="margin: 5px 0; font-size: 14pt; font-weight: normal;">LAPORAN LABA RUGI (INCOME STATEMENT)</h2>
+                <p style="margin: 0; font-size: 12pt; font-style: italic;">Untuk Periode: <span id="docPeriodeText"></span></p>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
-                <div class="print-box">
-                    <p style="margin:0 0 5px 0; font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Total Pemasukan</p>
-                    <h3 id="docOmzet" style="margin:0; color: #3498db; font-size: 18px;">Rp 0</h3>
-                </div>
-                <div class="print-box">
-                    <p style="margin:0 0 5px 0; font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Total Laba Kotor</p>
-                    <h3 id="docMargin" style="margin:0; color: #f39c12; font-size: 18px;">Rp 0</h3>
-                </div>
-                <div class="print-box">
-                    <p style="margin:0 0 5px 0; font-size: 11px; color: #7f8c8d; text-transform: uppercase;">Total Pengeluaran</p>
-                    <h3 id="docExpense" style="margin:0; color: #e74c3c; font-size: 18px;">Rp 0</h3>
-                </div>
-                <div class="print-box" style="border: 2px solid #27ae60; background: #f9fff9;">
-                    <p style="margin:0 0 5px 0; font-size: 11px; color: #27ae60; font-weight:bold;">LABA BERSIH</p>
-                    <h3 id="docNet" style="margin:0; color: #27ae60; font-size: 20px;">Rp 0</h3>
-                </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                    <td colspan="2" style="font-weight: bold; padding: 5px 0;">PENDAPATAN (REVENUE)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0 5px 20px;">Penjualan Kotor (Gross Sales)</td>
+                    <td style="text-align: right;" id="docOmzet">Rp 0</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0 5px 20px; border-bottom: 1px solid black;">Harga Pokok Penjualan (COGS)</td>
+                    <td style="text-align: right; border-bottom: 1px solid black;" id="docHPP">(Rp 0)</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; padding: 5px 0 5px 20px;">LABA KOTOR (GROSS PROFIT)</td>
+                    <td style="text-align: right; font-weight: bold;" id="docMargin">Rp 0</td>
+                </tr>
+                <tr><td colspan="2">&nbsp;</td></tr>
+                
+                <tr>
+                    <td colspan="2" style="font-weight: bold; padding: 5px 0;">BEBAN OPERASIONAL (OPERATING EXPENSES)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0 5px 20px; border-bottom: 1px solid black;">Total Pengeluaran Toko</td>
+                    <td style="text-align: right; border-bottom: 1px solid black;" id="docExpense">(Rp 0)</td>
+                </tr>
+                <tr><td colspan="2">&nbsp;</td></tr>
+                
+                <tr>
+                    <td style="font-weight: bold; font-size: 14pt; padding: 5px 0;">LABA BERSIH (NET INCOME)</td>
+                    <td style="text-align: right; font-weight: bold; font-size: 14pt; border-bottom: 3px double black;" id="docNet">Rp 0</td>
+                </tr>
+            </table>
+
+            <div style="page-break-before: auto;">
+                <h3 style="font-size: 12pt; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">LAMPIRAN 1: Rincian Pengeluaran Operasional</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11pt;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid black;">
+                            <th style="text-align: left; padding: 5px;">Tanggal</th>
+                            <th style="text-align: left; padding: 5px;">Keterangan</th>
+                            <th style="text-align: right; padding: 5px;">Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="docExpenseLog"></tbody>
+                </table>
             </div>
 
-            <h3 style="font-size: 14px; margin-bottom: 8px; color: #2c3e50;">1. Rincian Penjualan Berdasarkan Barang</h3>
-            <table class="print-table">
-                <thead><tr><th style="width:50%;">Nama Menu / Produk</th><th style="width:20%; text-align:center;">Qty Terjual</th><th style="width:30%; text-align:right;">Total Omzet</th></tr></thead>
-                <tbody id="docTopItems"></tbody>
-            </table>
-
-            <h3 style="font-size: 14px; margin-bottom: 8px; color: #2c3e50; margin-top: 25px;">2. Log Transaksi Kasir</h3>
-            <table class="print-table">
-                <thead><tr><th>Waktu & Tanggal</th><th>ID Shift / Kasir</th><th style="text-align:right;">Omzet (Rp)</th><th style="text-align:right;">Laba (Rp)</th></tr></thead>
-                <tbody id="docSalesLog"></tbody>
-            </table>
-
-            <h3 style="font-size: 14px; margin-bottom: 8px; color: #e74c3c; margin-top: 25px;">3. Log Pengeluaran Toko</h3>
-            <table class="print-table">
-                <thead><tr><th>Tanggal</th><th>Keterangan Pembelanjaan</th><th style="text-align:right;">Nominal (Rp)</th></tr></thead>
-                <tbody id="docExpenseLog"></tbody>
-            </table>
-
-            <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #95a5a6; font-style: italic;">
-                Dokumen ini dihasilkan secara otomatis oleh Sistem SHANDOZ POS pada <span id="docPrintDate"></span>.
+            <div style="margin-top: 60px; text-align: right; float: right; width: 250px; text-align: center;">
+                <p style="margin-bottom: 70px;">Dicetak pada: <span id="docPrintDate"></span><br>Mengetahui,</p>
+                <p style="font-weight: bold; text-decoration: underline; margin:0;">Manajemen Keuangan</p>
             </div>
+            <div style="clear: both;"></div>
         </div>
     </div>
 
