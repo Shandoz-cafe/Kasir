@@ -1,12 +1,12 @@
-// === 1. CONFIG FIREBASE BOS (WAJIB DIGANTI SAMA KODE DARI GOOGLE) ===
+// === 1. CONFIG FIREBASE ASLI SHANDOZ POS ===
 const firebaseConfig = {
-    apiKey: "API_KEY_KAMU",
-    authDomain: "PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "PROJECT_ID",
-    storageBucket: "PROJECT_ID.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
+  apiKey: "AIzaSyDWXhCZu0VcDhfKijaDZycA0Th-reUAnNg",
+  authDomain: "shandoz-pos.firebaseapp.com",
+  databaseURL: "https://shandoz-pos-default-rtdb.firebaseio.com",
+  projectId: "shandoz-pos",
+  storageBucket: "shandoz-pos.firebasestorage.app",
+  messagingSenderId: "451234972920",
+  appId: "1:451234972920:web:dead8905720cb55329670d"
 };
 
 // Inisialisasi Firebase
@@ -18,11 +18,9 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 // === 2. MESIN SINKRONISASI OTOMATIS (CLOUD SYNC HACK) ===
-// Ini adalah kode rahasia yang akan mencegat setiap kali aplikasi menyimpan data di HP, 
-// dan sepersekian detik kemudian langsung menembakkannya ke Cloud Firebase!
 const originalSetItem = localStorage.setItem;
 localStorage.setItem = function(key, value) {
-    // 1. Simpan di memori lokal HP biar aplikasi tetap ngebut
+    // 1. Simpan di memori lokal HP
     originalSetItem.apply(this, arguments); 
     
     // 2. Langsung Backup ke Awan!
@@ -37,14 +35,13 @@ localStorage.setItem = function(key, value) {
 function checkAuth() {
     auth.onAuthStateChanged((user) => {
         const path = window.location.pathname;
-        const isIndex = path.endsWith('index.html') || path === '/';
+        const isIndex = path.endsWith('index.html') || path === '/' || path.endsWith('Shandoz-cafe/');
 
         if (user) {
-            // BEGITU LOGIN: Sedot kembali semua data dari Cloud ke HP baru/website!
+            // BEGITU LOGIN: Sedot kembali semua data dari Cloud ke HP!
             db.ref('ShandozPOS/' + user.uid).once('value').then((snapshot) => {
                 if (snapshot.exists()) {
                     const cloudData = snapshot.val();
-                    // Pulihkan data tanpa memicu upload ulang
                     if(cloudData.products) originalSetItem.call(localStorage, 'products', cloudData.products);
                     if(cloudData.sales) originalSetItem.call(localStorage, 'sales', cloudData.sales);
                     if(cloudData.users) originalSetItem.call(localStorage, 'users', cloudData.users);
@@ -53,15 +50,13 @@ function checkAuth() {
                     if(cloudData.printerSettings) originalSetItem.call(localStorage, 'printerSettings', cloudData.printerSettings);
                 }
                 
-                // Kalau lagi di halaman login, pindahkan ke pilih profil
                 if (isIndex) window.location.href = 'profiles.html';
             }).catch(error => {
                 console.error("Gagal narik data:", error);
-                if (isIndex) window.location.href = 'profiles.html'; // Tetap masuk walau offline
+                if (isIndex) window.location.href = 'profiles.html'; 
             });
 
         } else {
-            // Kalau belum login, lempar ke depan
             if (!isIndex) window.location.href = 'index.html';
         }
     });
@@ -92,7 +87,6 @@ function registerWithEmail() {
     if(loader) loader.style.display = 'flex';
 
     auth.createUserWithEmailAndPassword(email, pass).then((userCredential) => {
-        // Bikin Profil Owner Default & Langsung tembak ke Cloud lewat setItem hack
         const defaultUser = [{ id: 'admin_'+Date.now(), name: name, role: 'admin', pin: 'SETUP' }];
         localStorage.setItem('users', JSON.stringify(defaultUser));
     }).catch((error) => {
@@ -110,7 +104,7 @@ function loginWithGoogle() {
 function logout() {
     if(confirm("Yakin ingin keluar dari sistem?")) {
         auth.signOut().then(() => {
-            localStorage.clear(); // Aman dibersihkan dari HP karena data sudah tersimpan di Awan
+            localStorage.clear(); // Bersihkan HP karena data sudah aman di Awan
             window.location.href = 'index.html';
         });
     }
