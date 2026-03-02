@@ -40,19 +40,17 @@ function matchDate(dateString) {
 function loadFinanceReports() {
     const allSales = JSON.parse(localStorage.getItem('sales') || '[]');
     const allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    const masterProducts = JSON.parse(localStorage.getItem('products') || '[]'); // Ambil data modal gudang
     
     const sales = allSales.filter(s => matchDate(s.date));
     const expenses = allExpenses.filter(e => matchDate(e.date));
 
-    let totalOmzet = 0, totalLabaKotor = 0;
+    let totalOmzet = 0, totalHPP = 0;
     let itemAnalytics = {}; 
     let chartData = {}; 
 
-    let docSalesHTML = ''; 
-    
     sales.forEach(s => {
         totalOmzet += s.total; 
-        totalLabaKotor += (s.netProfit || 0);
         
         let parts = s.date.split(', ');
         let datePart = parts[0];
@@ -60,40 +58,41 @@ function loadFinanceReports() {
         let labelKey = datePart;
 
         if (currentFilter === 'hari' || currentFilter === 'custom') {
-            labelKey = timePart.substring(0, 2) + ":00"; // Menjadi Jam
+            labelKey = timePart.substring(0, 2) + ":00"; 
         } else if (currentFilter === 'bulan') {
-            labelKey = datePart; // Menjadi Tanggal
+            labelKey = datePart; 
         } else if (currentFilter === 'tahun') {
             let dParts = datePart.split('/');
             let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-            labelKey = monthNames[parseInt(dParts[1]) - 1] + " " + dParts[2]; // Menjadi Bulan
+            labelKey = monthNames[parseInt(dParts[1]) - 1] + " " + dParts[2]; 
         }
         
         if(!chartData[labelKey]) chartData[labelKey] = 0;
         chartData[labelKey] += s.total;
 
+        // Hitung HPP dan Analitik Item
         s.items.forEach(item => {
+            // Cari HPP di master gudang
+            const dbProduct = masterProducts.find(p => p.name === item.name);
+            const itemCost = dbProduct ? dbProduct.cost : 0;
+            totalHPP += (itemCost * item.qty);
+
             if(!itemAnalytics[item.name]) itemAnalytics[item.name] = { qty: 0, total: 0 };
             itemAnalytics[item.name].qty += item.qty;
             itemAnalytics[item.name].total += item.total;
         });
-
-        docSalesHTML += `<tr>
-            <td>${s.date}</td>
-            <td>${s.user || 'Admin'}</td>
-            <td style="text-align:right;">Rp ${s.total.toLocaleString('id-ID')}</td>
-            <td style="text-align:right; color:#27ae60;">Rp ${(s.netProfit||0).toLocaleString('id-ID')}</td>
-        </tr>`;
     });
 
+    let totalLabaKotor = totalOmzet - totalHPP; // Penjualan Kotor - Modal Barang
+
+    // Urutkan item dari yang paling laku
     let sortedItems = Object.keys(itemAnalytics).map(key => {
         return { name: key, qty: itemAnalytics[key].qty, total: itemAnalytics[key].total };
     }).sort((a, b) => b.qty - a.qty); 
 
-    let uiTopHTML = '', docTopHTML = '';
+    let uiTopHTML = '';
     if(sortedItems.length === 0) {
         uiTopHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">Belum ada data penjualan</td></tr>';
-        docTopHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada data pada periode ini</td></tr>';
     } else {
         sortedItems.forEach(item => {
             uiTopHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
@@ -101,22 +100,16 @@ function loadFinanceReports() {
                 <td style="text-align:center; padding: 8px;">${item.qty}</td>
                 <td style="text-align:right; color:#27ae60; font-weight:bold; padding: 8px;">Rp ${item.total.toLocaleString('id-ID')}</td>
             </tr>`;
-            docTopHTML += `<tr>
-                <td>${item.name}</td>
-                <td style="text-align:center;">${item.qty} Item</td>
-                <td style="text-align:right;">Rp ${item.total.toLocaleString('id-ID')}</td>
-            </tr>`;
         });
     }
     document.getElementById('uiTopItems').innerHTML = uiTopHTML;
-    document.getElementById('docTopItems').innerHTML = docTopHTML;
-    document.getElementById('docSalesLog').innerHTML = docSalesHTML || '<tr><td colspan="4" style="text-align:center;">Tidak ada transaksi.</td></tr>';
 
+    // Render Pengeluaran
     let totalPengeluaran = 0;
     let uiExpHTML = '', docExpHTML = '';
     if(expenses.length === 0) {
         uiExpHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">Belum ada biaya tercatat</td></tr>';
-        docExpHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada pengeluaran.</td></tr>';
+        docExpHTML = '<tr><td colspan="3" style="text-align:center; padding:5px;">Nihil / Tidak ada pengeluaran.</td></tr>';
     } else {
         expenses.forEach(e => {
             totalPengeluaran += e.amount;
@@ -126,9 +119,9 @@ function loadFinanceReports() {
                 <td style="text-align:right; color:#e74c3c; font-weight:bold; padding: 8px;">Rp ${e.amount.toLocaleString('id-ID')}</td>
             </tr>`;
             docExpHTML += `<tr>
-                <td>${e.date.split(', ')[0]}</td>
-                <td>${e.desc}</td>
-                <td style="text-align:right; color:#e74c3c;">Rp ${e.amount.toLocaleString('id-ID')}</td>
+                <td style="padding: 5px;">${e.date.split(', ')[0]}</td>
+                <td style="padding: 5px;">${e.desc}</td>
+                <td style="text-align:right; padding: 5px;">Rp ${e.amount.toLocaleString('id-ID')}</td>
             </tr>`;
         });
     }
@@ -137,17 +130,21 @@ function loadFinanceReports() {
 
     const labaBersih = totalLabaKotor - totalPengeluaran;
     
+    // UPDATE ANGKA DI DASHBOARD
     document.getElementById('uiOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
     document.getElementById('uiMargin').innerText = `Rp ${totalLabaKotor.toLocaleString('id-ID')}`;
     document.getElementById('uiExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
     document.getElementById('uiNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
+    // UPDATE ANGKA DI DOKUMEN PDF RESMI
+    document.getElementById('docStoreName').innerText = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
     document.getElementById('docOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+    document.getElementById('docHPP').innerText = `(Rp ${totalHPP.toLocaleString('id-ID')})`;
     document.getElementById('docMargin').innerText = `Rp ${totalLabaKotor.toLocaleString('id-ID')}`;
-    document.getElementById('docExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
+    document.getElementById('docExpense').innerText = `(Rp ${totalPengeluaran.toLocaleString('id-ID')})`;
     document.getElementById('docNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
-    // === MENGGAMBAR GRAFIK BATANG (BAR) ===
+    // === MENGGAMBAR GRAFIK BATANG ===
     const labels = Object.keys(chartData).sort(); 
     const dataOmzet = labels.map(label => chartData[label]);
 
@@ -187,20 +184,16 @@ function addExpense() {
     loadFinanceReports();
 }
 
-// ==========================================
-// MESIN EKSPOR: JPG, PDF ASLI, & EXCEL PROFESIONAL
-// ==========================================
+// MESIN EKSPOR
 function exportLaporan(format) {
     if (format === 'pdf') {
-        // 1. PDF ASLI (Bawaan HP/Sistem)
-        document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
+        // PDF FORMAL AKUNTANSI 
+        document.getElementById('docPrintDate').innerText = new Date().toLocaleDateString('id-ID');
         window.print();
     } 
     else if (format === 'jpg') {
-        // 2. JPG GAMBAR (Screenshot bersih tanpa tombol)
         const controlPanel = document.getElementById('controlPanel');
         controlPanel.style.display = 'none'; 
-        
         const uiContainer = document.getElementById('uiContainer');
         html2canvas(uiContainer, { scale: 2, useCORS: true, backgroundColor: '#f0f2f5' }).then(canvas => {
             controlPanel.style.display = 'flex'; 
@@ -212,7 +205,6 @@ function exportLaporan(format) {
         });
     } 
     else if (format === 'excel') {
-        // 3. EXCEL ASLI (.xlsx) DENGAN SHEET TERPISAH
         buatLaporanExcelAsli();
     }
 }
@@ -221,83 +213,68 @@ function exportLaporan(format) {
 function buatLaporanExcelAsli() {
     const allSales = JSON.parse(localStorage.getItem('sales') || '[]');
     const allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    const masterProducts = JSON.parse(localStorage.getItem('products') || '[]');
     
-    // Filter sesuai pilihan di layar
     const sales = allSales.filter(s => matchDate(s.date));
     const expenses = allExpenses.filter(e => matchDate(e.date));
 
-    const wb = XLSX.utils.book_new(); // Buat file Excel Baru
+    const wb = XLSX.utils.book_new(); 
     const periodeName = document.getElementById('periodeTextUI').innerText;
+    const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
 
-    // --- SHEET 1: RINGKASAN ---
-    let totalOmzet = 0, totalLabaKotor = 0, totalPengeluaran = 0, totalTiket = sales.length;
-    sales.forEach(s => { totalOmzet += s.total; totalLabaKotor += (s.netProfit || 0); });
+    // SHEET 1: RINGKASAN
+    let totalOmzet = 0, totalHPP = 0, totalPengeluaran = 0;
+    sales.forEach(s => { 
+        totalOmzet += s.total; 
+        s.items.forEach(item => {
+            const dbProduct = masterProducts.find(p => p.name === item.name);
+            totalHPP += ((dbProduct ? dbProduct.cost : 0) * item.qty);
+        });
+    });
     expenses.forEach(e => { totalPengeluaran += e.amount; });
+    
+    let totalLabaKotor = totalOmzet - totalHPP;
     const labaBersih = totalLabaKotor - totalPengeluaran;
 
     const summaryData = [
-        ['LAPORAN KEUANGAN SHANDOZ POS'],
-        ['Periode Filter', periodeName],
-        ['Dicetak Pada', new Date().toLocaleString('id-ID')],
+        ['LAPORAN LABA RUGI (INCOME STATEMENT)'],
+        [storeName],
+        ['Periode', periodeName],
         [''],
-        ['KATEGORI', 'NOMINAL (Rp) / JUMLAH'],
-        ['Total Omzet (Penjualan Kotor)', totalOmzet],
-        ['Laba Kotor (Margin Barang)', totalLabaKotor],
-        ['Total Pengeluaran (Belanja)', totalPengeluaran],
-        ['LABA BERSIH (Keuntungan)', labaBersih],
-        ['Total Transaksi (Struk Keluar)', totalTiket]
+        ['KATEGORI', 'NOMINAL (Rp)'],
+        ['PENDAPATAN / PENJUALAN KOTOR', totalOmzet],
+        ['Harga Pokok Penjualan (HPP)', -totalHPP],
+        ['LABA KOTOR (GROSS PROFIT)', totalLabaKotor],
+        ['Beban Operasional', -totalPengeluaran],
+        ['LABA BERSIH (NET INCOME)', labaBersih]
     ];
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-    wsSummary['!cols'] = [{wch: 35}, {wch: 25}]; // Atur lebar kolom
-    XLSX.utils.book_append_sheet(wb, wsSummary, "1. Ringkasan Laba Rugi");
+    wsSummary['!cols'] = [{wch: 35}, {wch: 20}]; 
+    XLSX.utils.book_append_sheet(wb, wsSummary, "Laba Rugi");
 
-    // --- SHEET 2: DATA TRANSAKSI KASIR ---
-    const salesData = [['Waktu & Tanggal', 'Nama Kasir', 'Daftar Menu Terjual', 'Omzet (Rp)', 'Laba Kotor (Rp)']];
+    // SHEET 2: TRANSAKSI KASIR
+    const salesData = [['Waktu & Tanggal', 'Nama Kasir', 'Daftar Menu Terjual', 'Omzet (Rp)']];
     sales.forEach(s => {
         let menuList = s.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
-        salesData.push([s.date, s.user || 'Admin', menuList, s.total, (s.netProfit || 0)]);
+        salesData.push([s.date, s.user || 'Admin', menuList, s.total]);
     });
-    if(sales.length === 0) salesData.push(['Tidak ada data', '', '', '', '']);
+    if(sales.length === 0) salesData.push(['Tidak ada data', '', '', '']);
     const wsSales = XLSX.utils.aoa_to_sheet(salesData);
-    wsSales['!cols'] = [{wch: 20}, {wch: 15}, {wch: 50}, {wch: 15}, {wch: 15}];
-    XLSX.utils.book_append_sheet(wb, wsSales, "2. Riwayat Transaksi");
+    wsSales['!cols'] = [{wch: 20}, {wch: 15}, {wch: 50}, {wch: 15}];
+    XLSX.utils.book_append_sheet(wb, wsSales, "Riwayat Transaksi");
 
-    // --- SHEET 3: PENGELUARAN ---
+    // SHEET 3: PENGELUARAN
     const expData = [['Tanggal', 'Keterangan Pengeluaran', 'Nominal (Rp)']];
     expenses.forEach(e => {
-        let dateOnly = e.date.split(',')[0] || e.date;
-        expData.push([dateOnly, e.desc, e.amount]);
+        expData.push([e.date.split(',')[0], e.desc, e.amount]);
     });
     if(expenses.length === 0) expData.push(['Tidak ada data', '', '']);
     const wsExp = XLSX.utils.aoa_to_sheet(expData);
     wsExp['!cols'] = [{wch: 15}, {wch: 40}, {wch: 15}];
-    XLSX.utils.book_append_sheet(wb, wsExp, "3. Pengeluaran Toko");
+    XLSX.utils.book_append_sheet(wb, wsExp, "Beban Pengeluaran");
 
-    // --- SHEET 4: ITEM TERLARIS ---
-    let itemAnalytics = {};
-    sales.forEach(s => {
-        s.items.forEach(item => {
-            if(!itemAnalytics[item.name]) itemAnalytics[item.name] = { qty: 0, total: 0 };
-            itemAnalytics[item.name].qty += item.qty;
-            itemAnalytics[item.name].total += item.total;
-        });
-    });
-    let sortedItems = Object.keys(itemAnalytics).map(key => {
-        return { name: key, qty: itemAnalytics[key].qty, total: itemAnalytics[key].total };
-    }).sort((a, b) => b.qty - a.qty);
-
-    const itemsData = [['Peringkat', 'Nama Menu / Produk', 'Jumlah Terjual (Pcs)', 'Total Omzet (Rp)']];
-    sortedItems.forEach((i, index) => {
-        itemsData.push([index + 1, i.name, i.qty, i.total]);
-    });
-    if(sortedItems.length === 0) itemsData.push(['-', 'Tidak ada data', '', '']);
-    const wsItems = XLSX.utils.aoa_to_sheet(itemsData);
-    wsItems['!cols'] = [{wch: 10}, {wch: 35}, {wch: 20}, {wch: 20}];
-    XLSX.utils.book_append_sheet(wb, wsItems, "4. Menu Terlaris");
-
-    // --- EKSEKUSI DOWNLOAD EXCEL ---
     let fileNameDate = periodeName.replace(/[^a-zA-Z0-9]/g, '_');
-    XLSX.writeFile(wb, `Laporan_Excel_Shandoz_${fileNameDate}.xlsx`);
+    XLSX.writeFile(wb, `Laporan_${storeName}_${fileNameDate}.xlsx`);
 }
 
 document.addEventListener('DOMContentLoaded', () => { filterReports('semua'); });
