@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan & Analitik - SHANDOZ</title>
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
         .print-table th, .print-table td { border: 1px solid #bdc3c7; padding: 8px; text-align: left; }
@@ -15,7 +18,7 @@
         
         #printLayer { display: none; }
         
-        /* MAGIC CSS UNTUK PRINT PDF ASLI! */
+        /* MAGIC CSS UNTUK PRINT PDF ASLI BAWAAN SISTEM */
         @media print {
             @page { size: A4 portrait; margin: 10mm; }
             body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -44,9 +47,10 @@
                 <input type="date" id="customDate" style="margin: 0; padding: 6px 10px; width: auto; border-radius: 8px; border: 1px solid #ccc;" onchange="filterByCustomDate()">
             </div>
             
-            <div style="display: flex; gap: 10px;">
-                <button class="bg-success" style="color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('jpg')">📷 Unduh JPG (Visual)</button>
-                <button class="bg-danger" style="color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('pdf')">📄 Cetak / PDF Asli</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="bg-primary" style="background:#3b82f6; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('jpg')">📷 JPG</button>
+                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('pdf')">📄 PDF</button>
+                <button class="bg-success" style="background:#10b981; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold;" onclick="exportLaporan('excel')">📊 EXCEL</button>
             </div>
         </div>
 
