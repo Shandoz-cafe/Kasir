@@ -26,47 +26,47 @@
     <header>
         <h2><span style="color:#10b981;">●</span> Sistem Operasi</h2>
         <div style="display: flex; gap: 8px;">
-            <button class="bg-primary btn-head" style="background:#3b82f6;" onclick="document.getElementById('aboutModal').style.display='flex'">ℹ️ Info</button>
-            <button class="bg-warning btn-head" onclick="window.location.href='profiles.html'">👥 Ganti Profil</button>
-            <button class="bg-danger btn-head" onclick="logout()">🛑 Keluar</button>
+            <button class="bg-primary btn-head" style="background:#3b82f6;" onclick="document.getElementById('aboutModal').style.display='flex'" data-i18n="dash_info">ℹ️ Info</button>
+            <button class="bg-warning btn-head" onclick="window.location.href='profiles.html'" data-i18n="dash_profile">👥 Ganti Profil</button>
+            <button class="bg-danger btn-head" onclick="logout()" data-i18n="dash_logout">🛑 Keluar</button>
         </div>
     </header>
     
     <div class="container">
         <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px;">
-            <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;">Halo, <span id="userNameDisplay">User</span>! 👋</h3>
-            <p style="font-size: 12px; opacity: 0.9;">Selamat datang di Shandoz Command Center. Semua fitur telah <b>dibuka penuh</b>.</p>
+            <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;" data-i18n="dash_welcome">Halo, <span id="userNameDisplay">User</span>! 👋</h3>
+            <p style="font-size: 12px; opacity: 0.9;" data-i18n="dash_sub">Selamat datang di Shandoz Command Center. Semua fitur telah <b>dibuka penuh</b>.</p>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
             <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #3b82f6;">
-                <div style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Pendapatan Hari Ini</div>
+                <div style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;" data-i18n="dash_income">Pendapatan Hari Ini</div>
                 <div style="font-size: 20px; font-weight: 800; color: #0f172a;" id="todayIncome">Rp 0</div>
             </div>
             <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-left: 5px solid #10b981;">
-                <div style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Total Tiket</div>
+                <div style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;" data-i18n="dash_tickets">Total Tiket</div>
                 <div style="font-size: 20px; font-weight: 800; color: #0f172a;" id="todayOrders">0</div>
             </div>
         </div>
 
-        <h4 style="margin-bottom: 15px; color: #334155; font-weight: 700;">Aplikasi Utama</h4>
+        <h4 style="margin-bottom: 15px; color: #334155; font-weight: 700;" data-i18n="dash_apps">Aplikasi Utama</h4>
         
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
             <a href="pos.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">🛒</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">KASIR (POS)</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_pos">KASIR (POS)</span>
             </a>
             <a href="product.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📦</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">GUDANG / MENU</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_inv">GUDANG / MENU</span>
             </a>
             <a href="reports.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📈</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">LAPORAN KEUANGAN</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_rep">LAPORAN KEUANGAN</span>
             </a>
             <a href="setting.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">⚙️</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">PENGATURAN TOKO</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_set">PENGATURAN TOKO</span>
             </a>
         </div>
         
@@ -102,11 +102,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <script src="auth.js"></script>
+    
+    <script src="lang.js"></script>
+
     <script>
         checkAuth();
         
         const currentUser = localStorage.getItem('currentUser') || 'User';
-        document.getElementById('userNameDisplay').innerText = currentUser.toUpperCase();
+        const nameDisplay = document.getElementById('userNameDisplay');
+        if(nameDisplay) nameDisplay.innerText = currentUser.toUpperCase();
 
         function initDashboardData() {
             const salesData = JSON.parse(localStorage.getItem('sales') || '[]');
