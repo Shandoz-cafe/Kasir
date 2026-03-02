@@ -6,165 +6,153 @@
     <title>Pengaturan - Shandoz POS</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init("pgslV2rXk3tukFEMk"); // PUBLIC KEY BOS
+       })();
+    </script>
+
+    <style>
+        .setting-group { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .setting-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        .setting-item { margin-bottom: 15px; }
+        .setting-item label { display: block; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 5px; }
+        .setting-item input, .setting-item select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Poppins', sans-serif; outline: none; }
+        .setting-item input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; margin-top: 5px; }
+    </style>
 </head>
-<body>
-    <header>
+<body class="pos-body" style="background: #f8fafc;">
+
+    <div id="loader">Memproses Data...</div>
+
+    <header style="background: #334155;">
         <h2>⚙️ Pengaturan Sistem</h2>
-        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Kembali</button>
+        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
     </header>
 
-    <div class="container">
+    <div class="container" style="max-width: 600px; margin: 0 auto; padding-top: 20px;">
         
-        <div id="adminUserManagement" style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
-            <h3 style="margin-top: 0; margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">👥 Manajemen Pengguna</h3>
-            <div id="usersList" style="margin-bottom: 20px;"></div>
+        <div class="setting-group">
+            <div class="setting-title">🏪 Profil Usaha & Printer</div>
+            <div class="setting-item">
+                <label>Nama Kafe / Toko (Tampil di Struk)</label>
+                <input type="text" id="setStoreName" placeholder="Contoh: SHANDOZ CAFE">
+            </div>
+            <div class="setting-item">
+                <label>Ukuran Kertas Printer Bluetooth</label>
+                <select id="setPrinterSize">
+                    <option value="58">Ukuran Kecil (58mm)</option>
+                    <option value="80">Ukuran Besar (80mm)</option>
+                </select>
+            </div>
+            <button class="btn-action" style="background: #10b981;" onclick="saveStoreSettings()">💾 Simpan Pengaturan Toko</button>
+        </div>
 
-            <div style="background: #f0f8ff; padding: 15px; border-radius: 12px; border: 1px dashed #3b82f6; margin-bottom: 20px;">
-                <h4 style="margin-bottom: 10px; color: #1e3a8a;">+ Tambah Profil Kasir</h4>
-                <input type="text" id="newKasirName" placeholder="Nama Kasir (Contoh: Budi)">
-                <input type="number" id="newKasirPin" placeholder="Buat PIN Kasir (4 Angka)" maxlength="4" pattern="\d*">
-                <button class="bg-primary" style="width:100%; padding:15px; color:white; font-size:15px;" onclick="addKasir()">Simpan Kasir Baru</button>
+        <div class="setting-group" style="border-left: 5px solid #ef4444;">
+            <div class="setting-title" style="color: #ef4444;">🛡️ Pusat Keamanan Owner</div>
+            
+            <div style="background: #fff1f2; padding: 15px; border-radius: 8px; border: 1px dashed #fecdd3; margin-bottom: 15px;">
+                <p style="font-size: 12px; color: #be123c; margin-bottom: 10px; font-weight: 500;">Perubahan PIN akan dilindungi oleh kode OTP yang dikirim otomatis ke Email Anda.</p>
+                <button class="btn-action" style="background: #e11d48;" onclick="requestPinChangeWithOTP()">🔑 Ganti PIN Kasir Owner</button>
             </div>
 
-            <div style="background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px dashed #ef4444;">
-                <h4 style="margin-bottom: 10px; color: #991b1b;">🔑 Ubah PIN Owner</h4>
-                <input type="number" id="newOwnerPin" placeholder="Masukkan PIN Owner Baru" maxlength="4" pattern="\d*">
-                <button class="bg-danger" style="width:100%; padding:15px; color:white; font-size:15px;" onclick="changeOwnerPin()">Update PIN Owner</button>
+            <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border: 1px dashed #bae6fd;">
+                <p style="font-size: 12px; color: #0369a1; margin-bottom: 10px; font-weight: 500;">Lupa atau ingin mengganti kata sandi login Google Anda?</p>
+                <button class="btn-action" style="background: #0ea5e9;" onclick="requestPasswordReset()">📧 Kirim Link Ganti Password</button>
             </div>
         </div>
 
-        <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
-            <h3 style="margin-top: 0; margin-bottom: 20px; color: #10b981; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">🏢 Profil Toko & Struk</h3>
-            
-            <label>Nama Cafe / Toko:</label>
-            <input type="text" id="storeNameInput" placeholder="Contoh: SHANDOZ CAFE">
-            
-            <label>Gambar Logo Struk:</label>
-            <input type="file" id="storeLogoInput" accept="image/*" style="padding: 10px;">
-            <div id="logoPreview" style="max-height: 80px; margin-bottom: 15px;"></div>
-
-            <label>Lebar Kertas Printer:</label>
-            <select id="paperSizeInput">
-                <option value="58">Kertas Kecil (Thermal 58mm)</option>
-                <option value="80">Kertas Besar (Thermal 80mm)</option>
-            </select>
-
-            <button class="bg-success" onclick="saveStoreSettings()" style="width: 100%; padding: 18px; font-size: 16px; color:white;">💾 SIMPAN PENGATURAN</button>
-        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <script src="auth.js"></script>
+
     <script>
-        checkAuth();
-        let currentLogoBase64 = null;
+        checkAuth(); // Pastikan tidak ada penyusup masuk ke halaman setting
 
-        window.onload = function() {
-            // DETEKSI JABATAN: Sembunyikan form PIN & Kasir kalau bukan Owner!
-            const role = localStorage.getItem('currentRole') || 'cashier';
-            if(role !== 'admin') {
-                document.getElementById('adminUserManagement').style.display = 'none';
-            }
-
-            document.getElementById('storeNameInput').value = localStorage.getItem('storeName') || '';
-            currentLogoBase64 = localStorage.getItem('storeLogo');
-            if(currentLogoBase64) {
-                document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
-            }
-            const ps = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
-            document.getElementById('paperSizeInput').value = ps.paperSize;
-            renderUserList();
-        }
-
-        function renderUserList() {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            document.getElementById('usersList').innerHTML = users.map((u, i) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:15px; margin-bottom:10px; border-radius:12px;">
-                    <div>
-                        <b style="font-size:16px;">${u.name}</b> <span style="font-size:10px; background:${u.role === 'admin' ? '#3b82f6' : '#10b981'}; color:white; padding:3px 8px; border-radius:10px; margin-left:5px;">${u.role.toUpperCase()}</span><br>
-                        <small style="color:#64748b;">PIN: <b>${u.pin}</b></small>
-                    </div>
-                    ${u.role !== 'admin' ? `<button class="bg-danger" style="padding:8px 12px; font-size:12px; color:white;" onclick="deleteUser(${i})">Hapus</button>` : `<span style="font-size:24px;">👑</span>`}
-                </div>
-            `).join('');
-        }
-
-        // PENGAMANAN GANDA DI FUNGSI KLIK
-        function addKasir() {
-            if(localStorage.getItem('currentRole') !== 'admin') return alert("Akses Ditolak! Khusus Owner.");
-            const name = document.getElementById('newKasirName').value;
-            const pin = document.getElementById('newKasirPin').value;
-            if(!name || pin.length !== 4) return alert("Gagal! Nama dan PIN wajib diisi.");
-            
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            users.push({ id: 'kasir_'+Date.now(), name: name, role: 'cashier', pin: pin });
-            localStorage.setItem('users', JSON.stringify(users)); 
-            document.getElementById('newKasirName').value = ''; document.getElementById('newKasirPin').value = '';
-            renderUserList(); alert("Sukses");
-        }
-
-        function changeOwnerPin() {
-            if(localStorage.getItem('currentRole') !== 'admin') return alert("Akses Ditolak! Khusus Owner.");
-            const newPin = document.getElementById('newOwnerPin').value;
-            if(newPin.length !== 4) return alert("Gagal! PIN wajib 4 angka.");
-            
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const ownerIndex = users.findIndex(u => u.role === 'admin'); 
-            if(ownerIndex !== -1) {
-                users[ownerIndex].pin = newPin; 
-                localStorage.setItem('users', JSON.stringify(users)); 
-                alert("Sukses"); document.getElementById('newOwnerPin').value = ''; renderUserList();
-            }
-        }
-
-        function deleteUser(index) {
-            if(localStorage.getItem('currentRole') !== 'admin') return alert("Akses Ditolak! Khusus Owner.");
-            if(confirm("Hapus?")) {
-                const users = JSON.parse(localStorage.getItem('users') || '[]');
-                users.splice(index, 1); localStorage.setItem('users', JSON.stringify(users)); renderUserList();
-            }
-        }
-
-        // AUTO-KOMPRES LOGO
-        document.getElementById('storeLogoInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 300; 
-                        let width = img.width; let height = img.height;
-                        if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
-                        canvas.width = width; canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        currentLogoBase64 = canvas.toDataURL('image/jpeg', 0.8); 
-                        document.getElementById('logoPreview').innerHTML = `<img src="${currentLogoBase64}" style="max-height:80px;">`;
-                    };
-                    img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
-            }
+        // 1. FUNGSI LOAD DATA AWAL
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('setStoreName').value = localStorage.getItem('storeName') || "SHANDOZ CAFE";
+            const printerConfig = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58"}');
+            document.getElementById('setPrinterSize').value = printerConfig.paperSize;
         });
 
+        // 2. FUNGSI SIMPAN INFO TOKO
         function saveStoreSettings() {
-            const sName = document.getElementById('storeNameInput').value;
-            const pSize = document.getElementById('paperSizeInput').value;
+            const role = localStorage.getItem('currentRole');
+            if(role !== 'admin') return alert("Hanya Owner yang berhak merubah info toko!");
+
+            const newName = document.getElementById('setStoreName').value.trim();
+            const newSize = document.getElementById('setPrinterSize').value;
             
-            localStorage.setItem('storeName', sName);
-            if (currentLogoBase64) localStorage.setItem('storeLogo', currentLogoBase64); 
-            localStorage.setItem('printerSettings', JSON.stringify({ paperSize: pSize, autoPrint: true }));
+            if(newName) localStorage.setItem('storeName', newName);
+            localStorage.setItem('printerSettings', JSON.stringify({ paperSize: newSize, autoPrint: true }));
             
-            // SISTEM SINKRONISASI LOGO DAN NAMA TOKO KE CLOUD
-            const syncSettings = { storeName: sName, storeLogo: currentLogoBase64 || '', paperSize: pSize };
-            localStorage.setItem('settings', JSON.stringify(syncSettings));
+            alert("✅ Pengaturan toko berhasil disimpan!");
+        }
+
+        // 3. MESIN CANGGIH GANTI PIN DENGAN VERIFIKASI OTP EMAILJS
+        let generatedOTP = "";
+
+        function requestPinChangeWithOTP() {
+            const role = localStorage.getItem('currentRole');
+            if(role !== 'admin') return alert("❌ Akses Ditolak! Hanya Owner yang berhak mengganti PIN Utama.");
+
+            const currentUser = auth.currentUser;
+            let emailTarget = currentUser ? currentUser.email : prompt("Masukkan Email Anda untuk menerima kode OTP:");
             
-            alert('Sukses');
+            if(!emailTarget) return;
+
+            // Bikin 4 Angka OTP Acak (Contoh: 4921)
+            generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+
+            showLoader(true);
+
+            // MENGIRIM SURAT LEWAT MESIN EMAILJS
+            emailjs.send("service_s4n2kxr", "template_bkbzv39", {
+                email: emailTarget,
+                otp_code: generatedOTP
+            }).then(function(response) {
+                showLoader(false);
+                
+                // Minta Bos masukin OTP yang masuk ke Email
+                let inputOTP = prompt(`🔒 KODE OTP TERKIRIM!\nSilakan cek kotak masuk atau folder spam email: ${emailTarget}\n\nMasukkan 4 Digit Kode OTP di bawah ini:`);
+                
+                if (inputOTP === generatedOTP) {
+                    // JIKA OTP BENAR, SURUH MASUKIN PIN BARU
+                    let newPin = prompt("✅ VERIFIKASI BERHASIL!\n\nSilakan buat 4 digit PIN BARU Anda:");
+                    if (newPin && newPin.length === 4 && !isNaN(newPin)) {
+                        simpanPinOwnerBaru(newPin);
+                    } else {
+                        alert("❌ Gagal. PIN wajib berisi 4 angka!");
+                    }
+                } else {
+                    alert("❌ KODE OTP SALAH ATAU KADALUARSA!");
+                }
+
+            }, function(error) {
+                showLoader(false);
+                alert("❌ Gagal mengirim email OTP. Pastikan koneksi internet stabil.\nDetail: " + JSON.stringify(error));
+            });
+        }
+
+        // 4. FUNGSI PENYIMPANAN PIN BARU KE FIREBASE
+        function simpanPinOwnerBaru(newPin) {
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            let ownerIndex = users.findIndex(u => u.role === 'admin');
+            
+            if(ownerIndex > -1) {
+                users[ownerIndex].pin = newPin;
+                localStorage.setItem('users', JSON.stringify(users)); // Otomatis kesedot Firebase via auth.js
+                alert("🎉 PIN Kemananan Owner berhasil diganti!");
+            } else {
+                alert("Data Owner tidak ditemukan di sistem.");
+            }
         }
     </script>
 </body>
