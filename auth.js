@@ -75,16 +75,24 @@ function mulaiSinkronisasiCloud() {
         isSyncingFromCloud = true; 
         const data = snap.val() || {};
 
+        // 1. OTOMATIS BIKIN PROFIL OWNER JIKA AKUN BARU DAFTAR
+        let usersData = data.users;
+        if (!usersData || usersData === '[]' || (Array.isArray(usersData) && usersData.length === 0)) {
+            const ownerName = localStorage.getItem('currentUser') || "Owner";
+            const defaultArray = [{ id: 'owner_1', name: ownerName, role: 'admin', pin: 'SETUP' }];
+            usersData = JSON.stringify(defaultArray);
+            userRef.child('users').set(usersData); // Tembak langsung ke awan!
+        }
+
         const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
         
         cloudKeys.forEach(key => {
-            if (data[key] !== undefined) {
-                let val = data[key];
-                
-                // PERBAIKAN FATAL: Memaksa Firebase mengembalikan format Array agar Laporan tidak Crash!
+            let val = (key === 'users' && !data.users) ? usersData : data[key];
+            
+            if (val !== undefined) {
                 if (typeof val === 'object') {
                     if (['products', 'sales', 'users', 'expenses'].includes(key) && !Array.isArray(val)) {
-                        val = Object.values(val); // Paksa jadi Array
+                        val = Object.values(val); 
                     }
                     localStorage.setItem(key, JSON.stringify(val));
                 } else {
@@ -101,7 +109,6 @@ function mulaiSinkronisasiCloud() {
         if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
         if(typeof initDashboardData === 'function') initDashboardData();
         if(typeof renderProfiles === 'function') renderProfiles();
-        // Update: Memanggil fungsi yang benar di reports.js
         if(typeof loadFinanceReports === 'function') loadFinanceReports();
 
         isSyncingFromCloud = false; 
@@ -113,13 +120,12 @@ function mulaiSinkronisasiCloud() {
         const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
         
         if (!isSyncingFromCloud && cloudKeys.includes(key)) {
-            // KIRIM SEBAGAI STRING JSON BIAR FIREBASE TIDAK MERUSAKNYA
             userRef.child(key).set(value).catch(e => console.error(e));
         }
     };
 }
 
-// === FUNGSI CEK OTENTIKASI & JURUS BYPASS INSTAN ===
+// === FUNGSI CEK OTENTIKASI ===
 function checkAuth() {
     const path = window.location.pathname;
     const isIndex = path.endsWith('index.html') || path.endsWith('/Kasir/') || path === '/' || path.includes('index');
