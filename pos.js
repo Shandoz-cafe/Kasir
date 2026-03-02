@@ -145,7 +145,6 @@ function renderPreviewModal(data, isCopy) {
     document.getElementById('receiptPreviewContent').innerHTML = contentHTML;
     document.getElementById('previewModal').style.display = 'flex';
     
-    // Aktifkan kembali tombol cetak
     let btnCetak = document.querySelector('.bg-success');
     if(btnCetak) btnCetak.disabled = false;
 
@@ -155,7 +154,6 @@ function renderPreviewModal(data, isCopy) {
 function confirmAndPrint() {
     if(!activePrintData) return;
     
-    // PENGAMAN 1: Matikan tombol agar Kasir tidak menekan berkali-kali (Mencegah struk dobel)
     let btnCetak = document.querySelector('.bg-success');
     if(btnCetak) btnCetak.disabled = true;
 
@@ -169,26 +167,30 @@ function confirmAndPrint() {
         let sales = [];
         try { sales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(sales)) sales = Object.values(sales); } catch(e) { sales = []; }
         
-        // PENGAMAN 2: Cek apakah ID transaksi ini sudah ada (Mencegah duplikat jaringan)
         if (!sales.find(s => s.id === activePrintData.id)) {
             sales.push(activePrintData); 
             localStorage.setItem('sales', JSON.stringify(sales));
         }
         
-        isReprintMode = true; // Kunci permanen agar tidak nge-save dua kali walau delay
+        isReprintMode = true; 
     }
     
     const printHTML = document.getElementById('receiptPreviewContent').innerHTML;
-    window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
-
-    setTimeout(() => { 
-        cart = []; 
-        document.getElementById('cashInput').value = ''; 
-        document.getElementById('custName').value = ''; 
-        closePreview(); 
-        initPOS(); 
-        renderCart();
-    }, 1500);
+    
+    // === FIX TERPENTING: JEDA WAKTU SINKRONISASI ===
+    // Menunggu 1 detik agar Firebase selesai Upload data ke awan sebelum dialihkan ke RawBT
+    setTimeout(() => {
+        window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
+        
+        setTimeout(() => { 
+            cart = []; 
+            document.getElementById('cashInput').value = ''; 
+            document.getElementById('custName').value = ''; 
+            closePreview(); 
+            initPOS(); 
+            renderCart();
+        }, 1500);
+    }, 1000); // 1000ms delay = 1 Detik Nafas untuk Firebase
 }
 
 function showPosHistory() {
