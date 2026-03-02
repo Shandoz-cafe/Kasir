@@ -121,7 +121,8 @@
             generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
             showLoader(true);
 
-            emailjs.send("service_s4n2kxr", "template_bkbzv39", {
+            // === SUDAH DIUPDATE KE TEMPLATE ID YANG BARU ===
+            emailjs.send("service_s4n2kxr", "template_c6f0gjr", {
                 email: emailTarget, otp_code: generatedOTP
             }).then(function() {
                 showLoader(false);
