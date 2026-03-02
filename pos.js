@@ -6,7 +6,9 @@ let isReprintMode = false;
 const getPrinterSettings = () => JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58", "autoPrint":true}');
 
 function initPOS() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    let products = [];
+    try { products = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(products)) products = Object.values(products); } catch(e) { products = []; }
+    
     let categories = [...new Set(products.map(p => p.category || 'Umum'))];
     categories.sort((a, b) => a.localeCompare(b)); 
     const catOptions = document.getElementById('categoryOptions');
@@ -15,7 +17,9 @@ function initPOS() {
 }
 
 function filterAndSortProducts() {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    let products = [];
+    try { products = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(products)) products = Object.values(products); } catch(e) { products = []; }
+    
     const searchQuery = document.getElementById('searchInput').value.toLowerCase();
     const filterValue = document.getElementById('filterSelect').value; 
     let filtered = products.filter(p => p.name.toLowerCase().includes(searchQuery));
@@ -36,7 +40,9 @@ function filterAndSortProducts() {
 }
 
 function addToCart(id) {
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    let products = [];
+    try { products = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(products)) products = Object.values(products); } catch(e) { products = []; }
+    
     const p = products.find(x => x.id === id);
     const existing = cart.find(x => x.id === id);
     if(existing) {
@@ -82,7 +88,9 @@ function previewCheckout() {
 }
 
 function reprintSale(saleId) {
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    let sales = [];
+    try { sales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(sales)) sales = Object.values(sales); } catch(e) { sales = []; }
+    
     const sale = sales.find(s => String(s.id) === String(saleId));
     if(!sale) return alert('Data tidak ditemukan');
     isReprintMode = true; activePrintData = sale;
@@ -137,30 +145,56 @@ function renderPreviewModal(data, isCopy) {
     document.getElementById('receiptPreviewContent').innerHTML = contentHTML;
     document.getElementById('previewModal').style.display = 'flex';
     
+    // Aktifkan kembali tombol cetak
+    let btnCetak = document.querySelector('.bg-success');
+    if(btnCetak) btnCetak.disabled = false;
+
     if(settings.autoPrint && !isCopy && !isReprintMode) { confirmAndPrint(); }
 }
 
 function confirmAndPrint() {
     if(!activePrintData) return;
+    
+    // PENGAMAN 1: Matikan tombol agar Kasir tidak menekan berkali-kali (Mencegah struk dobel)
+    let btnCetak = document.querySelector('.bg-success');
+    if(btnCetak) btnCetak.disabled = true;
+
     if (!isReprintMode) {
-        const products = JSON.parse(localStorage.getItem('products') || '[]');
+        let products = [];
+        try { products = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(products)) products = Object.values(products); } catch(e) { products = []; }
+        
         activePrintData.items.forEach(cItem => { const p = products.find(x => x.id === cItem.id); if(p) p.stock -= cItem.qty; });
         localStorage.setItem('products', JSON.stringify(products));
-        const sales = JSON.parse(localStorage.getItem('sales') || '[]');
-        sales.push(activePrintData); localStorage.setItem('sales', JSON.stringify(sales));
+        
+        let sales = [];
+        try { sales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(sales)) sales = Object.values(sales); } catch(e) { sales = []; }
+        
+        // PENGAMAN 2: Cek apakah ID transaksi ini sudah ada (Mencegah duplikat jaringan)
+        if (!sales.find(s => s.id === activePrintData.id)) {
+            sales.push(activePrintData); 
+            localStorage.setItem('sales', JSON.stringify(sales));
+        }
+        
+        isReprintMode = true; // Kunci permanen agar tidak nge-save dua kali walau delay
     }
     
     const printHTML = document.getElementById('receiptPreviewContent').innerHTML;
     window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
 
     setTimeout(() => { 
-        if(!isReprintMode) { cart = []; document.getElementById('cashInput').value = ''; document.getElementById('custName').value = ''; }
-        closePreview(); initPOS(); renderCart();
+        cart = []; 
+        document.getElementById('cashInput').value = ''; 
+        document.getElementById('custName').value = ''; 
+        closePreview(); 
+        initPOS(); 
+        renderCart();
     }, 1500);
 }
 
 function showPosHistory() {
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+    let sales = [];
+    try { sales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(sales)) sales = Object.values(sales); } catch(e) { sales = []; }
+    
     const recentSales = sales.slice(-20).reverse();
     const tbody = document.getElementById('posHistoryList');
     if(!tbody) return;
