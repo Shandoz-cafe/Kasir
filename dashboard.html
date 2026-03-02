@@ -7,12 +7,26 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* TAMBAHAN CSS KHUSUS UNTUK KOTAK ABOUT DEVELOPER */
+        .about-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;}
+        .about-box { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%; text-align: center; color: white; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); position: relative; overflow: hidden;}
+        .about-box::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(0,0,0,0) 70%); pointer-events: none; }
+        .about-title { font-size: 24px; font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; background: -webkit-linear-gradient(#3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .about-version { font-size: 11px; color: #94a3b8; letter-spacing: 3px; margin-bottom: 25px; display: block;}
+        .about-text { font-size: 13px; color: #cbd5e1; line-height: 1.6; text-align: justify; margin-bottom: 20px; font-weight: 400;}
+        .about-highlight { color: #fff; font-weight: 600; }
+        .dev-badge { display: inline-block; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; padding: 8px 15px; border-radius: 30px; font-size: 12px; font-weight: 700; color: #60a5fa; margin-top: 10px; margin-bottom: 20px;}
+        .btn-close-about { background: #334155; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-close-about:hover { background: #475569; }
+    </style>
 </head>
 <body>
 
     <header>
         <h2><span style="color:#10b981;">●</span> Sistem Operasi</h2>
         <div style="display: flex; gap: 8px;">
+            <button class="bg-primary btn-head" style="background:#3b82f6;" onclick="document.getElementById('aboutModal').style.display='flex'">ℹ️ Info</button>
             <button class="bg-warning btn-head" onclick="window.location.href='profiles.html'">👥 Ganti Profil</button>
             <button class="bg-danger btn-head" onclick="logout()">🛑 Keluar</button>
         </div>
@@ -58,7 +72,28 @@
         
         <div style="text-align: center; margin-top: 30px; opacity: 0.5;">
             <h4 style="font-weight: 900; letter-spacing: 2px; color: #0f172a;">SHANDOZ SYSTEMS</h4>
-            <p style="font-size: 10px; font-weight: bold;">v4.0 UNLOCKED EDITION</p>
+            <p style="font-size: 10px; font-weight: bold;">v4.0 ENTERPRISE EDITION</p>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="about-modal">
+        <div class="about-box">
+            <h2 class="about-title">SHANDOZ POS</h2>
+            <span class="about-version">ENTERPRISE EDITION V4.0</span>
+            
+            <div class="dev-badge">👨‍💻 ARCHITECTED & DEVELOPED BY OWNER</div>
+
+            <p class="about-text">
+                Shandoz POS is not just a cash register; it is a meticulously engineered <span class="about-highlight">command center</span> designed for high-energy, modern F&B operations. Built from the ground up to eliminate bottlenecks, this system brings cutting-edge enterprise technology directly to the fingertips of owners and staff.
+            </p>
+            <p class="about-text">
+                Powered by a relentless <span class="about-highlight">Real-Time Cloud Synchronization Engine</span>, it ensures every transaction and inventory update is securely mirrored across all devices instantly. Featuring strictly enforced Role-Based Access Control, automated bank-standard financial reporting, and a seamless offline-to-cloud architecture.
+            </p>
+            <p class="about-text" style="text-align: center; font-style: italic; color: #94a3b8;">
+                "Bridging the gap between elegant design and hardcore backend infrastructure."
+            </p>
+            
+            <button class="btn-close-about" onclick="document.getElementById('aboutModal').style.display='none'">Acknowledge</button>
         </div>
     </div>
 
@@ -91,4 +126,3 @@
     </script>
 </body>
 </html>
- 
