@@ -1,62 +1,61 @@
 // === 1. CONFIG FIREBASE ASLI SHANDOZ POS ===
 const firebaseConfig = {
-  apiKey: "AIzaSyDWXhCZu0VcDhfKijaDZycA0Th-reUAnNg",
-  authDomain: "shandoz-pos.firebaseapp.com",
-  databaseURL: "https://shandoz-pos-default-rtdb.firebaseio.com",
-  projectId: "shandoz-pos",
-  storageBucket: "shandoz-pos.firebasestorage.app",
-  messagingSenderId: "451234972920",
-  appId: "1:451234972920:web:dead8905720cb55329670d"
+    apiKey: "AIzaSyDWXhCZu0VcDhfKijaDZycA0Th-reUAnNg",
+    authDomain: "shandoz-pos.firebaseapp.com",
+    databaseURL: "https://shandoz-pos-default-rtdb.firebaseio.com",
+    projectId: "shandoz-pos",
+    storageBucket: "shandoz-pos.firebasestorage.app",
+    messagingSenderId: "451234972920",
+    appId: "1:451234972920:web:dead8905720cb55329670d"
 };
 
-// Inisialisasi Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// === 2. MESIN SINKRONISASI OTOMATIS (CLOUD SYNC HACK) ===
+// === 2. MESIN SINKRONISASI OTOMATIS (AUTO-SAVE KE AWAN) ===
 const originalSetItem = localStorage.setItem;
 localStorage.setItem = function(key, value) {
-    // 1. Simpan di memori lokal HP
-    originalSetItem.apply(this, arguments); 
-    
-    // 2. Langsung Backup ke Awan!
+    originalSetItem.apply(this, arguments);
     const user = auth.currentUser;
-    if (user && ['products', 'sales', 'users', 'storeName', 'storeLogo', 'printerSettings'].includes(key)) {
-        db.ref('ShandozPOS/' + user.uid + '/' + key).set(value)
-          .catch(err => console.error("Gagal backup ke awan: ", err));
+    // Cek apakah data yang diubah adalah data penting kafe
+    if (user && ['products', 'sales', 'users', 'settings', 'storeName', 'storeLogo'].includes(key)) {
+        try {
+            const dataToSave = (key === 'storeName' || key === 'storeLogo') ? value : JSON.parse(value);
+            db.ref('ShandozPOS/' + user.uid + '/' + key).set(dataToSave);
+        } catch(e) { console.error("Sync Error:", e); }
     }
 };
 
-// === 3. FUNGSI PENGECEKAN LOGIN & TARIK DATA OTOMATIS ===
+// === 3. FUNGSI CEK LOGIN (ANTI-STUCK & AUTO-PULL) ===
 function checkAuth() {
     auth.onAuthStateChanged((user) => {
         const path = window.location.pathname;
-        const isIndex = path.endsWith('index.html') || path === '/' || path.endsWith('Shandoz-cafe/');
+        const isIndex = path.endsWith('index.html') || path.endsWith('/Kasir/') || path === '/' || path.includes('index');
 
         if (user) {
-            // BEGITU LOGIN: Sedot kembali semua data dari Cloud ke HP!
-            db.ref('ShandozPOS/' + user.uid).once('value').then((snapshot) => {
+            localStorage.setItem('userUid', user.uid);
+            localStorage.setItem('currentUser', user.displayName || user.email.split('@')[0]);
+
+            // SEDOT DATA DARI AWAN (Agar Device Lain Update Otomatis)
+            db.ref('ShandozPOS/' + user.uid).on('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const cloudData = snapshot.val();
-                    if(cloudData.products) originalSetItem.call(localStorage, 'products', cloudData.products);
-                    if(cloudData.sales) originalSetItem.call(localStorage, 'sales', cloudData.sales);
-                    if(cloudData.users) originalSetItem.call(localStorage, 'users', cloudData.users);
+                    // Update memori lokal HP tanpa memicu upload balik
+                    if(cloudData.products) originalSetItem.call(localStorage, 'products', JSON.stringify(cloudData.products));
+                    if(cloudData.sales) originalSetItem.call(localStorage, 'sales', JSON.stringify(cloudData.sales));
+                    if(cloudData.users) originalSetItem.call(localStorage, 'users', JSON.stringify(cloudData.users));
+                    if(cloudData.settings) originalSetItem.call(localStorage, 'settings', JSON.stringify(cloudData.settings));
                     if(cloudData.storeName) originalSetItem.call(localStorage, 'storeName', cloudData.storeName);
                     if(cloudData.storeLogo) originalSetItem.call(localStorage, 'storeLogo', cloudData.storeLogo);
-                    if(cloudData.printerSettings) originalSetItem.call(localStorage, 'printerSettings', cloudData.printerSettings);
                 }
                 
+                // Lempar ke profiles.html jika login berhasil
                 if (isIndex) window.location.href = 'profiles.html';
-            }).catch(error => {
-                console.error("Gagal narik data:", error);
-                if (isIndex) window.location.href = 'profiles.html'; 
             });
 
         } else {
+            // Jika belum login, pastikan user ada di halaman depan
             if (!isIndex) window.location.href = 'index.html';
         }
     });
@@ -66,45 +65,20 @@ function checkAuth() {
 function loginWithEmail() {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPass').value;
-    if(!email || !pass) return alert("Email dan Sandi wajib diisi!");
+    if(!email || !pass) return alert("Isi Email & Sandi!");
     
-    const loader = document.getElementById('loader');
-    if(loader) loader.style.display = 'flex';
-    
-    auth.signInWithEmailAndPassword(email, pass).catch((error) => {
-        if(loader) loader.style.display = 'none';
-        alert("Gagal Masuk: " + error.message);
-    });
-}
-
-function registerWithEmail() {
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const pass = document.getElementById('regPass').value;
-    if(!name || !email || !pass) return alert("Isi semua data!");
-
-    const loader = document.getElementById('loader');
-    if(loader) loader.style.display = 'flex';
-
-    auth.createUserWithEmailAndPassword(email, pass).then((userCredential) => {
-        const defaultUser = [{ id: 'admin_'+Date.now(), name: name, role: 'admin', pin: 'SETUP' }];
-        localStorage.setItem('users', JSON.stringify(defaultUser));
-    }).catch((error) => {
-        if(loader) loader.style.display = 'none';
-        alert("Gagal Daftar: " + error.message);
-    });
+    auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Gagal: " + err.message));
 }
 
 function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch((error) => alert("Gagal Google Login: " + error.message));
+    auth.signInWithPopup(provider).catch(err => alert("Gagal Google: " + err.message));
 }
 
-// === 5. FUNGSI LOGOUT (SEKARANG SUDAH AMAN) ===
 function logout() {
-    if(confirm("Yakin ingin keluar dari sistem?")) {
+    if(confirm("Keluar dari sistem?")) {
         auth.signOut().then(() => {
-            localStorage.clear(); // Bersihkan HP karena data sudah aman di Awan
+            localStorage.clear();
             window.location.href = 'index.html';
         });
     }
