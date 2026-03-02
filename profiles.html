@@ -186,6 +186,9 @@
             localStorage.setItem('users', JSON.stringify(users));
             alert("Sukses"); closePinModal(); renderProfiles();
         }
+
+        // TAMPILKAN PROFIL SEKETIKA SAAT HALAMAN DIBUKA
+        document.addEventListener('DOMContentLoaded', renderProfiles);
     </script>
 </body>
 </html>
