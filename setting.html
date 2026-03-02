@@ -9,9 +9,7 @@
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
-       (function(){
-          emailjs.init("pgslV2rXk3tukFEMk"); // PUBLIC KEY BOS
-       })();
+       (function(){ emailjs.init("pgslV2rXk3tukFEMk"); })();
     </script>
 
     <style>
@@ -29,129 +27,120 @@
     <div id="loader">Memproses Data...</div>
 
     <header style="background: #334155;">
-        <h2>⚙️ Pengaturan Sistem</h2>
-        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+        <h2 data-i18n="set_title">⚙️ Pengaturan Sistem</h2>
+        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'" data-i18n="set_back">⬅️ Dashboard</button>
     </header>
 
     <div class="container" style="max-width: 600px; margin: 0 auto; padding-top: 20px;">
         
         <div class="setting-group">
-            <div class="setting-title">🏪 Profil Usaha & Printer</div>
+            <div class="setting-title" data-i18n="set_store">🏪 Profil Usaha & Printer</div>
             <div class="setting-item">
-                <label>Nama Kafe / Toko (Tampil di Struk)</label>
+                <label data-i18n="set_store_name">Nama Kafe / Toko (Tampil di Struk)</label>
                 <input type="text" id="setStoreName" placeholder="Contoh: SHANDOZ CAFE">
             </div>
             <div class="setting-item">
-                <label>Ukuran Kertas Printer Bluetooth</label>
+                <label data-i18n="set_print_size">Ukuran Kertas Printer Bluetooth</label>
                 <select id="setPrinterSize">
                     <option value="58">Ukuran Kecil (58mm)</option>
                     <option value="80">Ukuran Besar (80mm)</option>
                 </select>
             </div>
-            <button class="btn-action" style="background: #10b981;" onclick="saveStoreSettings()">💾 Simpan Pengaturan Toko</button>
+            <button class="btn-action" style="background: #10b981;" onclick="saveStoreSettings()" data-i18n="set_btn_store">💾 Simpan Pengaturan Toko</button>
+        </div>
+
+        <div class="setting-group" style="border-left: 5px solid #8b5cf6;">
+            <div class="setting-title" data-i18n="set_lang_title">🌐 Bahasa / Language</div>
+            <div class="setting-item">
+                <label data-i18n="set_lang_label">Pilih Bahasa Aplikasi</label>
+                <select id="setLanguageDropdown">
+                    <option value="id">🇮🇩 Bahasa Indonesia</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+            </div>
+            <button class="btn-action" style="background: #8b5cf6;" onclick="saveLanguage()" data-i18n="set_btn_lang">💾 Simpan Bahasa</button>
         </div>
 
         <div class="setting-group" style="border-left: 5px solid #ef4444;">
-            <div class="setting-title" style="color: #ef4444;">🛡️ Pusat Keamanan Owner</div>
+            <div class="setting-title" style="color: #ef4444;" data-i18n="set_sec_title">🛡️ Pusat Keamanan Owner</div>
             
             <div style="background: #fff1f2; padding: 15px; border-radius: 8px; border: 1px dashed #fecdd3; margin-bottom: 15px;">
-                <p style="font-size: 12px; color: #be123c; margin-bottom: 10px; font-weight: 500;">Perubahan PIN akan dilindungi oleh kode OTP yang dikirim otomatis ke Email Anda.</p>
-                <button class="btn-action" style="background: #e11d48;" onclick="requestPinChangeWithOTP()">🔑 Ganti PIN Kasir Owner</button>
+                <p style="font-size: 12px; color: #be123c; margin-bottom: 10px; font-weight: 500;" data-i18n="set_sec_desc1">Perubahan PIN akan dilindungi oleh kode OTP yang dikirim otomatis ke Email Anda.</p>
+                <button class="btn-action" style="background: #e11d48;" onclick="requestPinChangeWithOTP()" data-i18n="set_btn_pin">🔑 Ganti PIN Kasir Owner</button>
             </div>
 
             <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border: 1px dashed #bae6fd;">
-                <p style="font-size: 12px; color: #0369a1; margin-bottom: 10px; font-weight: 500;">Lupa atau ingin mengganti kata sandi login Google Anda?</p>
-                <button class="btn-action" style="background: #0ea5e9;" onclick="requestPasswordReset()">📧 Kirim Link Ganti Password</button>
+                <p style="font-size: 12px; color: #0369a1; margin-bottom: 10px; font-weight: 500;" data-i18n="set_sec_desc2">Lupa atau ingin mengganti kata sandi login Google Anda?</p>
+                <button class="btn-action" style="background: #0ea5e9;" onclick="requestPasswordReset()" data-i18n="set_btn_pass">📧 Kirim Link Ganti Password</button>
             </div>
         </div>
-
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="auth.js"></script>
+    
+    <script src="lang.js"></script>
 
     <script>
-        checkAuth(); // Pastikan tidak ada penyusup masuk ke halaman setting
+        checkAuth(); 
 
-        // 1. FUNGSI LOAD DATA AWAL
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('setStoreName').value = localStorage.getItem('storeName') || "SHANDOZ CAFE";
             const printerConfig = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58"}');
             document.getElementById('setPrinterSize').value = printerConfig.paperSize;
+            document.getElementById('setLanguageDropdown').value = localStorage.getItem('appLang') || 'id';
         });
 
-        // 2. FUNGSI SIMPAN INFO TOKO
         function saveStoreSettings() {
             const role = localStorage.getItem('currentRole');
-            if(role !== 'admin') return alert("Hanya Owner yang berhak merubah info toko!");
-
+            if(role !== 'admin') return alert("Hanya Owner!");
             const newName = document.getElementById('setStoreName').value.trim();
             const newSize = document.getElementById('setPrinterSize').value;
-            
             if(newName) localStorage.setItem('storeName', newName);
             localStorage.setItem('printerSettings', JSON.stringify({ paperSize: newSize, autoPrint: true }));
-            
-            alert("✅ Pengaturan toko berhasil disimpan!");
+            alert("✅ Sukses!");
         }
 
-        // 3. MESIN CANGGIH GANTI PIN DENGAN VERIFIKASI OTP EMAILJS
-        let generatedOTP = "";
+        function saveLanguage() {
+            const newLang = document.getElementById('setLanguageDropdown').value;
+            setLanguage(newLang); // Panggil fungsi dari lang.js
+            alert(newLang === 'en' ? "✅ Language updated successfully!" : "✅ Bahasa berhasil diperbarui!");
+        }
 
+        let generatedOTP = "";
         function requestPinChangeWithOTP() {
             const role = localStorage.getItem('currentRole');
-            if(role !== 'admin') return alert("❌ Akses Ditolak! Hanya Owner yang berhak mengganti PIN Utama.");
+            if(role !== 'admin') return alert("❌ Hanya Owner!");
 
             const currentUser = auth.currentUser;
-            let emailTarget = currentUser ? currentUser.email : prompt("Masukkan Email Anda untuk menerima kode OTP:");
-            
+            let emailTarget = currentUser ? currentUser.email : prompt("Masukkan Email Anda:");
             if(!emailTarget) return;
 
-            // Bikin 4 Angka OTP Acak (Contoh: 4921)
             generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
-
             showLoader(true);
 
-            // MENGIRIM SURAT LEWAT MESIN EMAILJS
             emailjs.send("service_s4n2kxr", "template_bkbzv39", {
-                email: emailTarget,
-                otp_code: generatedOTP
-            }).then(function(response) {
+                email: emailTarget, otp_code: generatedOTP
+            }).then(function() {
                 showLoader(false);
-                
-                // Minta Bos masukin OTP yang masuk ke Email
-                let inputOTP = prompt(`🔒 KODE OTP TERKIRIM!\nSilakan cek kotak masuk atau folder spam email: ${emailTarget}\n\nMasukkan 4 Digit Kode OTP di bawah ini:`);
-                
+                let inputOTP = prompt(`🔒 OTP TERKIRIM!\nCek email: ${emailTarget}\nMasukkan 4 Angka OTP:`);
                 if (inputOTP === generatedOTP) {
-                    // JIKA OTP BENAR, SURUH MASUKIN PIN BARU
-                    let newPin = prompt("✅ VERIFIKASI BERHASIL!\n\nSilakan buat 4 digit PIN BARU Anda:");
-                    if (newPin && newPin.length === 4 && !isNaN(newPin)) {
-                        simpanPinOwnerBaru(newPin);
-                    } else {
-                        alert("❌ Gagal. PIN wajib berisi 4 angka!");
-                    }
-                } else {
-                    alert("❌ KODE OTP SALAH ATAU KADALUARSA!");
-                }
-
-            }, function(error) {
-                showLoader(false);
-                alert("❌ Gagal mengirim email OTP. Pastikan koneksi internet stabil.\nDetail: " + JSON.stringify(error));
-            });
+                    let newPin = prompt("✅ BERHASIL!\nBuat 4 digit PIN BARU:");
+                    if (newPin && newPin.length === 4 && !isNaN(newPin)) simpanPinOwnerBaru(newPin);
+                    else alert("❌ Gagal. PIN wajib 4 angka!");
+                } else alert("❌ OTP SALAH!");
+            }, function(error) { showLoader(false); alert("❌ Gagal kirim email OTP."); });
         }
 
-        // 4. FUNGSI PENYIMPANAN PIN BARU KE FIREBASE
         function simpanPinOwnerBaru(newPin) {
             let users = JSON.parse(localStorage.getItem('users') || '[]');
             let ownerIndex = users.findIndex(u => u.role === 'admin');
-            
             if(ownerIndex > -1) {
                 users[ownerIndex].pin = newPin;
-                localStorage.setItem('users', JSON.stringify(users)); // Otomatis kesedot Firebase via auth.js
-                alert("🎉 PIN Kemananan Owner berhasil diganti!");
-            } else {
-                alert("Data Owner tidak ditemukan di sistem.");
+                localStorage.setItem('users', JSON.stringify(users)); 
+                alert("🎉 PIN Kemananan berhasil diganti!");
             }
         }
     </script>
