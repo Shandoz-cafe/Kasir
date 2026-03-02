@@ -32,7 +32,6 @@ function loginWithEmail() {
         .catch((error) => { showLoader(false); alert("Gagal Login: " + error.message); });
 }
 
-// === UPDATE: PENAMBAHAN EMAIL SAMBUTAN & VERIFIKASI ===
 function registerWithEmail() {
     const name = document.getElementById('regName').value;
     const email = document.getElementById('regEmail').value;
@@ -42,12 +41,10 @@ function registerWithEmail() {
     showLoader(true);
     auth.createUserWithEmailAndPassword(email, pass).then((userCred) => {
         userCred.user.updateProfile({ displayName: name }).then(() => {
-            // FIREBASE OTOMATIS NGIRIM EMAIL SAMBUTAN & LINK VERIFIKASI
             userCred.user.sendEmailVerification().then(() => {
-                alert("Pendaftaran Berhasil! Email sambutan & link verifikasi telah dikirim ke " + email + ".");
+                alert("Pendaftaran Berhasil! Email verifikasi telah dikirim.");
                 handleSuccessfulLogin(userCred.user);
             }).catch(e => {
-                console.log("Gagal kirim email sambutan", e);
                 handleSuccessfulLogin(userCred.user);
             });
         });
@@ -61,32 +58,18 @@ function loginWithGoogle() {
         .catch((error) => { showLoader(false); alert("Gagal Login Google: " + error.message); });
 }
 
-// === FUNGSI BARU: MINTA GANTI PASSWORD VIA EMAIL (ANTI-GHOSTING) ===
 function requestPasswordReset() {
-    // 1. Coba intip apakah Bos sudah ngetik email di kolom login
     const loginInput = document.getElementById('loginEmail');
     let emailTarget = loginInput ? loginInput.value.trim() : "";
+    if (!emailTarget) emailTarget = prompt("Masukkan Email untuk mereset sandi:");
+    else if (!confirm("Kirim link ganti sandi ke " + emailTarget + " ?")) return;
 
-    // 2. Kalau kolom isiannya kosong, paksa Bos ketik manual
-    if (!emailTarget) {
-        emailTarget = prompt("Masukkan Alamat Email akun Anda untuk mereset kata sandi:");
-    } else {
-        // Kalau udah ngetik di kolom login, konfirmasi dulu biar ga salah kirim
-        const confirmReset = confirm("Kirim link ganti sandi ke email: " + emailTarget + " ?");
-        if (!confirmReset) return;
-    }
-
-    // Kalau Bos klik Batal atau ngosongin isian, hentikan proses
     if (!emailTarget) return;
-
     showLoader(true);
     auth.sendPasswordResetEmail(emailTarget).then(() => {
         showLoader(false);
-        alert("🔒 Berhasil! Tautan aman untuk mengganti kata sandi telah dikirim ke " + emailTarget + ". Silakan cek kotak masuk atau folder spam Anda.");
-    }).catch(err => {
-        showLoader(false);
-        alert("Gagal mengirim email: " + err.message);
-    });
+        alert("🔒 Link ganti sandi telah dikirim ke " + emailTarget);
+    }).catch(err => { showLoader(false); alert("Gagal mengirim email: " + err.message); });
 }
 
 function handleSuccessfulLogin(user) {
@@ -104,12 +87,13 @@ function logout() {
     }
 }
 
-// === MESIN SINKRONISASI CLOUD ===
+// === MESIN SINKRONISASI CLOUD (ULTIMATE + WATCHDOG) ===
 function mulaiSinkronisasiCloud() {
     const uid = localStorage.getItem('userUid');
     if (!uid) return;
     const userRef = db.ref('ShandozPOS/' + uid);
 
+    // 1. SEDOT DATA DARI AWAN (DOWNLOAD)
     userRef.on('value', (snap) => {
         isSyncingFromCloud = true; 
         const data = snap.val() || {};
@@ -122,7 +106,7 @@ function mulaiSinkronisasiCloud() {
             userRef.child('users').set(usersData); 
         }
 
-        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
+        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
         
         cloudKeys.forEach(key => {
             let val = (key === 'users' && !data.users) ? usersData : data[key];
@@ -151,15 +135,33 @@ function mulaiSinkronisasiCloud() {
         isSyncingFromCloud = false; 
     });
 
+    // 2. SENSOR PINTU DEPAN (OVERRIDE LOKAL)
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
-        
+        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
         if (!isSyncingFromCloud && cloudKeys.includes(key)) {
             userRef.child(key).set(value).catch(e => console.error(e));
         }
     };
+
+    // 3. MESIN WATCHDOG (SATPAM PATROLI TIAP 2 DETIK)
+    const watchKeys = ['products', 'sales', 'users', 'expenses'];
+    let lastStates = {};
+    watchKeys.forEach(k => lastStates[k] = localStorage.getItem(k));
+
+    setInterval(() => {
+        if (isSyncingFromCloud) return; 
+        
+        watchKeys.forEach(key => {
+            let currentState = localStorage.getItem(key);
+            // Kalau terdeteksi ada perubahan diam-diam di memori HP (Jalan Belakang)
+            if (currentState !== lastStates[key] && currentState !== null) {
+                lastStates[key] = currentState; 
+                userRef.child(key).set(currentState).catch(e => console.error("Gagal Auto-Save:", e));
+            }
+        });
+    }, 2000);
 }
 
 // === FUNGSI CEK OTENTIKASI ===
