@@ -1,3 +1,4 @@
+// KONFIGURASI FIREBASE KAMU
 const firebaseConfig = {
     apiKey: "AIzaSyDWXhCZu0VcDhfKijaDZycA0Th-reUAnNg",
     authDomain: "shandoz-pos.firebaseapp.com",
@@ -8,6 +9,7 @@ const firebaseConfig = {
     appId: "1:451234972920:web:dead8905720cb55329670d"
 };
 
+// WAJIB PAKAI FORMAT INI UNTUK HTML BIASA (JANGAN PAKAI IMPORT)
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
@@ -54,9 +56,14 @@ function handleSuccessfulLogin(user) {
     window.location.href = 'profiles.html';
 }
 
+// ==========================================
+// MESIN SINKRONISASI CLOUD (REAL-TIME)
+// ==========================================
 function mulaiSinkronisasiCloud() {
     const uid = localStorage.getItem('userUid');
     if (!uid) return;
+    
+    // Data dikunci berdasarkan UID Gmail (Agar data kafe A tidak campur dengan Kafe B)
     const userRef = db.ref('tenants/' + uid);
 
     userRef.once('value').then((snapshot) => {
@@ -70,14 +77,16 @@ function mulaiSinkronisasiCloud() {
             });
         }
         
+        // MENDENGARKAN PERUBAHAN DATA DARI DEVICE LAIN (REALTIME)
         userRef.on('value', (snap) => {
-            isSyncingFromCloud = true;
+            isSyncingFromCloud = true; // Kunci sementara agar tidak looping
             const data = snap.val() || {};
+            
+            // Tarik data dari Cloud ke Lokal HP ini
             localStorage.setItem('users', JSON.stringify(data.users || []));
             localStorage.setItem('products', JSON.stringify(data.products || []));
             localStorage.setItem('sales', JSON.stringify(data.sales || []));
             
-            // SINKRONISASI PENGATURAN LOGO DAN TOKO
             if(data.settings && Object.keys(data.settings).length > 0) {
                 localStorage.setItem('settings', JSON.stringify(data.settings));
                 if(data.settings.storeName) localStorage.setItem('storeName', data.settings.storeName);
@@ -85,20 +94,26 @@ function mulaiSinkronisasiCloud() {
                 if(data.settings.paperSize) localStorage.setItem('printerSettings', JSON.stringify({paperSize: data.settings.paperSize, autoPrint: true}));
             }
             
+            // Refresh layar otomatis tanpa reload halaman
             if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
             if(typeof initDashboardData === 'function') initDashboardData();
             if(typeof renderProfiles === 'function') renderProfiles();
             if(typeof renderUserList === 'function') renderUserList();
-            isSyncingFromCloud = false;
+            
+            isSyncingFromCloud = false; // Buka kunci
         });
     });
 
+    // MENGIRIM DATA KE CLOUD SETIAP ADA PERUBAHAN DI HP INI
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        // Tangkap settings agar ikut terbang ke Cloud
         if (!isSyncingFromCloud && ['products', 'sales', 'users', 'settings'].includes(key)) {
-            try { userRef.child(key).set(JSON.parse(value)); } catch(e) {}
+            try { 
+                userRef.child(key).set(JSON.parse(value)); 
+            } catch(e) {
+                console.error("Gagal sinkronisasi ke Cloud", e);
+            }
         }
     };
 }
