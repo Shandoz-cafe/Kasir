@@ -14,7 +14,7 @@ const auth = firebase.auth();
 const db = firebase.database();
 let isSyncingFromCloud = false;
 
-// === LEM SUPER FIREBASE: Paksa akun nempel permanen di memori HP! ===
+// === LEM SUPER FIREBASE ===
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
 
 function showLoader(show) {
@@ -65,7 +65,7 @@ function logout() {
     }
 }
 
-// === MESIN SINKRONISASI CLOUD (SAPU JAGAT) ===
+// === MESIN SINKRONISASI CLOUD (ANTI-CORRUPT FIREBASE) ===
 function mulaiSinkronisasiCloud() {
     const uid = localStorage.getItem('userUid');
     if (!uid) return;
@@ -75,23 +75,34 @@ function mulaiSinkronisasiCloud() {
         isSyncingFromCloud = true; 
         const data = snap.val() || {};
 
-        if (!data.products) localStorage.setItem('products', '[]');
-        if (!data.sales) localStorage.setItem('sales', '[]');
-        if (!data.users) localStorage.setItem('users', '[]');
-
-        Object.keys(data).forEach(key => {
-            let val = data[key];
-            if (typeof val === 'object') {
-                localStorage.setItem(key, JSON.stringify(val));
-            } else {
-                localStorage.setItem(key, val);
+        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
+        
+        cloudKeys.forEach(key => {
+            if (data[key] !== undefined) {
+                let val = data[key];
+                
+                // PERBAIKAN FATAL: Memaksa Firebase mengembalikan format Array agar Laporan tidak Crash!
+                if (typeof val === 'object') {
+                    if (['products', 'sales', 'users', 'expenses'].includes(key) && !Array.isArray(val)) {
+                        val = Object.values(val); // Paksa jadi Array
+                    }
+                    localStorage.setItem(key, JSON.stringify(val));
+                } else {
+                    localStorage.setItem(key, val);
+                }
             }
         });
+
+        if (!localStorage.getItem('products')) localStorage.setItem('products', '[]');
+        if (!localStorage.getItem('sales')) localStorage.setItem('sales', '[]');
+        if (!localStorage.getItem('expenses')) localStorage.setItem('expenses', '[]');
+        if (!localStorage.getItem('users')) localStorage.setItem('users', '[]');
 
         if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
         if(typeof initDashboardData === 'function') initDashboardData();
         if(typeof renderProfiles === 'function') renderProfiles();
-        if(typeof loadSalesData === 'function') loadSalesData();
+        // Update: Memanggil fungsi yang benar di reports.js
+        if(typeof loadFinanceReports === 'function') loadFinanceReports();
 
         isSyncingFromCloud = false; 
     });
@@ -99,18 +110,11 @@ function mulaiSinkronisasiCloud() {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        const cloudKeys = [
-            'products', 'sales', 'users', 'storeName', 'storeLogo', 'settings', 
-            'expenses', 'pengeluaran', 'history', 'transactions', 'transaksi', 
-            'laporan', 'printerSettings', 'orders'
-        ];
+        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings'];
         
         if (!isSyncingFromCloud && cloudKeys.includes(key)) {
-            try {
-                let dataToSave;
-                try { dataToSave = JSON.parse(value); } catch(e) { dataToSave = value; } 
-                userRef.child(key).set(dataToSave).catch(e => console.error(e));
-            } catch(e) { console.error("Sync Error", e); }
+            // KIRIM SEBAGAI STRING JSON BIAR FIREBASE TIDAK MERUSAKNYA
+            userRef.child(key).set(value).catch(e => console.error(e));
         }
     };
 }
@@ -121,14 +125,12 @@ function checkAuth() {
     const isIndex = path.endsWith('index.html') || path.endsWith('/Kasir/') || path === '/' || path.includes('index');
     const savedUid = localStorage.getItem('userUid');
 
-    // 1. JURUS BYPASS INSTAN: Kalau buka APK dan akun masih nempel, langsung lempar ke Profil!
     if (isIndex && savedUid) {
-        localStorage.removeItem('currentRole'); // Paksa Kasir masukin PIN lagi!
+        localStorage.removeItem('currentRole'); 
         window.location.replace('profiles.html');
         return;
     }
 
-    // 2. JURUS TENDANG INSTAN: Kalau nekat buka menu tanpa login
     if (!isIndex && !savedUid) {
         window.location.replace('index.html');
         return;
@@ -146,7 +148,7 @@ function checkAuth() {
                 window.location.replace('profiles.html');
             }
         } else {
-            if (savedUid) localStorage.clear(); // Bersihkan sisa kotoran kalau sesi Google expired
+            if (savedUid) localStorage.clear(); 
             if (!isIndex) window.location.replace('index.html');
         }
     });
