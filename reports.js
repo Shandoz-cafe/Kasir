@@ -147,7 +147,7 @@ function loadFinanceReports() {
     document.getElementById('docExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
     document.getElementById('docNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
-    // === MENGGAMBAR GRAFIK BATANG (BAR) MEWAH ===
+    // === MENGGAMBAR GRAFIK BATANG (BAR) ===
     const labels = Object.keys(chartData).sort(); 
     const dataOmzet = labels.map(label => chartData[label]);
 
@@ -187,28 +187,117 @@ function addExpense() {
     loadFinanceReports();
 }
 
+// ==========================================
+// MESIN EKSPOR: JPG, PDF ASLI, & EXCEL PROFESIONAL
+// ==========================================
 function exportLaporan(format) {
     if (format === 'pdf') {
-        // PDF MENGGUNAKAN SISTEM BAWAAN DEVICE (JAUH LEBIH RAPI & BISA DICOPY TEKSNYA)
+        // 1. PDF ASLI (Bawaan HP/Sistem)
         document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
         window.print();
-    } else if (format === 'jpg') {
-        // JPG MENGAMBIL SCREENSHOT TAMPILAN DASHBOARD BERWARNA SECARA LANGSUNG
+    } 
+    else if (format === 'jpg') {
+        // 2. JPG GAMBAR (Screenshot bersih tanpa tombol)
         const controlPanel = document.getElementById('controlPanel');
-        controlPanel.style.display = 'none'; // Sembunyikan tombol biar gak ikutan ke-foto
+        controlPanel.style.display = 'none'; 
         
         const uiContainer = document.getElementById('uiContainer');
-        
         html2canvas(uiContainer, { scale: 2, useCORS: true, backgroundColor: '#f0f2f5' }).then(canvas => {
-            controlPanel.style.display = 'flex'; // Munculkan lagi tombolnya
-            
+            controlPanel.style.display = 'flex'; 
             let fileNameDate = document.getElementById('periodeTextUI').innerText.replace(/[^a-zA-Z0-9]/g, '_');
             const link = document.createElement('a');
             link.download = `Visual_Laporan_${fileNameDate}.jpg`;
             link.href = canvas.toDataURL('image/jpeg', 1.0);
             link.click();
         });
+    } 
+    else if (format === 'excel') {
+        // 3. EXCEL ASLI (.xlsx) DENGAN SHEET TERPISAH
+        buatLaporanExcelAsli();
     }
+}
+
+// MESIN PERAKIT EXCEL
+function buatLaporanExcelAsli() {
+    const allSales = JSON.parse(localStorage.getItem('sales') || '[]');
+    const allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]');
+    
+    // Filter sesuai pilihan di layar
+    const sales = allSales.filter(s => matchDate(s.date));
+    const expenses = allExpenses.filter(e => matchDate(e.date));
+
+    const wb = XLSX.utils.book_new(); // Buat file Excel Baru
+    const periodeName = document.getElementById('periodeTextUI').innerText;
+
+    // --- SHEET 1: RINGKASAN ---
+    let totalOmzet = 0, totalLabaKotor = 0, totalPengeluaran = 0, totalTiket = sales.length;
+    sales.forEach(s => { totalOmzet += s.total; totalLabaKotor += (s.netProfit || 0); });
+    expenses.forEach(e => { totalPengeluaran += e.amount; });
+    const labaBersih = totalLabaKotor - totalPengeluaran;
+
+    const summaryData = [
+        ['LAPORAN KEUANGAN SHANDOZ POS'],
+        ['Periode Filter', periodeName],
+        ['Dicetak Pada', new Date().toLocaleString('id-ID')],
+        [''],
+        ['KATEGORI', 'NOMINAL (Rp) / JUMLAH'],
+        ['Total Omzet (Penjualan Kotor)', totalOmzet],
+        ['Laba Kotor (Margin Barang)', totalLabaKotor],
+        ['Total Pengeluaran (Belanja)', totalPengeluaran],
+        ['LABA BERSIH (Keuntungan)', labaBersih],
+        ['Total Transaksi (Struk Keluar)', totalTiket]
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    wsSummary['!cols'] = [{wch: 35}, {wch: 25}]; // Atur lebar kolom
+    XLSX.utils.book_append_sheet(wb, wsSummary, "1. Ringkasan Laba Rugi");
+
+    // --- SHEET 2: DATA TRANSAKSI KASIR ---
+    const salesData = [['Waktu & Tanggal', 'Nama Kasir', 'Daftar Menu Terjual', 'Omzet (Rp)', 'Laba Kotor (Rp)']];
+    sales.forEach(s => {
+        let menuList = s.items.map(i => `${i.qty}x ${i.name}`).join(' | ');
+        salesData.push([s.date, s.user || 'Admin', menuList, s.total, (s.netProfit || 0)]);
+    });
+    if(sales.length === 0) salesData.push(['Tidak ada data', '', '', '', '']);
+    const wsSales = XLSX.utils.aoa_to_sheet(salesData);
+    wsSales['!cols'] = [{wch: 20}, {wch: 15}, {wch: 50}, {wch: 15}, {wch: 15}];
+    XLSX.utils.book_append_sheet(wb, wsSales, "2. Riwayat Transaksi");
+
+    // --- SHEET 3: PENGELUARAN ---
+    const expData = [['Tanggal', 'Keterangan Pengeluaran', 'Nominal (Rp)']];
+    expenses.forEach(e => {
+        let dateOnly = e.date.split(',')[0] || e.date;
+        expData.push([dateOnly, e.desc, e.amount]);
+    });
+    if(expenses.length === 0) expData.push(['Tidak ada data', '', '']);
+    const wsExp = XLSX.utils.aoa_to_sheet(expData);
+    wsExp['!cols'] = [{wch: 15}, {wch: 40}, {wch: 15}];
+    XLSX.utils.book_append_sheet(wb, wsExp, "3. Pengeluaran Toko");
+
+    // --- SHEET 4: ITEM TERLARIS ---
+    let itemAnalytics = {};
+    sales.forEach(s => {
+        s.items.forEach(item => {
+            if(!itemAnalytics[item.name]) itemAnalytics[item.name] = { qty: 0, total: 0 };
+            itemAnalytics[item.name].qty += item.qty;
+            itemAnalytics[item.name].total += item.total;
+        });
+    });
+    let sortedItems = Object.keys(itemAnalytics).map(key => {
+        return { name: key, qty: itemAnalytics[key].qty, total: itemAnalytics[key].total };
+    }).sort((a, b) => b.qty - a.qty);
+
+    const itemsData = [['Peringkat', 'Nama Menu / Produk', 'Jumlah Terjual (Pcs)', 'Total Omzet (Rp)']];
+    sortedItems.forEach((i, index) => {
+        itemsData.push([index + 1, i.name, i.qty, i.total]);
+    });
+    if(sortedItems.length === 0) itemsData.push(['-', 'Tidak ada data', '', '']);
+    const wsItems = XLSX.utils.aoa_to_sheet(itemsData);
+    wsItems['!cols'] = [{wch: 10}, {wch: 35}, {wch: 20}, {wch: 20}];
+    XLSX.utils.book_append_sheet(wb, wsItems, "4. Menu Terlaris");
+
+    // --- EKSEKUSI DOWNLOAD EXCEL ---
+    let fileNameDate = periodeName.replace(/[^a-zA-Z0-9]/g, '_');
+    XLSX.writeFile(wb, `Laporan_Excel_Shandoz_${fileNameDate}.xlsx`);
 }
 
 document.addEventListener('DOMContentLoaded', () => { filterReports('semua'); });
