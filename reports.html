@@ -15,19 +15,23 @@
         
         /* MAGIC CSS: MENGUBAH WEB JADI KERTAS DOKUMEN RESMI SAAT DICETAK */
         @media print {
-            @page { size: A4 portrait; margin: 15mm; }
+            @page { size: A4 portrait; margin: 12mm; }
             body { background: white; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
             body * { visibility: hidden; }
             #printLayer, #printLayer * { visibility: visible; }
             #printLayer { display: block; position: absolute; left: 0; top: 0; width: 100%; }
             header, .container { display: none !important; }
             
-            /* Anti Kepotong Beda Halaman */
-            table { page-break-inside: auto; }
+            /* Anti Kepotong Beda Halaman untuk data berlembar-lembar */
+            table { page-break-inside: auto; border-collapse: collapse; width: 100%; }
             tr { page-break-inside: avoid; page-break-after: auto; }
             thead { display: table-header-group; }
             tfoot { display: table-footer-group; }
             .page-break { page-break-before: always; margin-top: 20px; }
+            
+            /* Styling khusus tabel print biar rapi kaya Excel */
+            th { border-bottom: 2px solid #000; padding: 8px 4px; font-size: 10pt; background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
+            td { border-bottom: 1px solid #ddd; padding: 6px 4px; font-size: 9.5pt; }
         }
     </style>
 </head>
@@ -79,7 +83,7 @@
 
         <div class="card" style="margin-bottom: 20px;">
             <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 16px;">📈 Analitik Tren Penjualan</h3>
-            <div style="width: 100%; height: 280px; position: relative;">
+            <div style="width: 100%; height: 200px; position: relative;">
                 <canvas id="salesChart"></canvas>
             </div>
         </div>
@@ -120,35 +124,34 @@
             <div style="text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px;">
                 <h1 style="margin: 0; font-size: 18pt; text-transform: uppercase; font-weight: bold;" id="docStoreName">SHANDOZ CAFE & COFFEE BAR</h1>
                 <h2 style="margin: 5px 0; font-size: 14pt; font-weight: normal;">LAPORAN LABA RUGI KOMPREHENSIF</h2>
-                <p style="margin: 0; font-size: 11pt; font-style: italic;">Untuk Periode: <span id="docPeriodeText"></span></p>
+                <p style="margin: 0; font-size: 11pt; font-style: italic;">Periode: <span id="docPeriodeText"></span></p>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12pt;">
-                <tr><td colspan="2" style="font-weight: bold; padding: 5px 0; color: #2c3e50;">A. PENDAPATAN OPERASIONAL</td></tr>
-                <tr><td style="padding: 5px 0 5px 20px;">Penjualan Kotor (Gross Sales)</td><td style="text-align: right;" id="docOmzet">Rp 0</td></tr>
-                <tr><td style="padding: 5px 0 5px 20px; border-bottom: 1px solid black;">Harga Pokok Penjualan (HPP / COGS)</td><td style="text-align: right; border-bottom: 1px solid black;" id="docHPP">(Rp 0)</td></tr>
-                <tr><td style="font-weight: bold; padding: 5px 0 5px 20px;">LABA KOTOR (GROSS PROFIT)</td><td style="text-align: right; font-weight: bold;" id="docMargin">Rp 0</td></tr>
-                <tr><td colspan="2">&nbsp;</td></tr>
+            <table style="width: 100%; margin-bottom: 30px; font-size: 12pt;">
+                <tr><td colspan="2" style="font-weight: bold; padding: 5px 0; color: #2c3e50; font-size: 14pt; border-bottom: none;">A. PENDAPATAN OPERASIONAL</td></tr>
+                <tr><td style="padding: 5px 0 5px 20px; border-bottom: none;">Penjualan Kotor (Gross Sales)</td><td style="text-align: right; border-bottom: none;" id="docOmzet">Rp 0</td></tr>
+                <tr><td style="padding: 5px 0 5px 20px;">Harga Pokok Penjualan (HPP / COGS)</td><td style="text-align: right;" id="docHPP">(Rp 0)</td></tr>
+                <tr><td style="font-weight: bold; padding: 5px 0 5px 20px; border-bottom: none;">LABA KOTOR (GROSS PROFIT)</td><td style="text-align: right; font-weight: bold; border-bottom: none;" id="docMargin">Rp 0</td></tr>
+                <tr><td colspan="2" style="border-bottom: none;">&nbsp;</td></tr>
                 
-                <tr><td colspan="2" style="font-weight: bold; padding: 5px 0; color: #2c3e50;">B. BEBAN OPERASIONAL</td></tr>
-                <tr><td style="padding: 5px 0 5px 20px; border-bottom: 1px solid black;">Total Pengeluaran Toko</td><td style="text-align: right; border-bottom: 1px solid black;" id="docExpense">(Rp 0)</td></tr>
-                <tr><td colspan="2">&nbsp;</td></tr>
+                <tr><td colspan="2" style="font-weight: bold; padding: 5px 0; color: #2c3e50; font-size: 14pt; border-bottom: none;">B. BEBAN OPERASIONAL</td></tr>
+                <tr><td style="padding: 5px 0 5px 20px;">Total Pengeluaran Toko</td><td style="text-align: right;" id="docExpense">(Rp 0)</td></tr>
+                <tr><td colspan="2" style="border-bottom: none;">&nbsp;</td></tr>
                 
-                <tr><td style="font-weight: bold; font-size: 14pt; padding: 5px 0;">LABA BERSIH (NET INCOME)</td><td style="text-align: right; font-weight: bold; font-size: 14pt; border-bottom: 3px double black;" id="docNet">Rp 0</td></tr>
+                <tr><td style="font-weight: bold; font-size: 16pt; padding: 10px 0; border-bottom: none;">LABA BERSIH (NET INCOME)</td><td style="text-align: right; font-weight: bold; font-size: 16pt; border-bottom: 4px double black;" id="docNet">Rp 0</td></tr>
             </table>
 
             <div class="page-break">
-                <h3 style="font-size: 12pt; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">LAMPIRAN 1: Buku Besar Penjualan & HPP Item</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 9.5pt;">
+                <h3 style="font-size: 14pt; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; text-transform: uppercase;">LAMPIRAN 1: Buku Besar Penjualan & Rincian Item</h3>
+                <table>
                     <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid black;">
-                            <th style="text-align: left; padding: 6px;">Waktu</th>
-                            <th style="text-align: left; padding: 6px;">Struk ID</th>
-                            <th style="text-align: left; padding: 6px;">Item Terjual</th>
-                            <th style="text-align: center; padding: 6px;">Qty</th>
-                            <th style="text-align: right; padding: 6px;">HPP (Rp)</th>
-                            <th style="text-align: right; padding: 6px;">Jual (Rp)</th>
-                            <th style="text-align: right; padding: 6px;">Subtotal (Rp)</th>
+                        <tr>
+                            <th style="text-align: left;">Waktu & Tgl</th>
+                            <th style="text-align: left;">Struk ID & Item</th>
+                            <th style="text-align: center;">Qty</th>
+                            <th style="text-align: right;">HPP (Rp)</th>
+                            <th style="text-align: right;">Jual (Rp)</th>
+                            <th style="text-align: right;">Subtotal (Rp)</th>
                         </tr>
                     </thead>
                     <tbody id="docSalesLog"></tbody>
@@ -156,13 +159,13 @@
             </div>
 
             <div class="page-break" style="margin-top: 30px;">
-                <h3 style="font-size: 12pt; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">LAMPIRAN 2: Rincian Pengeluaran Operasional</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 10pt;">
+                <h3 style="font-size: 14pt; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; text-transform: uppercase;">LAMPIRAN 2: Rincian Pengeluaran Operasional</h3>
+                <table>
                     <thead>
-                        <tr style="background: #f8fafc; border-bottom: 2px solid black;">
-                            <th style="text-align: left; padding: 6px;">Waktu & Tanggal</th>
-                            <th style="text-align: left; padding: 6px;">Keterangan / Deskripsi Beban</th>
-                            <th style="text-align: right; padding: 6px;">Nominal (Rp)</th>
+                        <tr>
+                            <th style="text-align: left;">Waktu & Tanggal</th>
+                            <th style="text-align: left;">Keterangan / Deskripsi Beban</th>
+                            <th style="text-align: right;">Nominal (Rp)</th>
                         </tr>
                     </thead>
                     <tbody id="docExpenseLog"></tbody>
