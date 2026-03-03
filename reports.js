@@ -14,25 +14,46 @@ function filterByCustomDate() {
 }
 
 function filterReports(type) {
-    currentFilter = type; document.getElementById('customDate').value = '';
+    currentFilter = type; 
+    document.getElementById('customDate').value = '';
     const labels = { 'hari': 'Hari Ini', 'bulan': 'Bulan Ini', 'tahun': 'Tahun Ini', 'semua': 'Semua Waktu' };
     document.getElementById('periodeTextUI').innerText = labels[type];
     document.getElementById('docPeriodeText').innerText = labels[type];
     loadFinanceReports();
 }
 
+// FIX TERPENTING: MESIN PEMBACA TANGGAL ANTI-ERROR
 function matchDate(dateString) {
     if(currentFilter === 'semua') return true;
-    const [datePart] = dateString.split(', ');
-    if(currentFilter === 'hari') return datePart === new Date().toLocaleDateString('id-ID');
-    if(currentFilter === 'bulan') {
-        const now = new Date(); const parts = datePart.split('/');
-        return parseInt(parts[1]) === (now.getMonth() + 1) && parseInt(parts[2]) === now.getFullYear();
+    
+    // Pecah string "DD/MM/YYYY, HH:MM:SS" jadi bagian-bagian
+    let parts = dateString.split(',');
+    let datePart = parts[0].trim(); 
+    
+    // Cari pemisah (bisa / atau - tergantung HP)
+    let dParts = datePart.split('/');
+    if(dParts.length !== 3) dParts = datePart.split('-');
+    if(dParts.length !== 3) return false;
+
+    // Ubah jadi angka murni biar nggak salah baca (ex: "03" jadi 3)
+    let d = parseInt(dParts[0]);
+    let m = parseInt(dParts[1]);
+    let y = parseInt(dParts[2]);
+
+    let now = new Date();
+    
+    if(currentFilter === 'hari') {
+        return d === now.getDate() && m === (now.getMonth() + 1) && y === now.getFullYear();
     }
-    if(currentFilter === 'tahun') return parseInt(datePart.split('/')[2]) === new Date().getFullYear();
+    if(currentFilter === 'bulan') {
+        return m === (now.getMonth() + 1) && y === now.getFullYear();
+    }
+    if(currentFilter === 'tahun') {
+        return y === now.getFullYear();
+    }
     if(currentFilter === 'custom') {
         const [cy, cm, cd] = customDateValue.split('-');
-        return datePart === new Date(cy, parseInt(cm)-1, cd).toLocaleDateString('id-ID');
+        return d === parseInt(cd) && m === parseInt(cm) && y === parseInt(cy);
     }
     return true;
 }
@@ -43,61 +64,67 @@ function loadFinanceReports() {
     try { allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(allExpenses)) allExpenses = Object.values(allExpenses); } catch(e) {}
     try { masterProducts = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(masterProducts)) masterProducts = Object.values(masterProducts); } catch(e) {}
     
+    // Filter data berdasarkan tombol yang dipilih
     const sales = allSales.filter(s => matchDate(s.date));
     const expenses = allExpenses.filter(e => matchDate(e.date));
 
     let totalOmzet = 0, totalHPP = 0, totalPengeluaran = 0;
     let itemAnalytics = {}; 
     let chartData = {}; 
-    let docSalesHTML = ''; // Untuk nampung rincian PDF
+    let docSalesHTML = ''; // Untuk nampung rincian PDF (Buku Besar)
 
-    // 1. PROSES DATA PENJUALAN
+    // 1. PROSES DATA PENJUALAN & GRAFIK
     sales.forEach(s => {
         totalOmzet += s.total; 
         
-        let parts = s.date.split(', ');
-        let datePart = parts[0];
-        let timePart = parts[1] || "00:00:00";
-        let labelKey = "";
+        // Membedah Waktu untuk Grafik
+        let parts = s.date.split(',');
+        let datePart = parts[0].trim();
+        let timePart = parts.length > 1 ? parts[1].trim().replace('.', ':') : "00:00:00";
+        
+        let dParts = datePart.split('/');
+        if(dParts.length !== 3) dParts = datePart.split('-');
+        let d = dParts[0].padStart(2, '0');
+        let m = dParts[1].padStart(2, '0');
+        let y = dParts[2];
 
-        // LOGIKA GRAFIK DINAMIS
+        let labelKey = "";
+        let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        
+        // Aturan Sumbu Bawah Grafik Dinamis
         if (currentFilter === 'hari' || currentFilter === 'custom') {
-            labelKey = timePart.substring(0, 5); // Tampilkan Jam:Menit (ex: 14:30)
+            labelKey = timePart.substring(0, 5); // Tampil Jam (ex: 14:30)
         } else if (currentFilter === 'bulan') {
-            let dParts = datePart.split('/');
-            labelKey = dParts[0] + "/" + dParts[1]; // Tampilkan Tanggal/Bulan (ex: 03/03)
+            labelKey = d + "/" + m; // Tampil Tanggal (ex: 03/03)
         } else if (currentFilter === 'tahun') {
-            let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-            labelKey = monthNames[parseInt(datePart.split('/')[1]) - 1]; // Tampilkan Nama Bulan
+            labelKey = monthNames[parseInt(m) - 1]; // Tampil Bulan (ex: Mar)
         } else {
-            let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-            labelKey = monthNames[parseInt(datePart.split('/')[1]) - 1] + " " + datePart.split('/')[2];
+            labelKey = monthNames[parseInt(m) - 1] + " " + y; // Tampil Bulan Tahun
         }
         
         if(!chartData[labelKey]) chartData[labelKey] = 0;
         chartData[labelKey] += s.total;
 
-        // PROSES RINCIAN ITEM & HPP
+        // PROSES RINCIAN ITEM & HPP (UNTUK PDF BERLEMBAR-LEMBAR)
         s.items.forEach(item => {
             const dbProduct = masterProducts.find(p => p.name === item.name);
             const itemCost = dbProduct ? dbProduct.cost : 0;
             totalHPP += (itemCost * item.qty);
 
-            // Tulis baris untuk PDF
             let shortId = String(s.id).slice(-6);
+            let displayTime = currentFilter === 'hari' ? timePart : `${datePart} ${timePart.substring(0,5)}`;
+            
             docSalesHTML += `
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 6px;">${currentFilter === 'hari' ? timePart : s.date}</td>
-                    <td style="padding: 6px; font-family: monospace; color: #64748b;">#${shortId}</td>
-                    <td style="padding: 6px; font-weight: bold;">${item.name}</td>
-                    <td style="padding: 6px; text-align: center;">${item.qty}</td>
-                    <td style="padding: 6px; text-align: right; color: #ef4444;">${itemCost.toLocaleString('id-ID')}</td>
-                    <td style="padding: 6px; text-align: right;">${item.price.toLocaleString('id-ID')}</td>
-                    <td style="padding: 6px; text-align: right; font-weight: bold;">${item.total.toLocaleString('id-ID')}</td>
+                <tr>
+                    <td>${displayTime}</td>
+                    <td>#${shortId}<br><b>${item.name}</b></td>
+                    <td style="text-align: center;">${item.qty}</td>
+                    <td style="text-align: right; color: #e74c3c;">${itemCost.toLocaleString('id-ID')}</td>
+                    <td style="text-align: right;">${item.price.toLocaleString('id-ID')}</td>
+                    <td style="text-align: right; font-weight: bold;">${item.total.toLocaleString('id-ID')}</td>
                 </tr>
             `;
 
-            // Hitung Menu Terlaris UI
             if(!itemAnalytics[item.name]) itemAnalytics[item.name] = { qty: 0, total: 0 };
             itemAnalytics[item.name].qty += item.qty;
             itemAnalytics[item.name].total += item.total;
@@ -105,7 +132,7 @@ function loadFinanceReports() {
     });
 
     if(sales.length === 0) {
-        docSalesHTML = '<tr><td colspan="7" style="text-align:center; padding:15px; font-style:italic;">Tidak ada transaksi pada periode ini.</td></tr>';
+        docSalesHTML = '<tr><td colspan="6" style="text-align:center; padding:15px; font-style:italic;">Tidak ada transaksi pada periode ini.</td></tr>';
     }
     document.getElementById('docSalesLog').innerHTML = docSalesHTML;
 
@@ -139,14 +166,14 @@ function loadFinanceReports() {
         expenses.forEach(e => {
             totalPengeluaran += e.amount;
             uiExpHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
-                <td style="padding: 8px;">${e.date.split(', ')[0]}</td>
+                <td style="padding: 8px;">${e.date.split(',')[0]}</td>
                 <td style="padding: 8px;">${e.desc}</td>
                 <td style="text-align:right; color:#e74c3c; font-weight:bold; padding: 8px;">Rp ${e.amount.toLocaleString('id-ID')}</td>
             </tr>`;
-            docExpHTML += `<tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 6px;">${e.date}</td>
-                <td style="padding: 6px;">${e.desc}</td>
-                <td style="text-align:right; padding: 6px; font-weight:bold;">Rp ${e.amount.toLocaleString('id-ID')}</td>
+            docExpHTML += `<tr>
+                <td>${e.date}</td>
+                <td>${e.desc}</td>
+                <td style="text-align:right; font-weight:bold;">Rp ${e.amount.toLocaleString('id-ID')}</td>
             </tr>`;
         });
     }
@@ -155,13 +182,13 @@ function loadFinanceReports() {
 
     const labaBersih = totalLabaKotor - totalPengeluaran;
     
-    // UPDATE ANGKA RINGKASAN UI
+    // UPDATE ANGKA UI
     document.getElementById('uiOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
     document.getElementById('uiMargin').innerText = `Rp ${totalLabaKotor.toLocaleString('id-ID')}`;
     document.getElementById('uiExpense').innerText = `Rp ${totalPengeluaran.toLocaleString('id-ID')}`;
     document.getElementById('uiNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
-    // UPDATE ANGKA COVER PDF
+    // UPDATE ANGKA PDF
     document.getElementById('docStoreName').innerText = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
     document.getElementById('docOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
     document.getElementById('docHPP').innerText = `(Rp ${totalHPP.toLocaleString('id-ID')})`;
@@ -170,10 +197,15 @@ function loadFinanceReports() {
     document.getElementById('docNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
     // === MENGGAMBAR GRAFIK GARIS (LINE CHART) ELEGAN ===
-    // Urutkan label X-Axis agar waktu/tanggalnya berurutan
+    const monthOrder = { "Jan":1, "Feb":2, "Mar":3, "Apr":4, "Mei":5, "Jun":6, "Jul":7, "Ags":8, "Sep":9, "Okt":10, "Nov":11, "Des":12 };
     const labels = Object.keys(chartData).sort((a,b) => {
-        if(currentFilter === 'hari' || currentFilter === 'custom') return a.localeCompare(b);
-        return a.localeCompare(b); // Sorting standar cukup untuk format DD/MM
+        if(currentFilter === 'tahun' || currentFilter === 'semua') {
+            let mA = a.split(' ')[0]; let mB = b.split(' ')[0];
+            let yA = a.split(' ')[1] || "0"; let yB = b.split(' ')[1] || "0";
+            if (yA !== yB) return parseInt(yA) - parseInt(yB);
+            return monthOrder[mA] - monthOrder[mB];
+        }
+        return a.localeCompare(b);
     }); 
     const dataOmzet = labels.map(label => chartData[label]);
 
@@ -181,21 +213,21 @@ function loadFinanceReports() {
     if(myChart) myChart.destroy(); 
     
     myChart = new Chart(ctx, {
-        type: 'line', // Ganti jadi grafik garis
+        type: 'line', 
         data: {
             labels: labels.length > 0 ? labels : ['00:00'],
             datasets: [{
-                label: 'Penjualan Kotor (Rp)',
+                label: 'Omzet',
                 data: dataOmzet.length > 0 ? dataOmzet : [0],
-                backgroundColor: 'rgba(59, 130, 246, 0.15)', // Warna biru transparan (Fill)
-                borderColor: '#3b82f6', // Warna garis biru tajam
+                backgroundColor: 'rgba(59, 130, 246, 0.15)', 
+                borderColor: '#3b82f6', 
                 borderWidth: 3,
                 pointBackgroundColor: '#fff',
                 pointBorderColor: '#3b82f6',
                 pointBorderWidth: 2,
                 pointRadius: 4,
-                fill: true, // Mengaktifkan background gradient di bawah garis
-                tension: 0.3 // Membuat garisnya melengkung halus (curved)
+                fill: true, 
+                tension: 0.3 
             }]
         },
         options: {
@@ -203,19 +235,11 @@ function loadFinanceReports() {
             maintainAspectRatio: false,
             plugins: { 
                 legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) { return 'Rp ' + context.raw.toLocaleString('id-ID'); }
-                    }
-                }
+                tooltip: { callbacks: { label: function(context) { return 'Rp ' + context.raw.toLocaleString('id-ID'); } } }
             },
             scales: { 
-                x: { grid: { display: false } }, // Hilangkan garis vertikal biar bersih
-                y: { 
-                    beginAtZero: true, 
-                    border: { display: false },
-                    ticks: { callback: function(value) { return 'Rp ' + (value/1000) + 'k'; } } 
-                } 
+                x: { grid: { display: false } }, 
+                y: { beginAtZero: true, border: { display: false }, ticks: { callback: function(value) { return 'Rp ' + (value/1000) + 'k'; } } } 
             }
         }
     });
@@ -234,11 +258,11 @@ function addExpense() {
     loadFinanceReports();
 }
 
-// MESIN EKSPOR
+// MESIN EKSPOR (TOMBOL PDF SEKARANG PASTI JALAN)
 function exportLaporan(format) {
     if (format === 'pdf') {
         document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
-        window.print();
+        window.print(); // Ini perintah bawaan HP/Browser untuk memanggil mesin PDF
     } 
     else if (format === 'jpg') {
         const controlPanel = document.getElementById('controlPanel');
