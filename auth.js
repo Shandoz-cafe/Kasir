@@ -112,6 +112,8 @@ function mulaiSinkronisasiCloud() {
             let val = (key === 'users' && !data.users) ? usersData : data[key];
             if (val !== undefined) {
                 if (typeof val === 'object') {
+                    // Karena kita sekarang upload sales/expenses pakai ID individu, dari awan bentuknya Object
+                    // Harus diconvert ke Array biar webnya nggak error
                     if (['products', 'sales', 'users', 'expenses'].includes(key) && !Array.isArray(val)) {
                         val = Object.values(val); 
                     }
@@ -135,18 +137,20 @@ function mulaiSinkronisasiCloud() {
         isSyncingFromCloud = false; 
     });
 
-    // 2. SENSOR PINTU DEPAN (OVERRIDE LOKAL)
+    // 2. SENSOR PINTU DEPAN (OVERRIDE LOKAL) - FIX ANTI TABRAKAN
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
+        // Sales dan Expenses Dikeluarkan dari override massal biar nggak saling timpa
+        const cloudKeys = ['products', 'users', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
         if (!isSyncingFromCloud && cloudKeys.includes(key)) {
             userRef.child(key).set(value).catch(e => console.error(e));
         }
     };
 
-    // 3. MESIN WATCHDOG (SATPAM PATROLI TIAP 2 DETIK)
-    const watchKeys = ['products', 'sales', 'users', 'expenses'];
+    // 3. MESIN WATCHDOG (SATPAM PATROLI TIAP 2 DETIK) - FIX ANTI TABRAKAN
+    // Sales dan Expenses tidak di-scan massal, mereka akan diupload per-transaksi di pos.js dan reports.js
+    const watchKeys = ['products', 'users'];
     let lastStates = {};
     watchKeys.forEach(k => lastStates[k] = localStorage.getItem(k));
 
@@ -155,7 +159,6 @@ function mulaiSinkronisasiCloud() {
         
         watchKeys.forEach(key => {
             let currentState = localStorage.getItem(key);
-            // Kalau terdeteksi ada perubahan diam-diam di memori HP (Jalan Belakang)
             if (currentState !== lastStates[key] && currentState !== null) {
                 lastStates[key] = currentState; 
                 userRef.child(key).set(currentState).catch(e => console.error("Gagal Auto-Save:", e));
