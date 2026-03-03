@@ -114,12 +114,28 @@
 
         function initDashboardData() {
             const salesData = JSON.parse(localStorage.getItem('sales') || '[]');
-            const todayStr = new Date().toLocaleDateString('id-ID');
+            const now = new Date();
+            const tDate = now.getDate();
+            const tMonth = now.getMonth();
+            const tYear = now.getFullYear();
+            
             let todayIncome = 0; let todayOrders = 0;
             
             salesData.forEach(sale => {
-                const saleDate = sale.date.split(',')[0].trim();
-                if(saleDate === todayStr) { todayIncome += sale.total; todayOrders++; }
+                let isToday = false;
+                
+                // Prioritaskan cek pakai Timestamp murni yang akurat
+                if (sale.timestamp) {
+                    const sDate = new Date(sale.timestamp);
+                    isToday = (sDate.getDate() === tDate && sDate.getMonth() === tMonth && sDate.getFullYear() === tYear);
+                } else {
+                    // Fallback kalau data lama belum punya timestamp
+                    const todayStr = now.toLocaleDateString('id-ID');
+                    const saleDateStr = sale.date.split(',')[0].trim();
+                    isToday = (saleDateStr === todayStr);
+                }
+                
+                if(isToday) { todayIncome += sale.total; todayOrders++; }
             });
 
             document.getElementById('todayIncome').innerText = 'Rp ' + todayIncome.toLocaleString('id-ID');
