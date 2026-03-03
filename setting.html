@@ -35,10 +35,23 @@
         
         <div class="setting-group">
             <div class="setting-title" data-i18n="set_store">🏪 Profil Usaha & Printer</div>
+            
+            <div class="setting-item">
+                <label>Logo Kafe (Akan dicetak di Struk)</label>
+                <input type="file" id="setStoreLogo" accept="image/png, image/jpeg, image/webp" style="padding: 8px; font-size: 11px;">
+                
+                <div style="margin-top: 10px; text-align: center; background: #f1f5f9; padding: 10px; border-radius: 8px;">
+                    <img id="logoPreview" src="" alt="Preview Logo" style="max-height: 80px; max-width: 100%; object-fit: contain; display: none;">
+                    <p id="noLogoText" style="font-size: 11px; color: #94a3b8; margin: 0;">Belum ada logo terpasang</p>
+                </div>
+                <button class="bg-danger" id="btnHapusLogo" style="display:none; width:100%; margin-top:8px; font-size:12px; padding:8px; border:none; border-radius:8px; color:white; cursor:pointer;" onclick="hapusLogo()">🗑️ Hapus Logo</button>
+            </div>
+
             <div class="setting-item">
                 <label data-i18n="set_store_name">Nama Kafe / Toko (Tampil di Struk)</label>
                 <input type="text" id="setStoreName" placeholder="Contoh: SHANDOZ CAFE">
             </div>
+            
             <div class="setting-item">
                 <label data-i18n="set_print_size">Ukuran Kertas Printer Bluetooth</label>
                 <select id="setPrinterSize">
@@ -86,21 +99,71 @@
     <script>
         checkAuth(); 
 
+        let currentLogoBase64 = localStorage.getItem('storeLogo') || "";
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Load Nama & Kertas
             document.getElementById('setStoreName').value = localStorage.getItem('storeName') || "SHANDOZ CAFE";
             const printerConfig = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58"}');
             document.getElementById('setPrinterSize').value = printerConfig.paperSize;
             document.getElementById('setLanguageDropdown').value = localStorage.getItem('appLang') || 'id';
+
+            // Load Logo Preview
+            if (currentLogoBase64) {
+                document.getElementById('logoPreview').src = currentLogoBase64;
+                document.getElementById('logoPreview').style.display = 'inline-block';
+                document.getElementById('noLogoText').style.display = 'none';
+                document.getElementById('btnHapusLogo').style.display = 'inline-block';
+            }
+
+            // File Reader untuk Upload Logo
+            document.getElementById('setStoreLogo').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // Pembatas ukuran maksimal (sekitar 300KB) biar awan/cloud nggak berat
+                if (file.size > 300 * 1024) {
+                    alert("❌ Ukuran gambar terlalu besar! Maksimal 300KB agar sinkronisasi cloud lancar.");
+                    this.value = "";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    currentLogoBase64 = event.target.result;
+                    document.getElementById('logoPreview').src = currentLogoBase64;
+                    document.getElementById('logoPreview').style.display = 'inline-block';
+                    document.getElementById('noLogoText').style.display = 'none';
+                    document.getElementById('btnHapusLogo').style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            });
         });
+
+        function hapusLogo() {
+            if(!confirm("Hapus logo dari struk?")) return;
+            currentLogoBase64 = "";
+            document.getElementById('setStoreLogo').value = "";
+            document.getElementById('logoPreview').src = "";
+            document.getElementById('logoPreview').style.display = 'none';
+            document.getElementById('noLogoText').style.display = 'block';
+            document.getElementById('btnHapusLogo').style.display = 'none';
+        }
 
         function saveStoreSettings() {
             const role = localStorage.getItem('currentRole');
             if(role !== 'admin') return alert("Hanya Owner!");
+            
             const newName = document.getElementById('setStoreName').value.trim();
             const newSize = document.getElementById('setPrinterSize').value;
+            
             if(newName) localStorage.setItem('storeName', newName);
             localStorage.setItem('printerSettings', JSON.stringify({ paperSize: newSize, autoPrint: true }));
-            alert("✅ Sukses!");
+            
+            // Simpan Logo ke Memori (Otomatis dilempar ke awan oleh Watchdog auth.js)
+            localStorage.setItem('storeLogo', currentLogoBase64);
+            
+            alert("✅ Sukses Disimpan!");
         }
 
         function saveLanguage() {
@@ -121,7 +184,6 @@
             generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
             showLoader(true);
 
-            // === SUDAH DIUPDATE KE TEMPLATE ID YANG BARU ===
             emailjs.send("service_s4n2kxr", "template_c6f0gjr", {
                 email: emailTarget, otp_code: generatedOTP
             }).then(function() {
