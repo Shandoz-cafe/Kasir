@@ -83,7 +83,21 @@ function previewCheckout() {
     if(cash < grandTotal) return alert('Uang Pembayaran Kurang!');
 
     isReprintMode = false;
-    activePrintData = { id: Date.now(), user: localStorage.getItem('currentUser') || 'Admin', date: new Date().toLocaleString('id-ID'), items: [...cart], total: grandTotal, cash, change, customer: document.getElementById('custName').value.trim() || 'Umum', method: document.getElementById('payMethod').value };
+    
+    // PENAMBAHAN TIMESTAMP MURNI UNTUK AKURASI LAPORAN
+    const nowTime = Date.now();
+    activePrintData = { 
+        id: nowTime, 
+        timestamp: nowTime, // Ini senjata rahasia untuk laporan nanti
+        user: localStorage.getItem('currentUser') || 'Admin', 
+        date: new Date().toLocaleString('id-ID'), 
+        items: [...cart], 
+        total: grandTotal, 
+        cash, 
+        change, 
+        customer: document.getElementById('custName').value.trim() || 'Umum', 
+        method: document.getElementById('payMethod').value 
+    };
     renderPreviewModal(activePrintData, false);
 }
 
@@ -170,6 +184,14 @@ function confirmAndPrint() {
         if (!sales.find(s => s.id === activePrintData.id)) {
             sales.push(activePrintData); 
             localStorage.setItem('sales', JSON.stringify(sales));
+            
+            // === FIX RACE CONDITION: UPLOAD LANGSUNG KE FIREBASE SECARA INDIVIDU ===
+            // Kita upload struk ini ke "kamarnya" sendiri berdasarkan ID, bukan numpuk array
+            const uid = localStorage.getItem('userUid');
+            if (uid && typeof firebase !== 'undefined') {
+                firebase.database().ref('ShandozPOS/' + uid + '/sales/' + activePrintData.id).set(activePrintData)
+                .catch(err => console.error("Gagal sinkron struk ke cloud:", err));
+            }
         }
         
         isReprintMode = true; 
@@ -177,8 +199,6 @@ function confirmAndPrint() {
     
     const printHTML = document.getElementById('receiptPreviewContent').innerHTML;
     
-    // === FIX TERPENTING: JEDA WAKTU SINKRONISASI ===
-    // Menunggu 1 detik agar Firebase selesai Upload data ke awan sebelum dialihkan ke RawBT
     setTimeout(() => {
         window.location.href = "rawbt:data:text/html;base64," + btoa(unescape(encodeURIComponent(printHTML)));
         
@@ -190,12 +210,15 @@ function confirmAndPrint() {
             initPOS(); 
             renderCart();
         }, 1500);
-    }, 1000); // 1000ms delay = 1 Detik Nafas untuk Firebase
+    }, 1000);
 }
 
 function showPosHistory() {
     let sales = [];
     try { sales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(sales)) sales = Object.values(sales); } catch(e) { sales = []; }
+    
+    // Sortir berdasarkan timestamp kalau ada, biar urutannya selalu valid
+    sales.sort((a, b) => (a.timestamp || a.id) - (b.timestamp || b.id));
     
     const recentSales = sales.slice(-20).reverse();
     const tbody = document.getElementById('posHistoryList');
@@ -207,7 +230,7 @@ function showPosHistory() {
         tbody.innerHTML = recentSales.map(s => `
             <tr>
                 <td style="padding:15px; border-bottom:1px solid #e2e8f0;">
-                    <b>${s.date.split(', ')[1]}</b><br><small style="color:#666;">${s.customer}</small>
+                    <b>${s.date.split(', ')[1] || s.date}</b><br><small style="color:#666;">${s.customer}</small>
                 </td>
                 <td style="padding:15px; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#10b981;">
                     ${s.total.toLocaleString('id-ID')}
