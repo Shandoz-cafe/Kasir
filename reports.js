@@ -22,26 +22,32 @@ function filterReports(type) {
     loadFinanceReports();
 }
 
-// FIX TERPENTING: MESIN PEMBACA TANGGAL ANTI-ERROR
-function matchDate(dateString) {
+// FIX TERPENTING: MESIN PEMBACA TANGGAL ANTI-ERROR (DUKUNG TIMESTAMP MURNI)
+function matchDate(item) {
     if(currentFilter === 'semua') return true;
     
-    // Pecah string "DD/MM/YYYY, HH:MM:SS" jadi bagian-bagian
-    let parts = dateString.split(',');
-    let datePart = parts[0].trim(); 
-    
-    // Cari pemisah (bisa / atau - tergantung HP)
-    let dParts = datePart.split('/');
-    if(dParts.length !== 3) dParts = datePart.split('-');
-    if(dParts.length !== 3) return false;
-
-    // Ubah jadi angka murni biar nggak salah baca (ex: "03" jadi 3)
-    let d = parseInt(dParts[0]);
-    let m = parseInt(dParts[1]);
-    let y = parseInt(dParts[2]);
-
+    let d, m, y;
     let now = new Date();
-    
+
+    // Prioritaskan Timestamp murni kalau ada (Untuk data baru agar 100% akurat)
+    if (item.timestamp) {
+        let itemDate = new Date(item.timestamp);
+        d = itemDate.getDate();
+        m = itemDate.getMonth() + 1;
+        y = itemDate.getFullYear();
+    } else {
+        // Fallback: Pecah string tanggal untuk Data Lama yang belum pakai timestamp
+        let parts = item.date.split(',');
+        let datePart = parts[0].trim(); 
+        let dParts = datePart.split('/');
+        if(dParts.length !== 3) dParts = datePart.split('-');
+        if(dParts.length !== 3) return false;
+
+        d = parseInt(dParts[0]);
+        m = parseInt(dParts[1]);
+        y = parseInt(dParts[2]);
+    }
+
     if(currentFilter === 'hari') {
         return d === now.getDate() && m === (now.getMonth() + 1) && y === now.getFullYear();
     }
@@ -64,9 +70,9 @@ function loadFinanceReports() {
     try { allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(allExpenses)) allExpenses = Object.values(allExpenses); } catch(e) {}
     try { masterProducts = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(masterProducts)) masterProducts = Object.values(masterProducts); } catch(e) {}
     
-    // Filter data berdasarkan tombol yang dipilih
-    const sales = allSales.filter(s => matchDate(s.date));
-    const expenses = allExpenses.filter(e => matchDate(e.date));
+    // Filter data berdasarkan tombol yang dipilih (Melempar object utuh ke matchDate)
+    const sales = allSales.filter(s => matchDate(s));
+    const expenses = allExpenses.filter(e => matchDate(e));
 
     let totalOmzet = 0, totalHPP = 0, totalPengeluaran = 0;
     let itemAnalytics = {}; 
@@ -252,8 +258,26 @@ function addExpense() {
     let expenses = [];
     try { expenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(expenses)) expenses = Object.values(expenses); } catch(e) { expenses = []; }
     
-    expenses.push({ id: Date.now(), date: new Date().toLocaleString('id-ID'), desc: desc, amount: amount });
+    // PENAMBAHAN TIMESTAMP MURNI UNTUK PENGELUARAN
+    const nowTime = Date.now();
+    const newExpense = { 
+        id: nowTime, 
+        timestamp: nowTime, 
+        date: new Date().toLocaleString('id-ID'), 
+        desc: desc, 
+        amount: amount 
+    };
+    
+    expenses.push(newExpense);
     localStorage.setItem('expenses', JSON.stringify(expenses));
+    
+    // === FIX RACE CONDITION: UPLOAD PENGELUARAN LANGSUNG KE FIREBASE SECARA INDIVIDU ===
+    const uid = localStorage.getItem('userUid');
+    if (uid && typeof firebase !== 'undefined') {
+        firebase.database().ref('ShandozPOS/' + uid + '/expenses/' + newExpense.id).set(newExpense)
+        .catch(err => console.error("Gagal sinkron pengeluaran ke cloud:", err));
+    }
+
     document.getElementById('expDesc').value = ''; document.getElementById('expAmount').value = '';
     loadFinanceReports();
 }
@@ -289,8 +313,8 @@ function buatLaporanExcelAsli() {
     try { allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(allExpenses)) allExpenses = Object.values(allExpenses); } catch(e) {}
     try { masterProducts = JSON.parse(localStorage.getItem('products') || '[]'); if(!Array.isArray(masterProducts)) masterProducts = Object.values(masterProducts); } catch(e) {}
     
-    const sales = allSales.filter(s => matchDate(s.date));
-    const expenses = allExpenses.filter(e => matchDate(e.date));
+    const sales = allSales.filter(s => matchDate(s));
+    const expenses = allExpenses.filter(e => matchDate(e));
 
     const wb = XLSX.utils.book_new(); 
     const periodeName = document.getElementById('periodeTextUI').innerText;
