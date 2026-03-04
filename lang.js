@@ -112,6 +112,12 @@ const translations = {
         "rep_th_desc": "Keterangan",
         "rep_th_amount": "Nominal",
 
+        // Pilih Profil (Profiles)
+        "prof_title": "Siapa yang bertugas?",
+        "prof_pin_title": "Masukkan PIN",
+        "prof_pin_sub": "4 Angka Rahasia.",
+        "prof_btn_cancel": "Batal",
+
         // Pengaturan
         "set_title": "⚙️ Pengaturan Sistem",
         "set_store": "🏪 Profil Usaha & Printer",
@@ -238,6 +244,12 @@ const translations = {
         "rep_th_date": "Date",
         "rep_th_desc": "Description",
         "rep_th_amount": "Amount",
+
+        // Pilih Profil (Profiles)
+        "prof_title": "Who's on duty?",
+        "prof_pin_title": "Enter PIN",
+        "prof_pin_sub": "4 Secret Digits.",
+        "prof_btn_cancel": "Cancel",
 
         // Pengaturan
         "set_title": "⚙️ System Settings",
