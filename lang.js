@@ -21,7 +21,7 @@ const translations = {
         "side_info": "<i>ℹ️</i> Dukungan & Info",
         "side_logout": "<i>🛑</i> Keluar Sistem",
 
-        // Global (Tombol Kembali)
+        // Global (Tombol)
         "btn_back_dash": "⬅️ Dashboard",
         "btn_back_only": "⬅ Kembali",
 
@@ -34,6 +34,28 @@ const translations = {
         "pos_pay_text": "Bayar (Rp):",
         "pos_change_text": "Kembali: ",
         "pos_btn_charge": "BAYAR",
+
+        // Data Barang (Inventory)
+        "inv_title": "📦 Gudang & Produk",
+        "inv_add_title": "Tambah Produk Baru",
+        "inv_ph_name": "Nama Produk",
+        "inv_ph_category": "Kategori",
+        "inv_ph_barcode": "Kode Barcode",
+        "inv_btn_scan": "📷 Scan",
+        "inv_ph_cost": "Modal (HPP)",
+        "inv_ph_price": "Harga Jual",
+        "inv_ph_stock": "Stok",
+        "inv_btn_save": "➕ Simpan",
+        "inv_th_no": "No",
+        "inv_th_barcode": "Barcode",
+        "inv_th_category": "Kategori",
+        "inv_th_name": "Nama Item",
+        "inv_th_cost": "Modal",
+        "inv_th_price": "Jual",
+        "inv_th_stock": "Sisa Stok",
+        "inv_th_action": "Aksi",
+        "inv_scan_title": "Arahkan Kamera ke Barcode",
+        "inv_btn_cancel": "Batal",
 
         // Procurement & Opname
         "proc_title": "📋 Procurement & PO",
@@ -100,7 +122,7 @@ const translations = {
         "side_info": "<i>ℹ️</i> Support & Info",
         "side_logout": "<i>🛑</i> Logout System",
 
-        // Global (Tombol Kembali)
+        // Global (Tombol)
         "btn_back_dash": "⬅️ Dashboard",
         "btn_back_only": "⬅ Back",
 
@@ -113,6 +135,28 @@ const translations = {
         "pos_pay_text": "Pay (Rp):",
         "pos_change_text": "Change: ",
         "pos_btn_charge": "CHARGE",
+
+        // Data Barang (Inventory)
+        "inv_title": "📦 Inventory & Products",
+        "inv_add_title": "Add New Product",
+        "inv_ph_name": "Product Name",
+        "inv_ph_category": "Category",
+        "inv_ph_barcode": "Barcode Code",
+        "inv_btn_scan": "📷 Scan",
+        "inv_ph_cost": "Cost (COGS)",
+        "inv_ph_price": "Selling Price",
+        "inv_ph_stock": "Stock",
+        "inv_btn_save": "➕ Save",
+        "inv_th_no": "No",
+        "inv_th_barcode": "Barcode",
+        "inv_th_category": "Category",
+        "inv_th_name": "Item Name",
+        "inv_th_cost": "Cost",
+        "inv_th_price": "Price",
+        "inv_th_stock": "Stock Left",
+        "inv_th_action": "Action",
+        "inv_scan_title": "Point Camera at Barcode",
+        "inv_btn_cancel": "Cancel",
 
         // Procurement & Opname
         "proc_title": "📋 Procurement & PO",
