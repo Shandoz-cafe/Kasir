@@ -9,19 +9,19 @@
 </head>
 <body>
     <header>
-        <h2><span style="color:#10b981;">●</span> POS KASIR</h2>
+        <h2 data-i18n="pos_title"><span style="color:#10b981;">●</span> POS KASIR</h2>
         <div style="display: flex; gap: 8px;">
-            <button class="bg-primary btn-head" onclick="showPosHistory()">🕒 Riwayat</button>
-            <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+            <button class="bg-primary btn-head" onclick="showPosHistory()" data-i18n="pos_history_btn">🕒 Riwayat</button>
+            <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'" data-i18n="btn_back_dash">⬅️ Dashboard</button>
         </div>
     </header>
     
     <div class="pos-layout">
         <div class="pos-left">
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="searchInput" placeholder="🔍 Cari menu..." oninput="filterAndSortProducts()" style="margin:0; padding:12px; flex:2;">
+                <input type="text" id="searchInput" placeholder="🔍 Cari menu..." data-i18n-ph="pos_search_ph" oninput="filterAndSortProducts()" style="margin:0; padding:12px; flex:2;">
                 <select id="filterSelect" onchange="filterAndSortProducts()" style="margin:0; padding:12px; flex:1;">
-                    <option value="cat-Semua">Semua Kategori</option>
+                    <option value="cat-Semua" data-i18n="pos_all_cat">Semua Kategori</option>
                     <optgroup label="Kategori" id="categoryOptions"></optgroup>
                 </select>
             </div>
@@ -32,23 +32,23 @@
             <div class="cart-list-container" id="cartItems"></div>
             
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="custName" placeholder="Nama Pelanggan" style="margin: 0; padding: 12px; flex: 1;">
+                <input type="text" id="custName" placeholder="Nama Pelanggan" data-i18n-ph="pos_cust_ph" style="margin: 0; padding: 12px; flex: 1;">
                 <select id="payMethod" style="margin: 0; padding: 12px; flex: 1;" onchange="calculateTotal()">
                     <option value="Tunai">Tunai</option><option value="QRIS">QRIS</option>
                 </select>
             </div>
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <b style="font-size: 14px;">Bayar (Rp):</b>
+                <b style="font-size: 14px;" data-i18n="pos_pay_text">Bayar (Rp):</b>
                 <input type="number" id="cashInput" placeholder="0" oninput="calculateTotal()" style="width: 150px; margin: 0; padding: 10px; text-align: right; font-weight: bold; color: #10b981; font-size: 18px;">
             </div>
             
             <div style="text-align: right; margin-bottom: 10px; font-weight: bold; color: #334155;">
-                Kembali: <span id="changeDisplay" style="font-size: 20px;">Rp 0</span>
+                <span data-i18n="pos_change_text">Kembali: </span> <span id="changeDisplay" style="font-size: 20px;">Rp 0</span>
             </div>
             
             <button class="btn-charge" onclick="previewCheckout()" style="border:none;">
-                <span>BAYAR</span><span id="grandTotalDisplay">Rp 0</span>
+                <span data-i18n="pos_btn_charge">BAYAR</span><span id="grandTotalDisplay">Rp 0</span>
             </button>
         </div>
     </div>
@@ -86,6 +86,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script src="auth.js"></script>
+    <script src="lang.js"></script>
     
     <script>checkAuth();</script> 
     
