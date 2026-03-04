@@ -29,16 +29,16 @@ function addProduct() {
     const price = parseFloat(document.getElementById('prodPrice').value);
     const stock = parseInt(document.getElementById('prodStock').value);
     
-    // NOTIFIKASI PINTAR: Ngasih tahu Bos bagian mana yang kurang
+    // NOTIFIKASI PINTAR: Ngasih tahu Bos bagian mana yang kurang pake Custom Alert
     if(!name || isNaN(cost) || isNaN(price) || isNaN(stock)) {
-        return alert('Gagal! Pastikan Nama, Modal, Harga Jual, dan Stok sudah terisi semua dengan angka.');
+        return customAlert('Pastikan Nama, Modal, Harga Jual, dan Stok sudah terisi semua dengan angka!', 'Data Belum Lengkap', '❌');
     }
     
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     
     // CEK BARCODE DOBEL
     if(barcode && products.find(p => p.barcode === barcode)) {
-        return alert('Gagal! Kode Barcode ini sudah dipakai untuk barang lain.');
+        return customAlert('Kode Barcode ini sudah dipakai untuk barang lain. Silakan gunakan kode lain.', 'Barcode Ganda', '⚠️');
     }
 
     products.push({ id: Date.now().toString(), barcode, name, category, cost, price, stock });
@@ -53,31 +53,41 @@ function addProduct() {
     document.getElementById('prodStock').value = '';
     
     loadProducts();
-    alert("Sukses");
+    customAlert(`Barang <b>${name}</b> sukses ditambahkan ke gudang!`, "Berhasil Disimpan", "✅");
 }
 
 function addStock(index) {
     const products = JSON.parse(localStorage.getItem('products') || '[]');
-    const tambah = parseInt(prompt(`Tambah stok untuk ${products[index].name} sebanyak:`));
-    if(tambah && !isNaN(tambah)) { 
-        products[index].stock += tambah; 
-        localStorage.setItem('products', JSON.stringify(products)); 
-        loadProducts(); 
-    }
+    
+    // MENGGUNAKAN CUSTOM PROMPT MODERN
+    customPrompt(`Masukkan jumlah stok yang ingin ditambahkan untuk:<br><br><b style="font-size:16px; color:#3b82f6;">${products[index].name}</b>`, (val) => {
+        const tambah = parseInt(val);
+        if(tambah && !isNaN(tambah)) { 
+            products[index].stock += tambah; 
+            localStorage.setItem('products', JSON.stringify(products)); 
+            loadProducts(); 
+            customAlert(`Stok berhasil ditambah sebanyak <b>${tambah}</b>.`, "Stok Diperbarui", "📦");
+        } else {
+            customAlert("Angka yang dimasukkan tidak valid atau dibatalkan.", "Gagal Menambah Stok", "❌");
+        }
+    }, "Tambah Stok Barang", "➕", "number");
 }
 
 function deleteProduct(index) {
     // PENGAMAN GANDA ANTI-KASIR
     if(localStorage.getItem('currentRole') !== 'admin') {
-        return alert("Akses Ditolak! Khusus Owner.");
+        return customAlert("Akses Ditolak! Fitur hapus barang khusus untuk Owner.", "Akses Terbatas", "⛔");
     }
     
-    if(confirm('Yakin ingin menghapus produk ini?')) {
-        const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    // MENGGUNAKAN CUSTOM CONFIRM MODERN
+    customConfirm(`Yakin ingin menghapus produk <b>${products[index].name}</b> secara permanen dari menu?`, () => {
         products.splice(index, 1); 
         localStorage.setItem('products', JSON.stringify(products)); 
         loadProducts();
-    }
+        customAlert("Barang telah berhasil dihapus dari sistem.", "Terhapus", "🗑️");
+    }, "Hapus Produk", "⚠️");
 }
 
 // === LOGIKA KAMERA SCANNER BARCODE ===
