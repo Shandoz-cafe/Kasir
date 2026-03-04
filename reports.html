@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Keuangan - SHANDOZ</title>
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         #printLayer { display: none; }
         
-        /* MAGIC CSS: KLASIK UNTUK CETAK KERTAS DOKUMEN RESMI (ANTI MACET) */
+        /* MAGIC CSS: MENGUBAH WEB JADI KERTAS DOKUMEN RESMI SAAT DICETAK */
         @media print {
-            @page { size: A4 portrait; margin: 12mm; }
+            @page { size: A4 portrait; margin: 10mm; }
             body { background: white !important; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
             
-            /* Sembunyikan elemen UI, Tampilkan Print Layer secara Statis (Jangan Absolute) */
+            /* Sembunyikan elemen UI secara total (Anti macet) */
             header, #uiContainer, .custom-dialog-overlay { display: none !important; }
-            #printLayer { display: block !important; position: static !important; width: 100% !important; }
+            
+            /* Tampilkan Kertas Cetak secara Statis */
+            #printLayer { display: block !important; position: relative !important; width: 100% !important; left: 0; top: 0; }
             
             table { page-break-inside: auto; border-collapse: collapse; width: 100%; }
             tr { page-break-inside: avoid; page-break-after: auto; }
@@ -49,7 +52,7 @@
             </div>
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="exportLaporanPDF()">📄 UNDUH DOKUMEN PDF</button>
+                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 20px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="cetakLaporanPDF()">📄 UNDUH DOKUMEN PDF</button>
             </div>
         </div>
 
