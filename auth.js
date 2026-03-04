@@ -21,7 +21,7 @@ auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
 // === MESIN INJEKSI CUSTOM DIALOG GLOBAL (OTOMATIS MUNCUL DI SEMUA HALAMAN) ===
 // =========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Injeksi CSS Otomatis
+    // 1. Injeksi CSS Otomatis (Ditambah Input Box)
     if (!document.getElementById('customDialogStyle')) {
         const style = document.createElement('style');
         style.id = 'customDialogStyle';
@@ -31,7 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
             @keyframes popIn { to { transform: scale(1); } }
             .dialog-icon { font-size: 45px; margin-bottom: 10px; line-height: 1; }
             .dialog-title { color: #0f172a; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-            .dialog-message { color: #475569; font-size: 13px; margin-bottom: 25px; line-height: 1.5; }
+            .dialog-message { color: #475569; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+            .dialog-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 16px; outline: none; text-align: center; color: #0f172a; font-weight: 600; display: none; background: #f8fafc;}
+            .dialog-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
             .dialog-actions { display: flex; gap: 10px; justify-content: center; }
             .btn-dialog { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: 0.2s; }
             .btn-dialog:active { transform: scale(0.95); }
@@ -42,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(style);
     }
 
-    // 2. Injeksi HTML Otomatis
+    // 2. Injeksi HTML Otomatis (Ditambah Input Element)
     if (!document.getElementById('customDialog')) {
         const dialogHTML = `
         <div class="custom-dialog-overlay" id="customDialog">
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="dialog-icon" id="dialogIcon">⚠️</div>
                 <div class="dialog-title" id="dialogTitle">Peringatan</div>
                 <div class="dialog-message" id="dialogMessage">Pesan error di sini.</div>
+                <input type="text" id="dialogInput" class="dialog-input" autocomplete="off">
                 <div class="dialog-actions">
                     <button class="btn-dialog btn-dialog-cancel" id="btnDialogCancel" style="display: none;">Batal</button>
                     <button class="btn-dialog btn-dialog-ok" id="btnDialogOk">OK</button>
@@ -65,11 +68,12 @@ let dialogCallback = null;
 
 window.customAlert = function(message, title="Pemberitahuan", icon="ℹ️") {
     const dlg = document.getElementById('customDialog');
-    if(!dlg) return alert(message); // Fallback darurat
+    if(!dlg) return alert(message); 
 
     document.getElementById('dialogIcon').innerText = icon;
     document.getElementById('dialogTitle').innerText = title;
     document.getElementById('dialogMessage').innerHTML = message;
+    document.getElementById('dialogInput').style.display = 'none'; // Sembunyikan Input
     document.getElementById('btnDialogCancel').style.display = 'none';
     
     let btnOk = document.getElementById('btnDialogOk');
@@ -88,11 +92,12 @@ window.customConfirm = function(message, callback, title="Konfirmasi", icon="⚠
     document.getElementById('dialogIcon').innerText = icon;
     document.getElementById('dialogTitle').innerText = title;
     document.getElementById('dialogMessage').innerHTML = message;
+    document.getElementById('dialogInput').style.display = 'none'; // Sembunyikan Input
     document.getElementById('btnDialogCancel').style.display = 'block';
     
     let btnOk = document.getElementById('btnDialogOk');
     btnOk.innerText = "Ya, Lanjutkan";
-    btnOk.style.background = "#10b981"; // Hijau
+    btnOk.style.background = "#10b981"; 
     btnOk.style.color = "white";
     
     dialogCallback = callback;
@@ -108,6 +113,45 @@ window.customConfirm = function(message, callback, title="Konfirmasi", icon="⚠
     
     dlg.style.display = 'flex';
 };
+
+// FITUR BARU: CUSTOM PROMPT UNTUK INPUT DATA!
+window.customPrompt = function(message, callback, title="Input Data", icon="⌨️", inputType="number") {
+    const dlg = document.getElementById('customDialog');
+    if(!dlg) { 
+        let res = prompt(message); 
+        if(res !== null) callback(res); 
+        return; 
+    }
+
+    document.getElementById('dialogIcon').innerText = icon;
+    document.getElementById('dialogTitle').innerText = title;
+    document.getElementById('dialogMessage').innerHTML = message;
+    
+    const inputEl = document.getElementById('dialogInput');
+    inputEl.type = inputType;
+    inputEl.value = ""; // Reset value
+    inputEl.style.display = 'block'; // Tampilkan Input
+
+    document.getElementById('btnDialogCancel').style.display = 'block';
+    
+    let btnOk = document.getElementById('btnDialogOk');
+    btnOk.innerText = "Simpan";
+    btnOk.style.background = "#f59e0b"; // Warna Kuning/Orange untuk action input
+    btnOk.style.color = "white";
+    
+    btnOk.onclick = () => {
+        dlg.style.display = 'none';
+        callback(inputEl.value);
+    };
+    
+    document.getElementById('btnDialogCancel').onclick = () => {
+        dlg.style.display = 'none';
+    };
+    
+    dlg.style.display = 'flex';
+    setTimeout(() => inputEl.focus(), 100); // Fokus kursor otomatis
+};
+
 // =========================================================================
 
 function showLoader(show) {
@@ -157,9 +201,10 @@ function requestPasswordReset() {
     let emailTarget = loginInput ? loginInput.value.trim() : "";
     
     if (!emailTarget) {
-        emailTarget = prompt("Masukkan Email Anda untuk mereset sandi:");
-        if(!emailTarget) return;
-        executeReset(emailTarget);
+        customPrompt("Masukkan Email Anda yang terdaftar:", (inputEmail) => {
+            if(!inputEmail) return;
+            executeReset(inputEmail.trim());
+        }, "Reset Kata Sandi", "📧", "email");
     } else {
         customConfirm("Kirim link ganti sandi ke alamat email <b>" + emailTarget + "</b> ?", () => {
             executeReset(emailTarget);
@@ -170,7 +215,7 @@ function requestPasswordReset() {
         showLoader(true);
         auth.sendPasswordResetEmail(email).then(() => {
             showLoader(false);
-            customAlert("Link ganti sandi telah dikirim ke email " + email, "Terkirim", "🔒");
+            customAlert("Link ganti sandi telah dikirim ke email <br><b>" + email + "</b>", "Terkirim", "🔒");
         }).catch(err => { 
             showLoader(false); 
             customAlert("Gagal mengirim email reset: " + err.message, "Error", "❌"); 
@@ -245,14 +290,13 @@ function mulaiSinkronisasiCloud() {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        // Sales dan Expenses Dikeluarkan dari override massal biar nggak saling timpa
         const cloudKeys = ['products', 'users', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
         if (!isSyncingFromCloud && cloudKeys.includes(key)) {
             userRef.child(key).set(value).catch(e => console.error(e));
         }
     };
 
-    // 3. MESIN WATCHDOG (SATPAM PATROLI TIAP 2 DETIK) - FIX ANTI TABRAKAN
+    // 3. MESIN WATCHDOG (SATPAM PATROLI TIAP 2 DETIK)
     const watchKeys = ['products', 'users'];
     let lastStates = {};
     watchKeys.forEach(k => lastStates[k] = localStorage.getItem(k));
