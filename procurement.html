@@ -8,17 +8,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS KHUSUS MESIN CETAK */
+        /* CSS KLASIK UNTUK CETAK PDF (CARA BIASA) */
         #printLayer { display: none; }
         
         @media print {
             @page { size: A4 portrait; margin: 15mm; }
             body { background: white !important; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-            header, .container, .sidebar-overlay, .sidebar, #customDialog, #modalPreviewPO { display: none !important; }
-            #printLayer { display: block !important; position: absolute !important; width: 100% !important; left: 0; top: 0; }
-            table { border-collapse: collapse; width: 100%; font-size: 10pt; page-break-inside: auto; }
-            tr { page-break-inside: avoid; page-break-after: auto; }
-            th { border: 1px solid #000; padding: 8px 4px; background-color: #f8fafc !important; -webkit-print-color-adjust: exact; color-adjust: exact; text-align: center;}
+            body * { visibility: hidden; }
+            #printLayer, #printLayer * { visibility: visible; }
+            #printLayer { display: block !important; position: absolute !important; left: 0; top: 0; width: 100% !important; }
+            
+            header, .container, #customDialog { display: none !important; }
+            
+            table { border-collapse: collapse; width: 100%; font-size: 10pt; }
+            th { border: 1px solid #000; padding: 8px 4px; background-color: #f8fafc !important; -webkit-print-color-adjust: exact; text-align: center;}
             td { border: 1px solid #000; padding: 6px 4px; }
             .no-border { border: none !important; }
         }
@@ -49,9 +52,9 @@
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #10b981; margin-bottom: 20px;">
             <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
                 <span>📦 Audit Fisik / Stock Opname</span>
-                <button class="bg-primary" style="font-size: 11px; padding: 5px 10px;" onclick="loadOpnameData()">🔄 Refresh Tabel</button>
+                <button class="bg-primary" style="font-size: 11px; padding: 5px 10px;" onclick="loadOpnameData()">🔄 Refresh</button>
             </h3>
-            <div style="overflow-x: auto; max-height: 250px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="overflow-x: auto; max-height: 300px; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead style="background: #f1f5f9; color: #475569; position: sticky; top: 0; z-index: 10;">
                         <tr><th style="padding:10px; text-align:left;">Nama Item</th><th style="padding:10px; text-align:center;">Stok Sistem</th><th style="padding:10px; text-align:center;">Fisik Riil</th><th style="padding:10px; text-align:center;">Aksi</th></tr>
@@ -70,7 +73,7 @@
                 <div class="grid-po">
                     <div class="input-group">
                         <label>Nama Barang / Bahan</label>
-                        <input type="text" id="poItem" placeholder="Contoh: Biji Kopi" style="margin:0;">
+                        <input type="text" id="poItem" placeholder="Contoh: Biji Kopi Arabica" style="margin:0;">
                     </div>
                     <div class="input-group">
                         <label>Kategori</label>
@@ -119,7 +122,7 @@
                 <b>Grand Total Estimasi: <span id="poGrandTotal" style="color: #ef4444;">Rp 0</span></b>
             </div>
             
-            <button class="bg-danger" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; background: #e11d48;" onclick="cetakDanSimpanPO()">📄 SIMPAN & PRATINJAU DOKUMEN</button>
+            <button class="bg-danger" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; background: #e11d48;" onclick="cetakDanSimpanPO()">📄 SIMPAN & UNDUH DOKUMEN PO (PDF)</button>
         </div>
 
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #8b5cf6; margin-top: 20px; margin-bottom: 20px;">
@@ -134,35 +137,18 @@
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead style="background: #f1f5f9; color: #475569;">
-                        <tr><th style="padding:10px; text-align:left;">Tanggal & Waktu</th><th style="padding:10px; text-align:left;">No. Ref</th><th style="padding:10px; text-align:left;">Pembuat</th><th style="padding:10px; text-align:right;">Anggaran</th><th style="padding:10px; text-align:center;">Pratinjau</th></tr>
+                        <tr><th style="padding:10px; text-align:left;">Tanggal & Waktu</th><th style="padding:10px; text-align:left;">No. Ref</th><th style="padding:10px; text-align:left;">Pembuat</th><th style="padding:10px; text-align:right;">Anggaran</th><th style="padding:10px; text-align:center;">Unduh Ulang</th></tr>
                     </thead>
                     <tbody id="poHistoryList"></tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <div id="modalPreviewPO" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 99999; align-items: flex-start; padding-top: 20px; overflow-y: auto; backdrop-filter: blur(5px);">
-        <div style="max-width: 700px; width: 95%; margin: auto; background: #f8fafc; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-            <div style="background: #334155; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0; font-size: 16px;">📄 Pratinjau Dokumen PO</h3>
-                <button onclick="document.getElementById('modalPreviewPO').style.display='none'" style="background: transparent; border: none; color: white; font-size: 18px; cursor: pointer;">✖</button>
-            </div>
-            
-            <div style="padding: 20px; overflow-y: auto; max-height: 65vh; text-align: left;">
-                <div id="kertasPreview" style="background: white; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); color: black;">
-                    </div>
-            </div>
-
-            <div style="padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px;">
-                <button style="flex: 1; padding: 12px; font-weight:bold; background:#e2e8f0; color:#334155; border:none; border-radius:8px; cursor:pointer;" onclick="document.getElementById('modalPreviewPO').style.display='none'">Kembali</button>
-                <button style="flex: 2; padding: 12px; font-size: 14px; font-weight:bold; background:#10b981; color:white; border:none; border-radius:8px; cursor:pointer;" onclick="eksekusiUnduhPDF()">🌐 Buka Chrome & Unduh PDF</button>
-            </div>
-        </div>
     </div>
 
     <div id="printLayer">
         <div style="width: 100%; padding: 20px; color: black; line-height: 1.5; background: white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box;">
+            
             <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid black; padding-bottom: 10px; margin-bottom: 20px;">
                 <div>
                     <h1 style="margin: 0; font-size: 18pt; text-transform: uppercase; font-weight: bold;" id="docStoreName">SHANDOZ CAFE</h1>
@@ -183,15 +169,15 @@
                 </tr>
             </table>
 
-            <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse; font-size: 10pt;">
+            <table style="width: 100%; margin-bottom: 10px; font-size: 10pt; border-collapse: collapse;">
                 <thead>
                     <tr>
-                        <th style="border: 1px solid black; padding: 8px;">No</th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: left;">Nama Barang / Spesifikasi</th>
-                        <th style="border: 1px solid black; padding: 8px;">Kategori</th>
-                        <th style="border: 1px solid black; padding: 8px;">Qty</th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: right;">Est. Harga</th>
-                        <th style="border: 1px solid black; padding: 8px; text-align: right;">Total Harga</th>
+                        <th style="width: 5%; border: 1px solid black; padding: 8px;">No</th>
+                        <th style="width: 30%; border: 1px solid black; padding: 8px; text-align: left;">Nama Barang / Spesifikasi</th>
+                        <th style="width: 15%; border: 1px solid black; padding: 8px;">Kategori</th>
+                        <th style="width: 15%; border: 1px solid black; padding: 8px;">Kuantitas (Satuan)</th>
+                        <th style="width: 15%; border: 1px solid black; padding: 8px; text-align: right;">Estimasi Harga</th>
+                        <th style="width: 20%; border: 1px solid black; padding: 8px; text-align: right;">Total Harga</th>
                     </tr>
                 </thead>
                 <tbody id="docPoItems"></tbody>
@@ -203,13 +189,16 @@
                 </tfoot>
             </table>
 
+            <p style="font-size: 9pt; font-style: italic;">* Dokumen ini adalah pengajuan resmi untuk kebutuhan operasional. Harga tertera adalah estimasi yang dapat berubah menyesuaikan kondisi lapangan.</p>
+
             <table style="width: 100%; margin-top: 50px; text-align: center; border: none; font-size: 10pt; page-break-inside: avoid;">
                 <tr>
-                    <td style="border: none; width: 33%;">Dibuat Oleh,<br><br><br><br><br>( .............................. )<br>Procurement/Staff</td>
-                    <td style="border: none; width: 33%;">Diperiksa Oleh,<br><br><br><br><br>( .............................. )<br>Manager Operasional</td>
-                    <td style="border: none; width: 33%;">Disetujui Oleh,<br><br><br><br><br>( .............................. )<br>Direktur / Owner</td>
+                    <td style="border: none; width: 33%;">Dibuat Oleh,<br><br><br><br><br>( ...................................... )<br>Procurement/Staff</td>
+                    <td style="border: none; width: 33%;">Diperiksa Oleh,<br><br><br><br><br>( ...................................... )<br>Manager Operasional</td>
+                    <td style="border: none; width: 33%;">Disetujui Oleh,<br><br><br><br><br>( ...................................... )<br>Direktur / Owner</td>
                 </tr>
             </table>
+            
         </div>
     </div>
 
@@ -219,12 +208,8 @@
     <script src="auth.js"></script>
 
     <script>
-        // CEK JIKA DIBUKA UNTUK MODE PRINT DARI APK / TAB BARU
-        const urlParams = new URLSearchParams(window.location.search);
-        const autoPrintPoId = urlParams.get('print_po');
-        let currentPoIdForDownload = null;
+        checkAuth();
 
-        // PENGAMAN ALERT AGAR TIDAK MACET JIKA AUTH.JS TELAT LOAD
         function safeAlert(msg, title="Info", icon="ℹ️") {
             try { if(window.customAlert) { customAlert(msg, title, icon); } else { alert(msg); } } catch(e) { alert(msg); }
         }
@@ -232,29 +217,16 @@
             try { if(window.customConfirm) { customConfirm(msg, callback, title, icon); } else { if(confirm(msg)) callback(); } } catch(e) { if(confirm(msg)) callback(); }
         }
 
-        // MESIN AUTO-REFRESH OPNAME (RADAR SINKRONISASI)
         let lastProductsStr = "";
         setInterval(() => {
-            if (autoPrintPoId) return; // Jangan refresh kalau lagi mode print kertas
             const currentProdsStr = localStorage.getItem('products') || '[]';
             if(currentProdsStr !== '[]' && currentProdsStr !== lastProductsStr) {
                 lastProductsStr = currentProdsStr;
                 loadOpnameData();
             }
-        }, 1000);
+        }, 1500);
 
         document.addEventListener('DOMContentLoaded', () => {
-            // JIKA HALAMAN DIBUKA KHUSUS UNTUK CETAK (HASIL LEMPARAN KE CHROME)
-            if (autoPrintPoId) {
-                document.getElementById('uiContainer').style.display = 'none';
-                document.getElementById('topHeader').style.display = 'none';
-                document.body.style.background = 'white';
-                document.getElementById('printLayer').style.display = 'block'; // Tampilkan paksa untuk dipotret browser
-                
-                siapkanDataKertas(autoPrintPoId, true);
-                return;
-            }
-
             const role = localStorage.getItem('currentRole');
             if(role !== 'admin') {
                 safeAlert("⛔ Akses ditolak! Halaman ini khusus Manajemen.", "Peringatan", "⛔");
@@ -271,7 +243,11 @@
         function loadOpnameData() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const tbody = document.getElementById('opnameList');
-            if(products.length === 0) return;
+            
+            if(products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">Belum ada Data Barang. Sinkronisasi Cloud sedang berjalan...</td></tr>';
+                return;
+            }
 
             tbody.innerHTML = products.map((p, index) => `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
@@ -305,6 +281,7 @@
                         if (uid && typeof firebase !== 'undefined') {
                             firebase.database().ref('ShandozPOS/' + uid + '/products').set(products);
                         }
+
                         safeAlert('✅ Stok berhasil disesuaikan dengan sistem Cloud.', 'Berhasil', '📦');
                         loadOpnameData();
                     }, "Konfirmasi Opname", "📊"
@@ -336,10 +313,8 @@
 
             poCart.push({ name, category, qty, unit, price, total: (qty * price) });
             
-            document.getElementById('poItem').value = ''; 
-            document.getElementById('poQty').value = ''; 
-            document.getElementById('poPrice').value = ''; 
-            document.getElementById('poSubtotal').innerText = 'Rp 0';
+            document.getElementById('poItem').value = ''; document.getElementById('poQty').value = ''; 
+            document.getElementById('poPrice').value = ''; document.getElementById('poSubtotal').innerText = 'Rp 0';
             renderPO();
         }
 
@@ -414,13 +389,13 @@
                     <td style="padding: 10px;">${po.user}</td>
                     <td style="padding: 10px; text-align: right; font-weight: bold;">Rp ${po.total.toLocaleString('id-ID')}</td>
                     <td style="padding: 10px; text-align: center;">
-                        <button style="background:#3b82f6; padding:6px 12px; font-size:11px; border:none; color:white; border-radius:6px; cursor:pointer;" onclick="bukaPreviewPO('${po.id}')">👀 Pratinjau</button>
+                        <button class="bg-success" style="padding:6px 12px; font-size:11px; border:none; color:white; border-radius:6px; cursor:pointer;" onclick="cetakUlangPO('${po.id}')">🖨️ Cetak PDF</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // === 3. MESIN PEMBUAT DOKUMEN & PREVIEW MODAL ===
+        // === CARA BIASA (NORMAL PRINT) ===
         function cetakDanSimpanPO() {
             if(poCart.length === 0) return safeAlert("Daftar belanja (PO) masih kosong! Masukkan minimal 1 barang.", "Kosong", "🛒");
 
@@ -446,34 +421,34 @@
             if (uid && typeof firebase !== 'undefined') {
                 firebase.database().ref('ShandozPOS/' + uid + '/purchaseOrders').set(historyPO);
             }
+
+            siapkanKertasPO(poRef, fullDateStr, currentUser, grandTotal, poCart);
             
             poCart = []; document.getElementById('poItem').value = ''; document.getElementById('poQty').value = ''; document.getElementById('poPrice').value = '';
             renderPO(); renderPOHistory();
 
-            bukaPreviewPO(poRef);
+            // Panggil mode cetak klasik
+            setTimeout(() => { window.print(); }, 500);
         }
 
-        function bukaPreviewPO(poId) {
-            siapkanDataKertas(poId, false);
-            
-            // Ambil HTML dari Print Layer dan tempel ke dalam Kotak Modal agar bisa dilihat user
-            const kertasHTML = document.getElementById('printLayer').innerHTML;
-            document.getElementById('kertasPreview').innerHTML = kertasHTML;
-            document.getElementById('modalPreviewPO').style.display = 'flex';
-        }
-
-        function siapkanDataKertas(poId, isAutoPrint = false) {
+        function cetakUlangPO(poId) {
             let historyPO = JSON.parse(localStorage.getItem('purchaseOrders') || '[]');
             const po = historyPO.find(p => p.id === poId);
             if(!po) return safeAlert("Data tidak ditemukan.", "Error", "❌");
             
-            currentPoIdForDownload = po.id;
-            document.getElementById('docPoRef').innerText = po.id;
-            document.getElementById('docPoDate').innerText = po.displayDate || po.date;
-            document.getElementById('docPoUser').innerText = po.user;
-            document.getElementById('docPoGrandTotal').innerText = `Rp ${po.total.toLocaleString('id-ID')}`;
+            siapkanKertasPO(po.id, po.displayDate || po.date, po.user, po.total, po.items);
             
-            document.getElementById('docPoItems').innerHTML = po.items.map((item, i) => `
+            // Panggil mode cetak klasik
+            setTimeout(() => { window.print(); }, 500);
+        }
+
+        function siapkanKertasPO(poRef, dateStr, user, grandTotal, items) {
+            document.getElementById('docPoRef').innerText = poRef;
+            document.getElementById('docPoDate').innerText = dateStr;
+            document.getElementById('docPoUser').innerText = user;
+            document.getElementById('docPoGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+            
+            document.getElementById('docPoItems').innerHTML = items.map((item, i) => `
                 <tr>
                     <td style="border: 1px solid black; padding: 8px; text-align: center;">${i+1}</td>
                     <td style="border: 1px solid black; padding: 8px;">${item.name}</td>
@@ -483,25 +458,6 @@
                     <td style="border: 1px solid black; padding: 8px; text-align: right; font-weight: bold;">${item.total.toLocaleString('id-ID')}</td>
                 </tr>
             `).join('');
-
-            if (isAutoPrint) {
-                // Dipanggil dari tab Chrome baru untuk langsung munculin dialog Print bawaan
-                setTimeout(() => { window.print(); }, 1000);
-            }
-        }
-
-        // === 4. EKSEKUSI UNDUH MENGHINDARI BUG WEBVIEW APK ===
-        function eksekusiUnduhPDF() {
-            if(!currentPoIdForDownload) return;
-
-            const targetUrl = window.location.href.split('?')[0] + "?print_po=" + currentPoIdForDownload;
-            
-            document.getElementById('modalPreviewPO').style.display = 'none';
-
-            safeConfirm("Sistem akan membuka tab baru di Browser HP Anda (Chrome/Safari) agar PDF terunduh dengan sempurna. Lanjutkan?", () => {
-                // JURUS BYPASS KE BROWSER LUAR (Ini yang didukung oleh APK webintoapp)
-                window.open(targetUrl, "_blank");
-            }, "Dialihkan ke Browser", "🌐");
         }
     </script>
 </body>
