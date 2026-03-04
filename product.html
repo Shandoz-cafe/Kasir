@@ -10,33 +10,42 @@
 </head>
 <body>
     <header>
-        <h2>📦 Gudang & Produk</h2>
-        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+        <h2 data-i18n="inv_title">📦 Gudang & Produk</h2>
+        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'" data-i18n="btn_back_dash">⬅️ Dashboard</button>
     </header>
     
     <div class="container">
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="margin-top:0; margin-bottom: 15px; color: #1e293b;">Tambah Produk Baru</h3>
+            <h3 style="margin-top:0; margin-bottom: 15px; color: #1e293b;" data-i18n="inv_add_title">Tambah Produk Baru</h3>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <input type="text" id="prodName" placeholder="Nama Produk" style="flex:2; min-width:150px; margin:0;">
-                <input type="text" id="prodCategory" placeholder="Kategori" style="flex:1; min-width:120px; margin:0;">
+                <input type="text" id="prodName" placeholder="Nama Produk" data-i18n-ph="inv_ph_name" style="flex:2; min-width:150px; margin:0;">
+                <input type="text" id="prodCategory" placeholder="Kategori" data-i18n-ph="inv_ph_category" style="flex:1; min-width:120px; margin:0;">
                 
                 <div style="display:flex; flex:2; min-width:200px; gap:5px;">
-                    <input type="text" id="prodBarcode" placeholder="Kode Barcode" style="width:100%; margin:0;">
-                    <button class="bg-warning" style="margin:0; white-space:nowrap; border-radius: 8px; color: white;" onclick="openScanner()">📷 Scan</button>
+                    <input type="text" id="prodBarcode" placeholder="Kode Barcode" data-i18n-ph="inv_ph_barcode" style="width:100%; margin:0;">
+                    <button class="bg-warning" style="margin:0; white-space:nowrap; border-radius: 8px; color: white;" onclick="openScanner()" data-i18n="inv_btn_scan">📷 Scan</button>
                 </div>
                 
-                <input type="number" id="prodCost" placeholder="Modal (HPP)" style="flex:1; min-width:100px; margin:0;">
-                <input type="number" id="prodPrice" placeholder="Harga Jual" style="flex:1; min-width:100px; margin:0;">
-                <input type="number" id="prodStock" placeholder="Stok" style="flex:1; min-width:70px; margin:0;">
-                <button class="bg-primary" style="white-space: nowrap; margin:0; color: white;" onclick="addProduct()">➕ Simpan</button>
+                <input type="number" id="prodCost" placeholder="Modal (HPP)" data-i18n-ph="inv_ph_cost" style="flex:1; min-width:100px; margin:0;">
+                <input type="number" id="prodPrice" placeholder="Harga Jual" data-i18n-ph="inv_ph_price" style="flex:1; min-width:100px; margin:0;">
+                <input type="number" id="prodStock" placeholder="Stok" data-i18n-ph="inv_ph_stock" style="flex:1; min-width:70px; margin:0;">
+                <button class="bg-primary" style="white-space: nowrap; margin:0; color: white;" onclick="addProduct()" data-i18n="inv_btn_save">➕ Simpan</button>
             </div>
         </div>
         
         <div class="card" style="overflow-x: auto; padding: 0;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
                 <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
-                    <tr><th style="padding: 15px;">No</th><th>Barcode</th><th>Kategori</th><th>Nama Item</th><th>Modal</th><th>Jual</th><th>Sisa Stok</th><th>Aksi</th></tr>
+                    <tr>
+                        <th style="padding: 15px;" data-i18n="inv_th_no">No</th>
+                        <th data-i18n="inv_th_barcode">Barcode</th>
+                        <th data-i18n="inv_th_category">Kategori</th>
+                        <th data-i18n="inv_th_name">Nama Item</th>
+                        <th data-i18n="inv_th_cost">Modal</th>
+                        <th data-i18n="inv_th_price">Jual</th>
+                        <th data-i18n="inv_th_stock">Sisa Stok</th>
+                        <th data-i18n="inv_th_action">Aksi</th>
+                    </tr>
                 </thead>
                 <tbody id="productList"></tbody>
             </table>
@@ -45,9 +54,9 @@
 
     <div class="modal-overlay" id="scannerModal">
         <div class="modal-box">
-            <h3 style="margin-top: 0; color: #0f172a;">Arahkan Kamera ke Barcode</h3>
+            <h3 style="margin-top: 0; color: #0f172a;" data-i18n="inv_scan_title">Arahkan Kamera ke Barcode</h3>
             <div id="reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-            <button class="bg-danger" style="width: 100%; margin-top: 15px; padding: 12px; color: white;" onclick="closeScanner()">Batal</button>
+            <button class="bg-danger" style="width: 100%; margin-top: 15px; padding: 12px; color: white;" onclick="closeScanner()" data-i18n="inv_btn_cancel">Batal</button>
         </div>
     </div>
     
@@ -55,8 +64,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="auth.js"></script>
-    
-    <script>
+    <script src="lang.js"></script> <script>
         checkAuth(); 
         
         // OTOMATIS SEMBUNYIKAN FORM TAMBAH JIKA YANG LOGIN ADALAH KASIR
