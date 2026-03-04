@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard - Shandoz POS</title>
+    <title>Dashboard - VIREXON</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -26,7 +26,7 @@
             <div class="sidebar-profile-info">
                 <span class="sidebar-role" id="sideRole">Jabatan</span>
                 <span class="sidebar-name" id="sideName">Nama User</span>
-                <span class="sidebar-store" id="sideStore">SHANDOZ CAFE</span>
+                <span class="sidebar-store" id="sideStore">VIREXON</span>
             </div>
             <div class="sidebar-lock-icon">🔒</div>
         </div>
@@ -48,20 +48,20 @@
             <div class="sidebar-item" onclick="logout()" style="color: #ef4444;"><i>🛑</i> Keluar Sistem</div>
         </div>
         
-        <div class="sidebar-version">v.4.0 Enterprise</div>
+        <div class="sidebar-version">v.4.0 Virexon Enterprise Command Center</div>
     </div>
 
     <header>
         <div style="display: flex; align-items: center; gap: 10px;">
             <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
-            <h2 style="margin:0;"><span style="color:#10b981;">●</span> Command Center</h2>
+            <h2 style="margin:0;"><span style="color:#10b981;">●</span>Command Center</h2>
         </div>
     </header>
     
     <div class="container">
         <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);">
             <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;" data-i18n="dash_welcome">Halo, <span id="userNameDisplay">User</span>! 👋</h3>
-            <p style="font-size: 12px; opacity: 0.9;" data-i18n="dash_sub">Selamat datang di Shandoz Command Center. Semua fitur telah <b>dibuka penuh</b>.</p>
+            <p style="font-size: 12px; opacity: 0.9;" data-i18n="dash_sub">Selamat datang di VIREXON Enterprise<b>Command</b>Center</p>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
@@ -97,7 +97,7 @@
         </div>
         
         <div style="text-align: center; margin-top: 30px; opacity: 0.5;">
-            <h4 style="font-weight: 900; letter-spacing: 2px; color: #0f172a;">SHANDOZ SYSTEMS</h4>
+            <h4 style="font-weight: 900; letter-spacing: 2px; color: #0f172a;">VIREXON SYSTEMS</h4>
             <p style="font-size: 10px; font-weight: bold;">v4.0 ENTERPRISE EDITION</p>
         </div>
     </div>
@@ -121,10 +121,10 @@
 
     <div id="aboutModal" class="about-modal">
         <div class="about-box">
-            <h2 class="about-title">SHANDOZ POS</h2>
+            <h2 class="about-title">VIREXON</h2>
             <span class="about-version">ENTERPRISE EDITION V4.0</span>
-            <div class="dev-badge">👨‍💻 ARCHITECTED & DEVELOPED BY OWNER</div>
-            <p class="about-text">Shandoz POS is not just a cash register; it is a meticulously engineered <span class="about-highlight">command center</span> designed for high-energy, modern F&B operations.</p>
+            <div class="dev-badge">ARCHITECTED & ENGINEERED BY VIREXON</div>
+            <p class="about-text">VIREXON is not just a cash register; it is a meticulously engineered <span class="about-highlight">command center</span> designed for high-energy, modern operations.</p>
             <p class="about-text">Powered by a relentless <span class="about-highlight">Real-Time Cloud Synchronization Engine</span>, featuring strictly enforced Role-Based Access Control, automated bank-standard financial reporting, and a seamless offline-to-cloud architecture.</p>
             <button class="btn-close-about" onclick="document.getElementById('aboutModal').style.display='none'">Acknowledge</button>
         </div>
@@ -141,7 +141,7 @@
         
         const currentUser = localStorage.getItem('currentUser') || 'User';
         const currentRole = localStorage.getItem('currentRole') || 'Karyawan';
-        const storeName = localStorage.getItem('storeName') || 'SHANDOZ CAFE';
+        const storeName = localStorage.getItem('storeName') || 'VIREXON';
         
         // Update teks sapaan dan sidebar
         document.getElementById('userNameDisplay').innerText = currentUser.toUpperCase();
