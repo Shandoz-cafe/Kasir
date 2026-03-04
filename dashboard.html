@@ -5,35 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - Shandoz POS</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* TAMBAHAN CSS KHUSUS UNTUK KOTAK ABOUT DEVELOPER */
-        .about-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;}
+        /* CSS KHUSUS MODAL INFO (Tetap dipertahankan) */
+        .about-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 99999; justify-content: center; align-items: center; backdrop-filter: blur(10px); padding: 20px; box-sizing: border-box;}
         .about-box { background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%; text-align: center; color: white; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); position: relative; overflow: hidden;}
-        .about-box::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(0,0,0,0) 70%); pointer-events: none; }
         .about-title { font-size: 24px; font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; background: -webkit-linear-gradient(#3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .about-version { font-size: 11px; color: #94a3b8; letter-spacing: 3px; margin-bottom: 25px; display: block;}
         .about-text { font-size: 13px; color: #cbd5e1; line-height: 1.6; text-align: justify; margin-bottom: 20px; font-weight: 400;}
         .about-highlight { color: #fff; font-weight: 600; }
         .dev-badge { display: inline-block; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; padding: 8px 15px; border-radius: 30px; font-size: 12px; font-weight: 700; color: #60a5fa; margin-top: 10px; margin-bottom: 20px;}
         .btn-close-about { background: #334155; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; }
-        .btn-close-about:hover { background: #475569; }
     </style>
 </head>
 <body>
 
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header" onclick="window.location.href='profiles.html'">
+            <div class="sidebar-profile-info">
+                <span class="sidebar-role" id="sideRole">Jabatan</span>
+                <span class="sidebar-name" id="sideName">Nama User</span>
+                <span class="sidebar-store" id="sideStore">SHANDOZ CAFE</span>
+            </div>
+            <div class="sidebar-lock-icon">🔒</div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="window.location.href='pos.html'"><i>🛒</i> Penjualan (POS)</div>
+            <div class="sidebar-item" onclick="bukaHistoryStruk()"><i>🧾</i> Riwayat Struk</div>
+            <div class="sidebar-item" onclick="window.location.href='product.html'"><i>📦</i> Data Barang</div>
+            <div class="sidebar-item" onclick="window.location.href='procurement.html'"><i>📋</i> Stock Opname & PO</div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-item" onclick="window.location.href='reports.html'"><i>📊</i> Back Office (Laporan)</div>
+            <div class="sidebar-item" onclick="window.location.href='setting.html'"><i>⚙️</i> Pengaturan Toko</div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-item" onclick="document.getElementById('aboutModal').style.display='flex'; toggleSidebar();"><i>ℹ️</i> Dukungan & Info</div>
+            <div class="sidebar-item" onclick="logout()" style="color: #ef4444;"><i>🛑</i> Keluar Sistem</div>
+        </div>
+        
+        <div class="sidebar-version">v.4.0 Enterprise</div>
+    </div>
+
     <header>
-        <h2><span style="color:#10b981;">●</span> Sistem Operasi</h2>
-        <div style="display: flex; gap: 8px;">
-            <button class="bg-primary btn-head" style="background:#3b82f6;" onclick="document.getElementById('aboutModal').style.display='flex'" data-i18n="dash_info">ℹ️ Info</button>
-            <button class="bg-warning btn-head" onclick="window.location.href='profiles.html'" data-i18n="dash_profile">👥 Ganti Profil</button>
-            <button class="bg-danger btn-head" onclick="logout()" data-i18n="dash_logout">🛑 Keluar</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+            <h2 style="margin:0;"><span style="color:#10b981;">●</span> Command Center</h2>
         </div>
     </header>
     
     <div class="container">
-        <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px;">
+        <div style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; padding: 25px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);">
             <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;" data-i18n="dash_welcome">Halo, <span id="userNameDisplay">User</span>! 👋</h3>
             <p style="font-size: 12px; opacity: 0.9;" data-i18n="dash_sub">Selamat datang di Shandoz Command Center. Semua fitur telah <b>dibuka penuh</b>.</p>
         </div>
@@ -54,19 +80,19 @@
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
             <a href="pos.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">🛒</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_pos">KASIR (POS)</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;">KASIR (POS)</span>
             </a>
             <a href="product.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📦</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_inv">GUDANG / MENU</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;">GUDANG / MENU</span>
             </a>
             <a href="reports.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📈</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_rep">LAPORAN KEUANGAN</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;">LAPORAN KEUANGAN</span>
             </a>
-            <a href="setting.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
-                <span style="font-size: 35px; margin-bottom: 10px;">⚙️</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_set">PENGATURAN TOKO</span>
+            <a href="procurement.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-bottom: 4px solid #f59e0b; display: flex; flex-direction: column; align-items: center;">
+                <span style="font-size: 35px; margin-bottom: 10px;">📋</span>
+                <span style="font-size: 13px; font-weight: 800; color: #f59e0b;">PENGADAAN & OPNAME</span>
             </a>
         </div>
         
@@ -76,23 +102,30 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header"><h3>Riwayat Transaksi Terakhir</h3></div>
+            <div class="modal-body" style="padding: 0; max-height: 60vh; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead style="background: #f8fafc; position: sticky; top: 0;">
+                        <tr><th style="padding:15px; text-align:left;">Info</th><th style="padding:15px; text-align:right;">Total</th></tr>
+                    </thead>
+                    <tbody id="dashHistoryList"></tbody>
+                </table>
+            </div>
+            <div style="padding: 15px; border-top: 1px solid #e2e8f0;">
+                <button class="bg-danger" style="width: 100%; padding: 15px;" onclick="document.getElementById('historyModal').style.display='none'">Tutup</button>
+            </div>
+        </div>
+    </div>
+
     <div id="aboutModal" class="about-modal">
         <div class="about-box">
             <h2 class="about-title">SHANDOZ POS</h2>
             <span class="about-version">ENTERPRISE EDITION V4.0</span>
-            
             <div class="dev-badge">👨‍💻 ARCHITECTED & DEVELOPED BY OWNER</div>
-
-            <p class="about-text">
-                Shandoz POS is not just a cash register; it is a meticulously engineered <span class="about-highlight">command center</span> designed for high-energy, modern F&B operations. Built from the ground up to eliminate bottlenecks, this system brings cutting-edge enterprise technology directly to the fingertips of owners and staff.
-            </p>
-            <p class="about-text">
-                Powered by a relentless <span class="about-highlight">Real-Time Cloud Synchronization Engine</span>, it ensures every transaction and inventory update is securely mirrored across all devices instantly. Featuring strictly enforced Role-Based Access Control, automated bank-standard financial reporting, and a seamless offline-to-cloud architecture.
-            </p>
-            <p class="about-text" style="text-align: center; font-style: italic; color: #94a3b8;">
-                "Bridging the gap between elegant design and hardcore backend infrastructure."
-            </p>
-            
+            <p class="about-text">Shandoz POS is not just a cash register; it is a meticulously engineered <span class="about-highlight">command center</span> designed for high-energy, modern F&B operations.</p>
+            <p class="about-text">Powered by a relentless <span class="about-highlight">Real-Time Cloud Synchronization Engine</span>, featuring strictly enforced Role-Based Access Control, automated bank-standard financial reporting, and a seamless offline-to-cloud architecture.</p>
             <button class="btn-close-about" onclick="document.getElementById('aboutModal').style.display='none'">Acknowledge</button>
         </div>
     </div>
@@ -100,42 +133,70 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <script src="auth.js"></script>
-    
     <script src="lang.js"></script>
 
     <script>
         checkAuth();
         
         const currentUser = localStorage.getItem('currentUser') || 'User';
-        const nameDisplay = document.getElementById('userNameDisplay');
-        if(nameDisplay) nameDisplay.innerText = currentUser.toUpperCase();
+        const currentRole = localStorage.getItem('currentRole') || 'Karyawan';
+        const storeName = localStorage.getItem('storeName') || 'SHANDOZ CAFE';
+        
+        // Update teks sapaan dan sidebar
+        document.getElementById('userNameDisplay').innerText = currentUser.toUpperCase();
+        document.getElementById('sideRole').innerText = currentRole === 'admin' ? 'Pemilik (Owner)' : 'Kasir / Staff';
+        document.getElementById('sideName').innerText = currentUser;
+        document.getElementById('sideStore').innerText = storeName.toUpperCase();
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('active');
+                overlay.style.display = 'block';
+            }
+        }
+
+        // FUNGSI MELIHAT RIWAYAT STRUK DARI DASHBOARD
+        function bukaHistoryStruk() {
+            toggleSidebar(); // Tutup sidebar dulu
+            
+            let sales = [];
+            try { sales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(sales)) sales = Object.values(sales); } catch(e) { sales = []; }
+            
+            const recentSales = sales.slice(-30).reverse(); // Ambil 30 transaksi terakhir
+            const tbody = document.getElementById('dashHistoryList');
+            
+            if(recentSales.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:20px;">Belum ada transaksi</td></tr>';
+            } else {
+                tbody.innerHTML = recentSales.map(s => `
+                    <tr>
+                        <td style="padding:15px; border-bottom:1px solid #e2e8f0;">
+                            <b>${s.date.split(', ')[1]}</b> <span style="color:#94a3b8; font-size:11px;">(${s.date.split(',')[0]})</span><br>
+                            <small style="color:#666;">ID: #${String(s.id).slice(-6)} | Kasir: ${s.user}</small>
+                        </td>
+                        <td style="padding:15px; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:bold; color:#10b981; font-size: 15px;">
+                            ${s.total.toLocaleString('id-ID')}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('historyModal').style.display = 'flex';
+        }
 
         function initDashboardData() {
             const salesData = JSON.parse(localStorage.getItem('sales') || '[]');
-            const now = new Date();
-            const tDate = now.getDate();
-            const tMonth = now.getMonth();
-            const tYear = now.getFullYear();
-            
+            const todayStr = new Date().toLocaleDateString('id-ID');
             let todayIncome = 0; let todayOrders = 0;
             
             salesData.forEach(sale => {
-                let isToday = false;
-                
-                // Prioritaskan cek pakai Timestamp murni yang akurat
-                if (sale.timestamp) {
-                    const sDate = new Date(sale.timestamp);
-                    isToday = (sDate.getDate() === tDate && sDate.getMonth() === tMonth && sDate.getFullYear() === tYear);
-                } else {
-                    // Fallback kalau data lama belum punya timestamp
-                    const todayStr = now.toLocaleDateString('id-ID');
-                    const saleDateStr = sale.date.split(',')[0].trim();
-                    isToday = (saleDateStr === todayStr);
-                }
-                
-                if(isToday) { todayIncome += sale.total; todayOrders++; }
+                const saleDate = sale.date.split(',')[0].trim();
+                if(saleDate === todayStr) { todayIncome += sale.total; todayOrders++; }
             });
 
             document.getElementById('todayIncome').innerText = 'Rp ' + todayIncome.toLocaleString('id-ID');
