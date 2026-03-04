@@ -128,6 +128,13 @@
 
         <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #8b5cf6; margin-top: 20px; margin-bottom: 20px;">
             <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;">📂 Riwayat Dokumen PO</h3>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <input type="date" id="filterPoDate" style="padding: 10px; margin: 0; flex: 1; min-width: 130px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;" onchange="renderPOHistory()">
+                <input type="text" id="filterPoSearch" placeholder="🔍 Cari No. Ref PO..." style="padding: 10px; margin: 0; flex: 2; min-width: 150px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;" oninput="renderPOHistory()">
+                <button class="bg-danger" style="padding: 10px 15px; font-size: 12px; border-radius: 6px; background:#64748b;" onclick="resetFilterPO()">Reset</button>
+            </div>
+
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead style="background: #f1f5f9; color: #475569;">
@@ -304,27 +311,68 @@
             renderPO();
         }
 
+        // === FUNGSI RESET FILTER ===
+        function resetFilterPO() {
+            document.getElementById('filterPoDate').value = '';
+            document.getElementById('filterPoSearch').value = '';
+            renderPOHistory();
+        }
+
+        // === MESIN RENDER HISTORY PO DENGAN FILTER & PENCARIAN ===
         function renderPOHistory() {
             let historyPO = JSON.parse(localStorage.getItem('purchaseOrders') || '[]');
             const tbody = document.getElementById('poHistoryList');
-            if(historyPO.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#94a3b8; font-style:italic;">Belum ada riwayat PO.</td></tr>';
+            
+            // Ambil Nilai dari Input Filter
+            const filterDate = document.getElementById('filterPoDate').value; // Format: YYYY-MM-DD
+            const filterSearch = document.getElementById('filterPoSearch').value.toLowerCase().trim();
+
+            // Balik urutan dari yang terbaru dulu, lalu filter
+            let filteredPO = historyPO.reverse().filter(po => {
+                let matchSearch = true;
+                if (filterSearch) {
+                    // Cari berdasarkan ID (No Ref) PO
+                    matchSearch = po.id.toLowerCase().includes(filterSearch);
+                }
+
+                let matchDate = true;
+                if (filterDate) {
+                    // Konversi po.date (ex: 4/3/2026, 21:51:00) ke format YYYY-MM-DD untuk dicocokkan
+                    let dParts = po.date.split(',')[0].split('/');
+                    if(dParts.length !== 3) dParts = po.date.split(',')[0].split('-'); // Fallback
+                    
+                    if(dParts.length === 3) {
+                        let y = dParts[2];
+                        let m = dParts[1].padStart(2, '0');
+                        let d = dParts[0].padStart(2, '0');
+                        let poDateStr = `${y}-${m}-${d}`;
+                        
+                        matchDate = (poDateStr === filterDate);
+                    }
+                }
+
+                return matchSearch && matchDate;
+            });
+
+            if(filteredPO.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8; font-style:italic;">Data Dokumen PO tidak ditemukan.</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = historyPO.slice(-10).reverse().map((po, index) => `
+            tbody.innerHTML = filteredPO.map((po) => `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 10px;">${po.displayDate || po.date}</td>
                     <td style="padding: 10px; font-weight: bold; color: #3b82f6;">${po.id}</td>
                     <td style="padding: 10px;">${po.user}</td>
                     <td style="padding: 10px; text-align: right; font-weight: bold;">Rp ${po.total.toLocaleString('id-ID')}</td>
                     <td style="padding: 10px; text-align: center;">
-                        <button class="bg-primary" style="padding:5px 10px; font-size:11px;" onclick="cetakUlangPO('${po.id}')">🖨️ Cetak</button>
+                        <button class="bg-primary" style="padding:6px 12px; font-size:11px;" onclick="cetakUlangPO('${po.id}')">🖨️ Cetak</button>
                     </td>
                 </tr>
             `).join('');
         }
 
+        // === MESIN SIMPAN DAN CETAK PDF ===
         function cetakDanSimpanPO() {
             if(poCart.length === 0) return alert("Daftar PO kosong! Masukkan minimal 1 barang.");
 
@@ -350,8 +398,10 @@
             // 2. Siapkan Data di Kertas PDF
             siapkanKertasPO(poRef, fullDateStr, currentUser, grandTotal, poCart);
             
-            // 3. Langsung kosongkan keranjang UI di latar belakang
+            // 3. Langsung kosongkan keranjang UI di latar belakang & Reset Filter
             poCart = []; 
+            document.getElementById('filterPoDate').value = '';
+            document.getElementById('filterPoSearch').value = '';
             renderPO(); 
             renderPOHistory();
 
