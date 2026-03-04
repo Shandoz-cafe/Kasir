@@ -23,6 +23,7 @@ const translations = {
 
         // Global (Tombol Kembali)
         "btn_back_dash": "⬅️ Dashboard",
+        "btn_back_only": "⬅ Kembali",
 
         // Kasir (POS)
         "pos_title": "<span style='color:#10b981;'>●</span> POS KASIR",
@@ -34,9 +35,37 @@ const translations = {
         "pos_change_text": "Kembali: ",
         "pos_btn_charge": "BAYAR",
 
+        // Procurement & Opname
+        "proc_title": "📋 Procurement & PO",
+        "proc_lock_title": "Area Terbatas Manajemen",
+        "proc_lock_desc": "Masukkan PIN Keamanan Owner untuk mengakses menu Pengadaan & Opname.",
+        "proc_btn_unlock": "Buka Kunci 🔓",
+        "proc_warn_title": "Area Khusus Manajemen (GA / Owner)",
+        "proc_warn_desc": "Gunakan modul ini untuk menyesuaikan stok fisik (Opname) dan merencanakan daftar belanja.",
+        "proc_opname_title": "📦 Audit Fisik / Stock Opname",
+        "proc_btn_refresh": "🔄 Refresh",
+        "proc_po_title": "📝 Buat Daftar Belanja (Purchase Order)",
+        "proc_lbl_item": "Nama Barang / Bahan",
+        "proc_ph_item": "Contoh: Biji Kopi Arabica",
+        "proc_lbl_cat": "Kategori",
+        "proc_cat_bahan": "Bahan Baku (F&B)",
+        "proc_cat_pack": "Packaging",
+        "proc_cat_alat": "Peralatan (Asset)",
+        "proc_cat_bersih": "Alat Kebersihan",
+        "proc_cat_lain": "Lainnya",
+        "proc_lbl_qty": "Jumlah (Qty)",
+        "proc_lbl_unit": "Satuan",
+        "proc_lbl_price": "Estimasi Harga Satuan",
+        "proc_est_sub": "Estimasi Subtotal: ",
+        "proc_btn_add": "➕ Masukkan ke Daftar",
+        "proc_est_grand": "Grand Total Estimasi: ",
+        "proc_btn_save": "📄 SIMPAN & CETAK DOKUMEN PO (PDF)",
+        "proc_history_title": "📂 Riwayat Dokumen PO",
+        "proc_ph_search": "🔍 Cari No. Ref PO...",
+        "proc_btn_reset": "Reset",
+
         // Pengaturan
         "set_title": "⚙️ Pengaturan Sistem",
-        "set_back": "⬅️ Dashboard",
         "set_store": "🏪 Profil Usaha & Printer",
         "set_store_name": "Nama Kafe / Toko (Tampil di Struk)",
         "set_print_size": "Ukuran Kertas Printer Bluetooth",
@@ -73,6 +102,7 @@ const translations = {
 
         // Global (Tombol Kembali)
         "btn_back_dash": "⬅️ Dashboard",
+        "btn_back_only": "⬅ Back",
 
         // Kasir (POS)
         "pos_title": "<span style='color:#10b981;'>●</span> POS CASHIER",
@@ -84,9 +114,37 @@ const translations = {
         "pos_change_text": "Change: ",
         "pos_btn_charge": "CHARGE",
 
+        // Procurement & Opname
+        "proc_title": "📋 Procurement & PO",
+        "proc_lock_title": "Management Restricted Area",
+        "proc_lock_desc": "Enter Owner Security PIN to access Procurement & Opname menu.",
+        "proc_btn_unlock": "Unlock 🔓",
+        "proc_warn_title": "Management Exclusive Area (GA / Owner)",
+        "proc_warn_desc": "Use this module to adjust physical stock (Opname) and plan shopping lists.",
+        "proc_opname_title": "📦 Physical Audit / Stock Opname",
+        "proc_btn_refresh": "🔄 Refresh",
+        "proc_po_title": "📝 Create Shopping List (Purchase Order)",
+        "proc_lbl_item": "Item / Material Name",
+        "proc_ph_item": "Example: Arabica Coffee Beans",
+        "proc_lbl_cat": "Category",
+        "proc_cat_bahan": "Raw Material (F&B)",
+        "proc_cat_pack": "Packaging",
+        "proc_cat_alat": "Equipment (Asset)",
+        "proc_cat_bersih": "Cleaning Supplies",
+        "proc_cat_lain": "Others",
+        "proc_lbl_qty": "Quantity (Qty)",
+        "proc_lbl_unit": "Unit",
+        "proc_lbl_price": "Estimated Unit Price",
+        "proc_est_sub": "Estimated Subtotal: ",
+        "proc_btn_add": "➕ Add to List",
+        "proc_est_grand": "Estimated Grand Total: ",
+        "proc_btn_save": "📄 SAVE & PRINT PO DOCUMENT (PDF)",
+        "proc_history_title": "📂 PO Document History",
+        "proc_ph_search": "🔍 Search PO Ref No...",
+        "proc_btn_reset": "Reset",
+
         // Pengaturan
         "set_title": "⚙️ System Settings",
-        "set_back": "⬅️ Dashboard",
         "set_store": "🏪 Store Profile & Printer",
         "set_store_name": "Cafe / Store Name (Receipt)",
         "set_print_size": "Bluetooth Printer Paper Size",
