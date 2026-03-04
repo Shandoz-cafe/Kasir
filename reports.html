@@ -35,50 +35,50 @@
 </head>
 <body class="pos-body" style="background: #f0f2f5;">
     <header style="background: #27ae60;">
-        <h2>📊 Laporan Keuangan</h2>
-        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+        <h2 data-i18n="rep_title">📊 Laporan Keuangan</h2>
+        <button class="bg-warning btn-head" onclick="window.location.href='dashboard.html'" data-i18n="btn_back_dash">⬅️ Dashboard</button>
     </header>
     
     <div class="container" id="uiContainer">
         <div class="card" id="controlPanel" style="padding: 15px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; border-left: 5px solid #27ae60;">
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <button class="bg-primary" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('hari')">Hari Ini</button>
-                <button class="bg-primary" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('bulan')">Bulan Ini</button>
-                <button class="bg-primary" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('tahun')">Tahun Ini</button>
-                <button class="bg-warning" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('semua')">Semua</button>
+                <button class="bg-primary" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('hari')" data-i18n="rep_filter_today">Hari Ini</button>
+                <button class="bg-primary" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('bulan')" data-i18n="rep_filter_month">Bulan Ini</button>
+                <button class="bg-primary" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('tahun')" data-i18n="rep_filter_year">Tahun Ini</button>
+                <button class="bg-warning" style="padding: 8px 12px; color:white; border:none; border-radius:6px;" onclick="filterReports('semua')" data-i18n="rep_filter_all">Semua</button>
                 
                 <span style="margin: 0 5px; color: #ccc;">|</span>
                 <input type="date" id="customDate" style="margin: 0; padding: 6px 10px; width: auto; border-radius: 8px; border: 1px solid #ccc;" onchange="filterByCustomDate()">
             </div>
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="exportLaporan('pdf')">📄 DOKUMEN PDF</button>
+                <button class="bg-danger" style="background:#ef4444; color:white; padding: 10px 15px; border:none; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="exportLaporan('pdf')" data-i18n="rep_btn_pdf">📄 DOKUMEN PDF</button>
             </div>
         </div>
 
-        <h3 style="color: #2c3e50; text-align: center; margin-bottom: 20px;">Ringkasan Penjualan: <span id="periodeTextUI" style="color: #27ae60;">Semua Waktu</span></h3>
+        <h3 style="color: #2c3e50; text-align: center; margin-bottom: 20px;"><span data-i18n="rep_summary_title">Ringkasan Penjualan: </span><span id="periodeTextUI" style="color: #27ae60;">Semua Waktu</span></h3>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px;">
             <div class="card" style="text-align: left; border-top: 4px solid #3498db; padding: 15px;">
-                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-size:12px;">Penjualan Kotor</h4>
+                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-size:12px;" data-i18n="rep_gross_sales">Penjualan Kotor</h4>
                 <h2 id="uiOmzet" style="margin:0; color:#2c3e50; font-size: 1.5rem;">Rp 0</h2>
             </div>
             <div class="card" style="text-align: left; border-top: 4px solid #f39c12; padding: 15px;">
-                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-size:12px;">Laba Kotor</h4>
+                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-size:12px;" data-i18n="rep_gross_profit">Laba Kotor</h4>
                 <h2 id="uiMargin" style="margin:0; color:#2c3e50; font-size: 1.5rem;">Rp 0</h2>
             </div>
             <div class="card" style="text-align: left; border-top: 4px solid #e74c3c; padding: 15px;">
-                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-size:12px;">Total Pengeluaran</h4>
+                <h4 style="margin:0 0 5px 0; color:#7f8c8d; font-size:12px;" data-i18n="rep_total_expense">Total Pengeluaran</h4>
                 <h2 id="uiExpense" style="margin:0; color:#2c3e50; font-size: 1.5rem;">Rp 0</h2>
             </div>
             <div class="card" style="text-align: left; border-top: 4px solid #27ae60; background: #f9fff9; padding: 15px;">
-                <h4 style="margin:0 0 5px 0; color:#27ae60; font-size:12px; font-weight: bold;">Laba Bersih</h4>
+                <h4 style="margin:0 0 5px 0; color:#27ae60; font-size:12px; font-weight: bold;" data-i18n="rep_net_income">Laba Bersih</h4>
                 <h2 id="uiNet" style="margin:0; color:#27ae60; font-size: 1.5rem;">Rp 0</h2>
             </div>
         </div>
 
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 16px;">📈 Analitik Tren Penjualan</h3>
+            <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 16px;" data-i18n="rep_chart_title">📈 Analitik Tren Penjualan</h3>
             <div style="width: 100%; height: 200px; position: relative;">
                 <canvas id="salesChart"></canvas>
             </div>
@@ -86,10 +86,10 @@
 
         <div style="display: flex; gap: 20px; flex-wrap: wrap;">
             <div class="card" style="flex: 1; min-width: 280px; padding: 15px;">
-                <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 16px;">🏆 Menu Terlaris</h3>
+                <h3 style="margin-top:0; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 16px;" data-i18n="rep_top_menu_title">🏆 Menu Terlaris</h3>
                 <div style="overflow-x: auto;">
                     <table style="font-size: 0.85rem; width: 100%; border-collapse: collapse;">
-                        <thead><tr style="background:#f8fafc;"><th style="padding:8px; text-align:left;">Menu</th><th style="padding:8px; text-align:center;">Terjual</th><th style="padding:8px; text-align:right;">Omzet</th></tr></thead>
+                        <thead><tr style="background:#f8fafc;"><th style="padding:8px; text-align:left;" data-i18n="rep_th_menu">Menu</th><th style="padding:8px; text-align:center;" data-i18n="rep_th_sold">Terjual</th><th style="padding:8px; text-align:right;" data-i18n="rep_th_revenue">Omzet</th></tr></thead>
                         <tbody id="uiTopItems"></tbody>
                     </table>
                 </div>
@@ -97,16 +97,16 @@
 
             <div class="card" style="flex: 1; min-width: 280px; padding: 15px;">
                 <div style="background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px dashed #e74c3c; margin-bottom: 15px;">
-                    <h4 style="margin-top:0; margin-bottom: 10px; color:#e74c3c; font-size: 14px;">Catat Pengeluaran</h4>
-                    <input type="text" id="expDesc" placeholder="Keterangan (Contoh: Gula 1kg)" style="padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 6px;">
-                    <input type="number" id="expAmount" placeholder="Nominal (Rp)" style="padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 6px;">
-                    <button class="bg-danger" style="width: 100%; padding: 12px; color:white; border:none; border-radius:6px; font-weight:bold;" onclick="addExpense()">➖ Simpan Pengeluaran</button>
+                    <h4 style="margin-top:0; margin-bottom: 10px; color:#e74c3c; font-size: 14px;" data-i18n="rep_exp_add_title">Catat Pengeluaran</h4>
+                    <input type="text" id="expDesc" data-i18n-ph="rep_ph_exp_desc" placeholder="Keterangan (Contoh: Gula 1kg)" style="padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 6px;">
+                    <input type="number" id="expAmount" data-i18n-ph="rep_ph_exp_amount" placeholder="Nominal (Rp)" style="padding: 10px; margin-bottom: 10px; width: 100%; border: 1px solid #ccc; border-radius: 6px;">
+                    <button class="bg-danger" style="width: 100%; padding: 12px; color:white; border:none; border-radius:6px; font-weight:bold;" onclick="addExpense()" data-i18n="rep_btn_save_exp">➖ Simpan Pengeluaran</button>
                 </div>
                 
-                <h3 style="margin-top:0; color: #e74c3c; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 16px;">Riwayat Pengeluaran</h3>
+                <h3 style="margin-top:0; color: #e74c3c; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 16px;" data-i18n="rep_exp_history_title">Riwayat Pengeluaran</h3>
                 <div style="overflow-x: auto;">
                     <table style="font-size: 0.85rem; width: 100%; border-collapse: collapse;">
-                        <thead><tr style="background:#f8fafc;"><th style="padding:8px; text-align:left;">Tanggal</th><th style="padding:8px; text-align:left;">Keterangan</th><th style="padding:8px; text-align:right;">Nominal</th></tr></thead>
+                        <thead><tr style="background:#f8fafc;"><th style="padding:8px; text-align:left;" data-i18n="rep_th_date">Tanggal</th><th style="padding:8px; text-align:left;" data-i18n="rep_th_desc">Keterangan</th><th style="padding:8px; text-align:right;" data-i18n="rep_th_amount">Nominal</th></tr></thead>
                         <tbody id="uiExpenseList"></tbody>
                     </table>
                 </div>
@@ -183,7 +183,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script src="auth.js"></script>
-    <script>checkAuth();</script>
+    <script src="lang.js"></script> <script>checkAuth();</script>
     <script src="reports.js"></script>
 </body>
 </html>
