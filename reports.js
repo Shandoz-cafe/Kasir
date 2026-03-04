@@ -7,7 +7,11 @@ function filterByCustomDate() {
     if(!dateVal) return;
     currentFilter = 'custom'; customDateValue = dateVal;
     const [y, m, d] = dateVal.split('-');
-    const dateText = new Date(y, parseInt(m)-1, d).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    const lang = localStorage.getItem('appLang') || 'id';
+    const locale = lang === 'en' ? 'en-US' : 'id-ID';
+    
+    const dateText = new Date(y, parseInt(m)-1, d).toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     document.getElementById('periodeTextUI').innerText = dateText;
     document.getElementById('docPeriodeText').innerText = dateText;
     loadFinanceReports();
@@ -16,7 +20,15 @@ function filterByCustomDate() {
 function filterReports(type) {
     currentFilter = type; 
     document.getElementById('customDate').value = '';
-    const labels = { 'hari': 'Hari Ini', 'bulan': 'Bulan Ini', 'tahun': 'Tahun Ini', 'semua': 'Semua Waktu' };
+    const lang = localStorage.getItem('appLang') || 'id';
+    
+    let labels = {};
+    if (lang === 'en') {
+        labels = { 'hari': 'Today', 'bulan': 'This Month', 'tahun': 'This Year', 'semua': 'All Time' };
+    } else {
+        labels = { 'hari': 'Hari Ini', 'bulan': 'Bulan Ini', 'tahun': 'Tahun Ini', 'semua': 'Semua Waktu' };
+    }
+    
     document.getElementById('periodeTextUI').innerText = labels[type];
     document.getElementById('docPeriodeText').innerText = labels[type];
     loadFinanceReports();
@@ -63,6 +75,8 @@ function matchDate(item) {
 }
 
 function loadFinanceReports() {
+    const lang = localStorage.getItem('appLang') || 'id';
+    
     let allSales = []; let allExpenses = []; let masterProducts = [];
     try { allSales = JSON.parse(localStorage.getItem('sales') || '[]'); if(!Array.isArray(allSales)) allSales = Object.values(allSales); } catch(e) {}
     try { allExpenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(allExpenses)) allExpenses = Object.values(allExpenses); } catch(e) {}
@@ -90,7 +104,9 @@ function loadFinanceReports() {
         let y = dParts[2];
 
         let labelKey = "";
-        let monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        let monthNames = lang === 'en' 
+            ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            : ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
         
         if (currentFilter === 'hari' || currentFilter === 'custom') {
             labelKey = timePart.substring(0, 5); 
@@ -131,7 +147,8 @@ function loadFinanceReports() {
     });
 
     if(sales.length === 0) {
-        docSalesHTML = '<tr><td colspan="6" style="text-align:center; padding:15px; font-style:italic;">Tidak ada transaksi pada periode ini.</td></tr>';
+        let msg = lang === 'en' ? 'No transactions in this period.' : 'Tidak ada transaksi pada periode ini.';
+        docSalesHTML = `<tr><td colspan="6" style="text-align:center; padding:15px; font-style:italic;">${msg}</td></tr>`;
     }
     document.getElementById('docSalesLog').innerHTML = docSalesHTML;
 
@@ -143,7 +160,8 @@ function loadFinanceReports() {
 
     let uiTopHTML = '';
     if(sortedItems.length === 0) {
-        uiTopHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">Belum ada data penjualan</td></tr>';
+        let msg = lang === 'en' ? 'No sales data yet' : 'Belum ada data penjualan';
+        uiTopHTML = `<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">${msg}</td></tr>`;
     } else {
         sortedItems.forEach(item => {
             uiTopHTML += `<tr style="border-bottom: 1px solid #f0f2f5;">
@@ -157,8 +175,10 @@ function loadFinanceReports() {
 
     let uiExpHTML = '', docExpHTML = '';
     if(expenses.length === 0) {
-        uiExpHTML = '<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">Belum ada biaya tercatat</td></tr>';
-        docExpHTML = '<tr><td colspan="3" style="text-align:center; padding:15px; font-style:italic;">Tidak ada pengeluaran operasional.</td></tr>';
+        let msgUI = lang === 'en' ? 'No expenses recorded' : 'Belum ada biaya tercatat';
+        let msgDoc = lang === 'en' ? 'No operational expenses.' : 'Tidak ada pengeluaran operasional.';
+        uiExpHTML = `<tr><td colspan="3" style="text-align:center; color:#999; padding:15px;">${msgUI}</td></tr>`;
+        docExpHTML = `<tr><td colspan="3" style="text-align:center; padding:15px; font-style:italic;">${msgDoc}</td></tr>`;
     } else {
         expenses.forEach(e => {
             totalPengeluaran += e.amount;
@@ -191,7 +211,7 @@ function loadFinanceReports() {
     document.getElementById('docExpense').innerText = `(Rp ${totalPengeluaran.toLocaleString('id-ID')})`;
     document.getElementById('docNet').innerText = `Rp ${labaBersih.toLocaleString('id-ID')}`;
 
-    const monthOrder = { "Jan":1, "Feb":2, "Mar":3, "Apr":4, "Mei":5, "Jun":6, "Jul":7, "Ags":8, "Sep":9, "Okt":10, "Nov":11, "Des":12 };
+    const monthOrder = { "Jan":1, "Feb":2, "Mar":3, "Apr":4, "Mei":5, "Jun":6, "Jul":7, "Ags":8, "Sep":9, "Okt":10, "Nov":11, "Des":12, "May":5, "Aug":8, "Oct":10, "Dec":12 };
     const labels = Object.keys(chartData).sort((a,b) => {
         if(currentFilter === 'tahun' || currentFilter === 'semua') {
             let mA = a.split(' ')[0]; let mB = b.split(' ')[0];
@@ -206,12 +226,14 @@ function loadFinanceReports() {
     const ctx = document.getElementById('salesChart').getContext('2d');
     if(myChart) myChart.destroy(); 
     
+    let chartLabel = lang === 'en' ? 'Revenue' : 'Omzet';
+    
     myChart = new Chart(ctx, {
         type: 'line', 
         data: {
             labels: labels.length > 0 ? labels : ['00:00'],
             datasets: [{
-                label: 'Omzet',
+                label: chartLabel,
                 data: dataOmzet.length > 0 ? dataOmzet : [0],
                 backgroundColor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3b82f6', borderWidth: 3,
                 pointBackgroundColor: '#fff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 4, fill: true, tension: 0.3 
@@ -226,9 +248,15 @@ function loadFinanceReports() {
 }
 
 function addExpense() {
+    const lang = localStorage.getItem('appLang') || 'id';
     const desc = document.getElementById('expDesc').value.trim();
     const amount = parseFloat(document.getElementById('expAmount').value);
-    if(!desc || isNaN(amount)) return alert('Isi keterangan dan nominal!');
+    
+    if(!desc || isNaN(amount)) {
+        let msg = lang === 'en' ? 'Please fill in the description and amount!' : 'Isi keterangan dan nominal!';
+        return alert(msg);
+    }
+    
     let expenses = [];
     try { expenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(expenses)) expenses = Object.values(expenses); } catch(e) { expenses = []; }
     
