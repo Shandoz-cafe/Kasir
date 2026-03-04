@@ -246,7 +246,14 @@ function loadFinanceReports() {
 function addExpense() {
     const desc = document.getElementById('expDesc').value.trim();
     const amount = parseFloat(document.getElementById('expAmount').value);
-    if(!desc || isNaN(amount)) return safeAlert('Isi keterangan dan nominal!');
+    
+    // PENGAMAN ALERT
+    if(!desc || isNaN(amount)) {
+        if(typeof window.customAlert === 'function') { customAlert('Isi keterangan dan nominal yang valid!', 'Gagal', '❌'); }
+        else { alert('Isi keterangan dan nominal!'); }
+        return;
+    }
+
     let expenses = [];
     try { expenses = JSON.parse(localStorage.getItem('expenses') || '[]'); if(!Array.isArray(expenses)) expenses = Object.values(expenses); } catch(e) { expenses = []; }
     
@@ -268,16 +275,12 @@ function addExpense() {
     loadFinanceReports();
 }
 
-// MESIN EKSPOR KEMBALI KE NORMAL
-function exportLaporanPDF() {
-    document.getElementById('docPrintDate').innerText = new Date().toLocaleString('id-ID');
+// === MESIN EKSPOR NORMAL (TOMBOL PDF SEKARANG NYAMBUNG KEMARI) ===
+function cetakLaporanPDF() {
+    const docPrintElement = document.getElementById('docPrintDate');
+    if(docPrintElement) docPrintElement.innerText = new Date().toLocaleString('id-ID');
+    
     setTimeout(() => { window.print(); }, 500); 
-}
-
-// fallback for alert
-function safeAlert(msg) {
-    if(typeof window.customAlert === 'function') window.customAlert(msg, "Perhatian", "⚠️");
-    else alert(msg);
 }
 
 document.addEventListener('DOMContentLoaded', () => { filterReports('hari'); });
