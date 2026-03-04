@@ -114,7 +114,7 @@ function reprintSale(saleId) {
 
 function renderPreviewModal(data, isCopy) {
     const settings = getPrinterSettings();
-    const storeName = (localStorage.getItem('storeName') || 'SHANDOZ CAFE').toUpperCase();
+    const storeName = (localStorage.getItem('storeName') || 'VIREXON').toUpperCase();
     const storeLogo = localStorage.getItem('storeLogo');
     
     const maxWidth = settings.paperSize === "80" ? "380px" : "280px";
