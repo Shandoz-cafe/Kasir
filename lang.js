@@ -1,21 +1,40 @@
-// === KAMUS PINTAR SHANDOZ POS ===
+// === KAMUS PINTAR VIREXON ===
 const translations = {
     id: {
-        // Menu Atas
-        "dash_info": "ℹ️ Info",
-        "dash_profile": "👥 Ganti Profil",
-        "dash_logout": "🛑 Keluar",
+        // Dashboard & Sidebar
         "dash_welcome": "Halo, {name}! 👋",
-        "dash_sub": "Selamat datang di Shandoz Command Center. Semua fitur telah dibuka penuh.",
+        "dash_sub": "Selamat datang di VIREXON Enterprise Command Center. Semua fitur telah dibuka penuh.",
         "dash_income": "Pendapatan Hari Ini",
         "dash_tickets": "Total Tiket",
         "dash_apps": "Aplikasi Utama",
-        // Nama Aplikasi
         "app_pos": "KASIR (POS)",
         "app_inv": "GUDANG / MENU",
         "app_rep": "LAPORAN KEUANGAN",
-        "app_set": "PENGATURAN TOKO",
-        // Halaman Setting
+        "app_proc": "PENGADAAN & OPNAME",
+        
+        "side_pos": "<i>🛒</i> Penjualan (POS)",
+        "side_history": "<i>🧾</i> Riwayat Struk",
+        "side_inv": "<i>📦</i> Data Barang",
+        "side_proc": "<i>📋</i> Stock Opname & PO",
+        "side_rep": "<i>📊</i> Back Office (Laporan)",
+        "side_set": "<i>⚙️</i> Pengaturan Toko",
+        "side_info": "<i>ℹ️</i> Dukungan & Info",
+        "side_logout": "<i>🛑</i> Keluar Sistem",
+
+        // Global (Tombol Kembali)
+        "btn_back_dash": "⬅️ Dashboard",
+
+        // Kasir (POS)
+        "pos_title": "<span style='color:#10b981;'>●</span> POS KASIR",
+        "pos_history_btn": "🕒 Riwayat",
+        "pos_search_ph": "🔍 Cari menu...",
+        "pos_all_cat": "Semua Kategori",
+        "pos_cust_ph": "Nama Pelanggan",
+        "pos_pay_text": "Bayar (Rp):",
+        "pos_change_text": "Kembali: ",
+        "pos_btn_charge": "BAYAR",
+
+        // Pengaturan
         "set_title": "⚙️ Pengaturan Sistem",
         "set_back": "⬅️ Dashboard",
         "set_store": "🏪 Profil Usaha & Printer",
@@ -32,21 +51,40 @@ const translations = {
         "set_btn_pass": "📧 Kirim Link Ganti Password"
     },
     en: {
-        // Top Menu
-        "dash_info": "ℹ️ Info",
-        "dash_profile": "👥 Change Profile",
-        "dash_logout": "🛑 Logout",
+        // Dashboard & Sidebar
         "dash_welcome": "Hello, {name}! 👋",
-        "dash_sub": "Welcome to Shandoz Command Center. All features are fully unlocked.",
+        "dash_sub": "Welcome to VIREXON Enterprise Command Center. All features are fully unlocked.",
         "dash_income": "Today's Income",
         "dash_tickets": "Total Tickets",
         "dash_apps": "Main Applications",
-        // App Names
         "app_pos": "CASHIER (POS)",
         "app_inv": "INVENTORY / MENU",
         "app_rep": "FINANCIAL REPORTS",
-        "app_set": "STORE SETTINGS",
-        // Settings Page
+        "app_proc": "PROCUREMENT & OPNAME",
+        
+        "side_pos": "<i>🛒</i> Sales (POS)",
+        "side_history": "<i>🧾</i> Receipt History",
+        "side_inv": "<i>📦</i> Inventory Data",
+        "side_proc": "<i>📋</i> Stock Opname & PO",
+        "side_rep": "<i>📊</i> Back Office (Reports)",
+        "side_set": "<i>⚙️</i> Store Settings",
+        "side_info": "<i>ℹ️</i> Support & Info",
+        "side_logout": "<i>🛑</i> Logout System",
+
+        // Global (Tombol Kembali)
+        "btn_back_dash": "⬅️ Dashboard",
+
+        // Kasir (POS)
+        "pos_title": "<span style='color:#10b981;'>●</span> POS CASHIER",
+        "pos_history_btn": "🕒 History",
+        "pos_search_ph": "🔍 Search menu...",
+        "pos_all_cat": "All Categories",
+        "pos_cust_ph": "Customer Name",
+        "pos_pay_text": "Pay (Rp):",
+        "pos_change_text": "Change: ",
+        "pos_btn_charge": "CHARGE",
+
+        // Pengaturan
         "set_title": "⚙️ System Settings",
         "set_back": "⬅️ Dashboard",
         "set_store": "🏪 Store Profile & Printer",
@@ -76,7 +114,7 @@ function applyLanguage() {
     const dict = translations[lang];
     if (!dict) return;
 
-    // Cari semua elemen yang punya label "data-i18n"
+    // 1. Ganti teks biasa (innerHTML)
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) {
@@ -87,6 +125,14 @@ function applyLanguage() {
             } else {
                 el.innerHTML = dict[key];
             }
+        }
+    });
+
+    // 2. Ganti teks di dalam input box (placeholder)
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        if (dict[key]) {
+            el.placeholder = dict[key];
         }
     });
 }
