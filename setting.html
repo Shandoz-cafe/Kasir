@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pengaturan - Shandoz POS</title>
+    <title>Pengaturan - VIREXON</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -38,7 +38,7 @@
             <div class="setting-title" data-i18n="set_store">🏪 Profil Usaha & Printer</div>
             
             <div class="setting-item">
-                <label>Logo Kafe (Akan dicetak di Struk)</label>
+                <label id="lbl_logo">Logo Kafe (Akan dicetak di Struk)</label>
                 <input type="file" id="setStoreLogo" accept="image/png, image/jpeg, image/webp" style="padding: 8px; font-size: 11px;">
                 
                 <div style="margin-top: 10px; text-align: center; background: #f1f5f9; padding: 10px; border-radius: 8px;">
@@ -50,14 +50,14 @@
 
             <div class="setting-item">
                 <label data-i18n="set_store_name">Nama Kafe / Toko (Tampil di Struk)</label>
-                <input type="text" id="setStoreName" placeholder="Contoh: SHANDOZ CAFE">
+                <input type="text" id="setStoreName" placeholder="Contoh: VIREXON CAFE">
             </div>
             
             <div class="setting-item">
                 <label data-i18n="set_print_size">Ukuran Kertas Printer Bluetooth</label>
                 <select id="setPrinterSize">
-                    <option value="58">Ukuran Kecil (58mm)</option>
-                    <option value="80">Ukuran Besar (80mm)</option>
+                    <option value="58" id="opt_58">Ukuran Kecil (58mm)</option>
+                    <option value="80" id="opt_80">Ukuran Besar (80mm)</option>
                 </select>
             </div>
             <button class="btn-action" style="background: #10b981;" onclick="saveStoreSettings()" data-i18n="set_btn_store">💾 Simpan Pengaturan Toko</button>
@@ -67,7 +67,7 @@
             <div class="setting-title" data-i18n="set_lang_title">🌐 Bahasa / Language</div>
             <div class="setting-item">
                 <label data-i18n="set_lang_label">Pilih Bahasa Aplikasi</label>
-                <select id="setLanguageDropdown">
+                <select id="setLanguageDropdown" onchange="previewLanguage()">
                     <option value="id">🇮🇩 Bahasa Indonesia</option>
                     <option value="en">🇬🇧 English</option>
                 </select>
@@ -101,12 +101,31 @@
 
         let currentLogoBase64 = localStorage.getItem('storeLogo') || "";
 
+        function updateJSUI() {
+            const lang = localStorage.getItem('appLang') || 'id';
+            document.getElementById('lbl_logo').innerText = lang === 'en' ? 'Store Logo (Printed on Receipt)' : 'Logo Kafe (Akan dicetak di Struk)';
+            document.getElementById('noLogoText').innerText = lang === 'en' ? 'No logo uploaded' : 'Belum ada logo terpasang';
+            document.getElementById('btnHapusLogo').innerText = lang === 'en' ? '🗑️ Delete Logo' : '🗑️ Hapus Logo';
+            document.getElementById('opt_58').innerText = lang === 'en' ? 'Small Size (58mm)' : 'Ukuran Kecil (58mm)';
+            document.getElementById('opt_80').innerText = lang === 'en' ? 'Large Size (80mm)' : 'Ukuran Besar (80mm)';
+            
+            let loaderText = lang === 'en' ? 'Processing Data...' : 'Memproses Data...';
+            document.getElementById('loader').innerText = loaderText;
+        }
+
+        function previewLanguage() {
+            const tempLang = document.getElementById('setLanguageDropdown').value;
+            // Hanya preview, belum di save beneran
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             // Load Nama & Kertas
-            document.getElementById('setStoreName').value = localStorage.getItem('storeName') || "SHANDOZ CAFE";
+            document.getElementById('setStoreName').value = localStorage.getItem('storeName') || "VIREXON";
             const printerConfig = JSON.parse(localStorage.getItem('printerSettings') || '{"paperSize":"58"}');
             document.getElementById('setPrinterSize').value = printerConfig.paperSize;
             document.getElementById('setLanguageDropdown').value = localStorage.getItem('appLang') || 'id';
+
+            updateJSUI(); // Translate teks khusus JS
 
             // Load Logo Preview
             if (currentLogoBase64) {
@@ -118,11 +137,14 @@
 
             // File Reader untuk Upload Logo
             document.getElementById('setStoreLogo').addEventListener('change', function(e) {
+                const lang = localStorage.getItem('appLang') || 'id';
                 const file = e.target.files[0];
                 if (!file) return;
                 
                 if (file.size > 300 * 1024) {
-                    customAlert("Ukuran gambar terlalu besar! Maksimal 300KB agar cloud tidak berat.", "Peringatan Ukuran", "⚠️");
+                    let msg = lang === 'en' ? "Image too large! Maximum 300KB to prevent cloud overload." : "Ukuran gambar terlalu besar! Maksimal 300KB agar cloud tidak berat.";
+                    let title = lang === 'en' ? "Size Warning" : "Peringatan Ukuran";
+                    customAlert(msg, title, "⚠️");
                     this.value = "";
                     return;
                 }
@@ -141,20 +163,30 @@
 
         // HAPUS LOGO PAKE CUSTOM CONFIRM MODERN
         function hapusLogo() {
-            customConfirm("Yakin ingin menghapus logo ini dari struk cetak Anda?", () => {
+            const lang = localStorage.getItem('appLang') || 'id';
+            let msg = lang === 'en' ? "Are you sure you want to remove this logo from your receipts?" : "Yakin ingin menghapus logo ini dari struk cetak Anda?";
+            let title = lang === 'en' ? "Delete Logo" : "Hapus Logo";
+
+            customConfirm(msg, () => {
                 currentLogoBase64 = "";
                 document.getElementById('setStoreLogo').value = "";
                 document.getElementById('logoPreview').src = "";
                 document.getElementById('logoPreview').style.display = 'none';
                 document.getElementById('noLogoText').style.display = 'block';
                 document.getElementById('btnHapusLogo').style.display = 'none';
-            }, "Hapus Logo", "🗑️");
+            }, title, "🗑️");
         }
 
         // SIMPAN SETTING PAKE CUSTOM ALERT
         function saveStoreSettings() {
+            const lang = localStorage.getItem('appLang') || 'id';
             const role = localStorage.getItem('currentRole');
-            if(role !== 'admin') return customAlert("Akses ditolak! Hanya Owner yang bisa mengubah ini.", "Akses Terbatas", "⛔");
+            
+            if(role !== 'admin') {
+                let msg = lang === 'en' ? "Access Denied! Only Owner can change this." : "Akses ditolak! Hanya Owner yang bisa mengubah ini.";
+                let title = lang === 'en' ? "Restricted Access" : "Akses Terbatas";
+                return customAlert(msg, title, "⛔");
+            }
             
             const newName = document.getElementById('setStoreName').value.trim();
             const newSize = document.getElementById('setPrinterSize').value;
@@ -163,12 +195,16 @@
             localStorage.setItem('printerSettings', JSON.stringify({ paperSize: newSize, autoPrint: true }));
             localStorage.setItem('storeLogo', currentLogoBase64);
             
-            customAlert("Pengaturan profil toko dan printer berhasil disimpan ke sistem.", "Sukses", "✅");
+            let msgS = lang === 'en' ? "Store profile and printer settings successfully saved to system." : "Pengaturan profil toko dan printer berhasil disimpan ke sistem.";
+            let titleS = lang === 'en' ? "Success" : "Sukses";
+            customAlert(msgS, titleS, "✅");
         }
 
         function saveLanguage() {
             const newLang = document.getElementById('setLanguageDropdown').value;
-            setLanguage(newLang);
+            setLanguage(newLang); // Dari lang.js
+            updateJSUI(); // Update teks JS di halaman ini
+            
             if(newLang === 'en') customAlert("Language updated successfully!", "Success", "✅");
             else customAlert("Bahasa aplikasi berhasil diperbarui!", "Sukses", "✅");
         }
@@ -176,21 +212,30 @@
         // ALUR GANTI PIN PAKE CUSTOM PROMPT BERUNTUN
         let generatedOTP = "";
         function requestPinChangeWithOTP() {
+            const lang = localStorage.getItem('appLang') || 'id';
             const role = localStorage.getItem('currentRole');
-            if(role !== 'admin') return customAlert("Akses ditolak! Fitur ini khusus Owner.", "Keamanan", "⛔");
+            
+            if(role !== 'admin') {
+                let msg = lang === 'en' ? "Access Denied! This feature is for Owner only." : "Akses ditolak! Fitur ini khusus Owner.";
+                let title = lang === 'en' ? "Security" : "Keamanan";
+                return customAlert(msg, title, "⛔");
+            }
 
             const currentUser = auth.currentUser;
             
             if (currentUser && currentUser.email) {
-                prosesKirimEmailOTP(currentUser.email);
+                prosesKirimEmailOTP(currentUser.email, lang);
             } else {
-                customPrompt("Masukkan alamat Email Anda yang terdaftar:", (inputEmail) => {
-                    if(inputEmail) prosesKirimEmailOTP(inputEmail.trim());
-                }, "Verifikasi Identitas", "📧", "email");
+                let promptMsg = lang === 'en' ? "Enter your registered Email address:" : "Masukkan alamat Email Anda yang terdaftar:";
+                let promptTitle = lang === 'en' ? "Identity Verification" : "Verifikasi Identitas";
+
+                customPrompt(promptMsg, (inputEmail) => {
+                    if(inputEmail) prosesKirimEmailOTP(inputEmail.trim(), lang);
+                }, promptTitle, "📧", "email");
             }
         }
 
-        function prosesKirimEmailOTP(emailTarget) {
+        function prosesKirimEmailOTP(emailTarget, lang) {
             generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
             showLoader(true);
 
@@ -200,36 +245,53 @@
                 showLoader(false);
                 
                 // Minta OTP
-                customPrompt(`OTP TERKIRIM! 🔒<br>Silakan cek pesan masuk di email:<br><b style="color:#3b82f6;">${emailTarget}</b><br><br>Masukkan 4 Angka kode OTP:`, (inputOTP) => {
+                let otpMsg = lang === 'en' 
+                    ? `OTP SENT! 🔒<br>Please check your inbox at:<br><b style="color:#3b82f6;">${emailTarget}</b><br><br>Enter the 4-digit OTP code:`
+                    : `OTP TERKIRIM! 🔒<br>Silakan cek pesan masuk di email:<br><b style="color:#3b82f6;">${emailTarget}</b><br><br>Masukkan 4 Angka kode OTP:`;
+                let otpTitle = lang === 'en' ? "Email OTP Verification" : "Verifikasi OTP Email";
+
+                customPrompt(otpMsg, (inputOTP) => {
                     
                     if (inputOTP === generatedOTP) {
                         // Jika OTP Benar, minta PIN Baru
-                        customPrompt("OTP BENAR! ✅<br><br>Silakan buat 4 digit PIN BARU Anda:", (newPin) => {
+                        let newPinMsg = lang === 'en' ? "CORRECT OTP! ✅<br><br>Please create your NEW 4-digit PIN:" : "OTP BENAR! ✅<br><br>Silakan buat 4 digit PIN BARU Anda:";
+                        let newPinTitle = lang === 'en' ? "Create New PIN" : "Buat PIN Baru";
+
+                        customPrompt(newPinMsg, (newPin) => {
                             if (newPin && newPin.length === 4 && !isNaN(newPin)) {
-                                simpanPinOwnerBaru(newPin);
+                                simpanPinOwnerBaru(newPin, lang);
                             } else {
-                                customAlert("Gagal menyimpan. PIN wajib terdiri dari 4 angka!", "Format Salah", "❌");
+                                let failMsg = lang === 'en' ? "Failed to save. PIN must be exactly 4 digits!" : "Gagal menyimpan. PIN wajib terdiri dari 4 angka!";
+                                let failTitle = lang === 'en' ? "Wrong Format" : "Format Salah";
+                                customAlert(failMsg, failTitle, "❌");
                             }
-                        }, "Buat PIN Baru", "🔑", "password");
+                        }, newPinTitle, "🔑", "password");
                     } else {
-                        customAlert("Kode OTP yang Anda masukkan SALAH!", "Gagal Verifikasi", "❌");
+                        let wrongOtpMsg = lang === 'en' ? "The OTP code you entered is WRONG!" : "Kode OTP yang Anda masukkan SALAH!";
+                        let wrongOtpTitle = lang === 'en' ? "Verification Failed" : "Gagal Verifikasi";
+                        customAlert(wrongOtpMsg, wrongOtpTitle, "❌");
                     }
                     
-                }, "Verifikasi OTP Email", "📨", "number");
+                }, otpTitle, "📨", "number");
 
             }, function(error) { 
                 showLoader(false); 
-                customAlert("Gagal mengirim email OTP. Pastikan koneksi internet aktif.", "Error Server", "📡"); 
+                let errMsg = lang === 'en' ? "Failed to send OTP email. Make sure internet connection is active." : "Gagal mengirim email OTP. Pastikan koneksi internet aktif.";
+                let errTitle = lang === 'en' ? "Server Error" : "Error Server";
+                customAlert(errMsg, errTitle, "📡"); 
             });
         }
 
-        function simpanPinOwnerBaru(newPin) {
+        function simpanPinOwnerBaru(newPin, lang) {
             let users = JSON.parse(localStorage.getItem('users') || '[]');
             let ownerIndex = users.findIndex(u => u.role === 'admin');
             if(ownerIndex > -1) {
                 users[ownerIndex].pin = newPin;
                 localStorage.setItem('users', JSON.stringify(users)); 
-                customAlert("Hore! PIN Keamanan Owner berhasil diganti. Harap ingat PIN Anda baik-baik.", "PIN Diperbarui", "🎉");
+                
+                let successMsg = lang === 'en' ? "Hooray! Owner Security PIN has been changed. Please remember your PIN well." : "Hore! PIN Keamanan Owner berhasil diganti. Harap ingat PIN Anda baik-baik.";
+                let successTitle = lang === 'en' ? "PIN Updated" : "PIN Diperbarui";
+                customAlert(successMsg, successTitle, "🎉");
             }
         }
     </script>
