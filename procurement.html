@@ -37,36 +37,36 @@
 
     <div id="pinLockScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
         <div style="font-size: 60px; margin-bottom: 15px;">🔒</div>
-        <h2 style="margin-bottom: 10px; font-weight: 700; text-align:center;">Area Terbatas Manajemen</h2>
-        <p style="margin-bottom: 25px; color:#94a3b8; font-size:13px; text-align: center; padding: 0 20px;">Masukkan PIN Keamanan Owner untuk mengakses menu Pengadaan & Opname.</p>
+        <h2 style="margin-bottom: 10px; font-weight: 700; text-align:center;" data-i18n="proc_lock_title">Area Terbatas Manajemen</h2>
+        <p style="margin-bottom: 25px; color:#94a3b8; font-size:13px; text-align: center; padding: 0 20px;" data-i18n="proc_lock_desc">Masukkan PIN Keamanan Owner untuk mengakses menu Pengadaan & Opname.</p>
         
         <input type="password" id="procurementPinInput" placeholder="••••" style="width: 150px; text-align: center; font-size: 30px; letter-spacing: 10px; padding: 15px; border-radius: 12px; border: 2px solid #334155; background: #1e293b; color: white; outline: none; margin-bottom: 25px;" maxlength="4" autocomplete="off">
         
         <div style="display: flex; gap: 15px;">
-            <button class="bg-danger" style="padding: 12px 25px; border-radius: 8px; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 14px;" onclick="window.location.href='dashboard.html'">⬅ Kembali</button>
-            <button class="bg-success" style="padding: 12px 25px; border-radius: 8px; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 14px; background: #10b981;" onclick="cekPinProcurement()">Buka Kunci 🔓</button>
+            <button class="bg-danger" style="padding: 12px 25px; border-radius: 8px; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 14px;" onclick="window.location.href='dashboard.html'" data-i18n="btn_back_only">⬅ Kembali</button>
+            <button class="bg-success" style="padding: 12px 25px; border-radius: 8px; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 14px; background: #10b981;" onclick="cekPinProcurement()" data-i18n="proc_btn_unlock">Buka Kunci 🔓</button>
         </div>
     </div>
 
     <div id="mainContentWrapper" style="display: none;">
         <header style="background: #d97706;">
-            <h2>📋 Procurement & PO</h2>
-            <button class="bg-warning btn-head" style="background:#b45309;" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+            <h2 data-i18n="proc_title">📋 Procurement & PO</h2>
+            <button class="bg-warning btn-head" style="background:#b45309;" onclick="window.location.href='dashboard.html'" data-i18n="btn_back_dash">⬅️ Dashboard</button>
         </header>
 
         <div class="container" id="uiContainer">
             <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
                 <div style="font-size: 30px;">⚠️</div>
                 <div>
-                    <h4 style="margin: 0; color: #b45309; font-size: 14px;">Area Khusus Manajemen (GA / Owner)</h4>
-                    <p style="margin: 0; font-size: 12px; color: #d97706;">Gunakan modul ini untuk menyesuaikan stok fisik (Opname) dan merencanakan daftar belanja.</p>
+                    <h4 style="margin: 0; color: #b45309; font-size: 14px;" data-i18n="proc_warn_title">Area Khusus Manajemen (GA / Owner)</h4>
+                    <p style="margin: 0; font-size: 12px; color: #d97706;" data-i18n="proc_warn_desc">Gunakan modul ini untuk menyesuaikan stok fisik (Opname) dan merencanakan daftar belanja.</p>
                 </div>
             </div>
 
             <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #10b981; margin-bottom: 20px;">
                 <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
-                    <span>📦 Audit Fisik / Stock Opname</span>
-                    <button class="bg-primary" style="font-size: 11px; padding: 5px 10px;" onclick="loadOpnameData()">🔄 Refresh</button>
+                    <span data-i18n="proc_opname_title">📦 Audit Fisik / Stock Opname</span>
+                    <button class="bg-primary" style="font-size: 11px; padding: 5px 10px;" onclick="loadOpnameData()" data-i18n="proc_btn_refresh">🔄 Refresh</button>
                 </h3>
                 <div style="overflow-x: auto; max-height: 300px; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -81,30 +81,30 @@
             </div>
 
             <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #3b82f6;">
-                <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;">📝 Buat Daftar Belanja (Purchase Order)</h3>
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;" data-i18n="proc_po_title">📝 Buat Daftar Belanja (Purchase Order)</h3>
                 
                 <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1; margin-bottom: 20px;">
                     <div class="grid-po">
                         <div class="input-group">
-                            <label>Nama Barang / Bahan</label>
-                            <input type="text" id="poItem" placeholder="Contoh: Biji Kopi Arabica" style="margin:0;">
+                            <label data-i18n="proc_lbl_item">Nama Barang / Bahan</label>
+                            <input type="text" id="poItem" placeholder="Contoh: Biji Kopi Arabica" data-i18n-ph="proc_ph_item" style="margin:0;">
                         </div>
                         <div class="input-group">
-                            <label>Kategori</label>
+                            <label data-i18n="proc_lbl_cat">Kategori</label>
                             <select id="poCategory" style="margin:0; padding:12px;">
-                                <option value="Bahan Baku">Bahan Baku (F&B)</option>
-                                <option value="Packaging">Packaging</option>
-                                <option value="Peralatan">Peralatan (Asset)</option>
-                                <option value="Kebersihan">Alat Kebersihan</option>
-                                <option value="Lainnya">Lainnya</option>
+                                <option value="Bahan Baku" data-i18n="proc_cat_bahan">Bahan Baku (F&B)</option>
+                                <option value="Packaging" data-i18n="proc_cat_pack">Packaging</option>
+                                <option value="Peralatan" data-i18n="proc_cat_alat">Peralatan (Asset)</option>
+                                <option value="Kebersihan" data-i18n="proc_cat_bersih">Alat Kebersihan</option>
+                                <option value="Lainnya" data-i18n="proc_cat_lain">Lainnya</option>
                             </select>
                         </div>
                         <div class="input-group">
-                            <label>Jumlah (Qty)</label>
+                            <label data-i18n="proc_lbl_qty">Jumlah (Qty)</label>
                             <input type="number" id="poQty" placeholder="0" style="margin:0;" oninput="kalkulasiTotalPO()">
                         </div>
                         <div class="input-group">
-                            <label>Satuan</label>
+                            <label data-i18n="proc_lbl_unit">Satuan</label>
                             <select id="poUnit" style="margin:0; padding:12px;">
                                 <option value="Kg">Kg</option><option value="Gram">Gram</option>
                                 <option value="Liter">Liter</option><option value="Ml">Ml</option>
@@ -113,13 +113,13 @@
                             </select>
                         </div>
                         <div class="input-group">
-                            <label>Estimasi Harga Satuan</label>
+                            <label data-i18n="proc_lbl_price">Estimasi Harga Satuan</label>
                             <input type="number" id="poPrice" placeholder="Rp 0" style="margin:0;" oninput="kalkulasiTotalPO()">
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-                        <div style="font-size: 13px; color: #64748b;">Estimasi Subtotal: <strong id="poSubtotal" style="color:#0f172a; font-size: 16px;">Rp 0</strong></div>
-                        <button class="bg-primary" style="padding: 10px 25px;" onclick="tambahPO()">➕ Masukkan ke Daftar</button>
+                        <div style="font-size: 13px; color: #64748b;"><span data-i18n="proc_est_sub">Estimasi Subtotal: </span><strong id="poSubtotal" style="color:#0f172a; font-size: 16px;">Rp 0</strong></div>
+                        <button class="bg-primary" style="padding: 10px 25px;" onclick="tambahPO()" data-i18n="proc_btn_add">➕ Masukkan ke Daftar</button>
                     </div>
                 </div>
 
@@ -133,19 +133,19 @@
                 </div>
 
                 <div style="margin-top: 15px; text-align: right; font-size: 18px;">
-                    <b>Grand Total Estimasi: <span id="poGrandTotal" style="color: #ef4444;">Rp 0</span></b>
+                    <b><span data-i18n="proc_est_grand">Grand Total Estimasi: </span><span id="poGrandTotal" style="color: #ef4444;">Rp 0</span></b>
                 </div>
                 
-                <button class="bg-danger" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; background: #e11d48;" onclick="cetakDanSimpanPO()">📄 SIMPAN & CETAK DOKUMEN PO (PDF)</button>
+                <button class="bg-danger" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; background: #e11d48;" onclick="cetakDanSimpanPO()" data-i18n="proc_btn_save">📄 SIMPAN & CETAK DOKUMEN PO (PDF)</button>
             </div>
 
             <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #8b5cf6; margin-top: 20px; margin-bottom: 20px;">
-                <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;">📂 Riwayat Dokumen PO</h3>
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;" data-i18n="proc_history_title">📂 Riwayat Dokumen PO</h3>
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
                     <input type="date" id="filterPoDate" style="padding: 10px; margin: 0; flex: 1; min-width: 130px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;" onchange="renderPOHistory()">
-                    <input type="text" id="filterPoSearch" placeholder="🔍 Cari No. Ref PO..." style="padding: 10px; margin: 0; flex: 2; min-width: 150px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;" oninput="renderPOHistory()">
-                    <button class="bg-danger" style="padding: 10px 15px; font-size: 12px; border-radius: 6px; background:#64748b;" onclick="resetFilterPO()">Reset</button>
+                    <input type="text" id="filterPoSearch" placeholder="🔍 Cari No. Ref PO..." data-i18n-ph="proc_ph_search" style="padding: 10px; margin: 0; flex: 2; min-width: 150px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;" oninput="renderPOHistory()">
+                    <button class="bg-danger" style="padding: 10px 15px; font-size: 12px; border-radius: 6px; background:#64748b;" onclick="resetFilterPO()" data-i18n="proc_btn_reset">Reset</button>
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -218,6 +218,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="auth.js"></script>
+    <script src="lang.js"></script>
 
     <script>
         checkAuth();
