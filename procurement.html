@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Procurement & Opname - Shandoz POS</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: #f8fafc;">
+    
+    <header style="background: #d97706;">
+        <h2>📋 Procurement & Opname</h2>
+        <button class="bg-warning btn-head" style="background:#b45309;" onclick="window.location.href='dashboard.html'">⬅️ Dashboard</button>
+    </header>
+
+    <div class="container">
+        <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
+            <div style="font-size: 30px;">⚠️</div>
+            <div>
+                <h4 style="margin: 0; color: #b45309; font-size: 14px;">Area Khusus Manajemen (GA / Owner)</h4>
+                <p style="margin: 0; font-size: 12px; color: #d97706;">Gunakan modul ini untuk menyesuaikan stok fisik (Opname) dan merencanakan daftar belanja harian.</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+            
+            <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #10b981;">
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>📦 Audit Fisik / Stock Opname</span>
+                    <button class="bg-primary" style="font-size: 11px; padding: 5px 10px;" onclick="loadOpnameData()">🔄 Refresh Data</button>
+                </h3>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead style="background: #f1f5f9; color: #475569;">
+                            <tr>
+                                <th style="padding: 10px; text-align: left;">Nama Item</th>
+                                <th style="padding: 10px; text-align: center;">Stok Sistem</th>
+                                <th style="padding: 10px; text-align: center; width: 120px;">Fisik Riil</th>
+                                <th style="padding: 10px; text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="opnameList">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #3b82f6;">
+                <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;">📝 Buat Daftar Belanja (PO)</h3>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <input type="text" id="poItem" placeholder="Nama Barang (Contoh: Kopi Susu 1 Dus)" style="flex: 2; padding: 12px; margin: 0;">
+                    <input type="number" id="poQty" placeholder="Jumlah" style="flex: 1; padding: 12px; margin: 0;">
+                    <input type="number" id="poEstPrice" placeholder="Estimasi Harga Total" style="flex: 1; padding: 12px; margin: 0;">
+                    <button class="bg-primary" style="padding: 12px 20px; margin: 0;" onclick="tambahPO()">➕ Tambah</button>
+                </div>
+
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                    <h4 style="margin-top: 0; font-size: 13px; color: #64748b; margin-bottom: 10px;">Daftar Permintaan Belanja Saat Ini:</h4>
+                    <ul id="poList" style="list-style-type: none; padding: 0; margin: 0; font-size: 13px;">
+                        </ul>
+                    <div style="margin-top: 15px; text-align: right; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                        <b>Estimasi Total Anggaran: <span id="poTotalEst" style="color: #ef4444;">Rp 0</span></b>
+                    </div>
+                </div>
+                
+                <button class="bg-success" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 15px;" onclick="cetakPO()">🖨️ Cetak Surat Purchase Order (PDF)</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('currentRole');
+            if(role !== 'admin') {
+                alert("⛔ AKSES DITOLAK! Halaman ini khusus Manajemen (Owner/Admin GA).");
+                window.location.replace('dashboard.html');
+            } else {
+                loadOpnameData();
+                renderPO();
+            }
+        });
+
+        // MESIN OPNAME (UBAH STOK FISIK PAKSA)
+        function loadOpnameData() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const tbody = document.getElementById('opnameList');
+            
+            tbody.innerHTML = products.map((p, index) => `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 10px;"><b>${p.name}</b><br><span style="font-size:10px; color:#94a3b8;">${p.category || 'Umum'}</span></td>
+                    <td style="padding: 10px; text-align: center; font-size: 16px; font-weight: bold; color: #3b82f6;">${p.stock}</td>
+                    <td style="padding: 10px;">
+                        <input type="number" id="fisik_${index}" value="${p.stock}" style="width: 100%; text-align: center; padding: 8px; margin: 0; background: #f1f5f9;">
+                    </td>
+                    <td style="padding: 10px; text-align: center;">
+                        <button class="bg-warning" style="padding: 8px 15px; font-size: 12px;" onclick="simpanOpname(${index})">Simpan</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function simpanOpname(index) {
+            let products = JSON.parse(localStorage.getItem('products') || '[]');
+            let stokFisik = parseInt(document.getElementById(`fisik_${index}`).value);
+            
+            if (isNaN(stokFisik)) return alert('Masukkan angka yang valid!');
+            
+            let selisih = stokFisik - products[index].stock;
+            if (selisih !== 0) {
+                if(confirm(`Yakin menyesuaikan stok ${products[index].name}?\nSistem: ${products[index].stock} -> Fisik: ${stokFisik}\n(Selisih: ${selisih})`)) {
+                    products[index].stock = stokFisik;
+                    localStorage.setItem('products', JSON.stringify(products)); // Otomatis tersinkron Firebase!
+                    alert('✅ Stok berhasil disesuaikan!');
+                    loadOpnameData();
+                }
+            } else {
+                alert('Tidak ada perubahan stok yang perlu disimpan.');
+            }
+        }
+
+        // MESIN PURCHASE ORDER (PO) LOKAL
+        let poItems = [];
+
+        function tambahPO() {
+            const name = document.getElementById('poItem').value;
+            const qty = document.getElementById('poQty').value;
+            const estPrice = parseFloat(document.getElementById('poEstPrice').value) || 0;
+
+            if(!name || !qty) return alert("Isi Nama Barang & Jumlah!");
+
+            poItems.push({ name, qty, estPrice });
+            document.getElementById('poItem').value = '';
+            document.getElementById('poQty').value = '';
+            document.getElementById('poEstPrice').value = '';
+            renderPO();
+        }
+
+        function renderPO() {
+            const list = document.getElementById('poList');
+            let totalEst = 0;
+            list.innerHTML = poItems.map((item, index) => {
+                totalEst += item.estPrice;
+                return `
+                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                    <div><b>${item.name}</b> (Qty: ${item.qty})</div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span style="color:#64748b;">Est: Rp ${item.estPrice.toLocaleString('id-ID')}</span>
+                        <button style="background:transparent; color:#ef4444; border:none; cursor:pointer;" onclick="hapusPO(${index})">❌</button>
+                    </div>
+                </li>`;
+            }).join('');
+            
+            if(poItems.length === 0) list.innerHTML = "<li style='color:#94a3b8; font-style:italic;'>Belum ada item untuk dibelanja.</li>";
+            document.getElementById('poTotalEst').innerText = `Rp ${totalEst.toLocaleString('id-ID')}`;
+        }
+
+        function hapusPO(index) {
+            poItems.splice(index, 1);
+            renderPO();
+        }
+
+        function cetakPO() {
+            if(poItems.length === 0) return alert("Daftar PO masih kosong!");
+            alert("Sistem menyiapkan dokumen PDF Purchase Order...\n(Fitur ini menggunakan Print Engine bawaan browser, sama seperti Cetak Laporan Keuangan)");
+            window.print();
+        }
+    </script>
+</body>
+</html>
