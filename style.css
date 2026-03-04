@@ -1,48 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-body { background-color: #f0f4f8; color: #1e293b; -webkit-tap-highlight-color: transparent; overflow-x: hidden;}
-a { text-decoration: none; }
-
-/* HEADER */
-header { background: #0f172a; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-header h2 { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-
-/* TOMBOL GLOBAL */
-button { border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: white;}
-button:active { transform: scale(0.95); }
-.btn-head { padding: 8px 12px; font-size: 12px; }
-.bg-primary { background: #3b82f6; }
-.bg-success { background: #10b981; }
-.bg-danger { background: #ef4444; }
-.bg-warning { background: #f59e0b; }
-
-/* FORM INPUT */
-input, select { width: 100%; padding: 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; transition: 0.3s; color: #334155; }
-input:focus, select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #475569; }
-
-/* POS LAYOUT (KASIR) */
-.pos-layout { display: flex; flex-direction: column; height: calc(100vh - 60px); }
-.pos-left { flex: 1; overflow-y: auto; padding: 10px; background: #f8fafc; }
-.pos-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; padding-bottom: 20px; }
-.product-item { background: #fff; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 2px solid transparent; transition: 0.2s; display: flex; flex-direction: column; min-height: 110px;}
-.product-item:active { border-color: #3b82f6; transform: scale(0.98); }
-.pos-right { background: #fff; border-top: 1px solid #e2e8f0; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 50; flex-shrink: 0;}
-.cart-list-container { max-height: 25vh; overflow-y: auto; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;}
-.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; }
-.btn-charge { width: 100%; padding: 18px; font-size: 18px; background: #10b981; color: white; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; margin-top: 10px;}
-
-@media (min-width: 650px) {
-    .pos-layout { flex-direction: row; height: calc(100vh - 60px); overflow: hidden; }
-    .pos-left { flex: 2; overflow-y: auto; }
-    .pos-right { flex: 1; max-width: 400px; overflow-y: auto; border-left: 1px solid #e2e8f0; border-top: none; }
-    .cart-list-container { max-height: 40vh; }
+/* =========================================
+   SIDEBAR NAVIGATION (NEW UI)
+   ========================================= */
+.sidebar-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); z-index: 1000; backdrop-filter: blur(2px);
 }
+.sidebar {
+    position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+    background: #1e293b; color: white; z-index: 1001; transition: left 0.3s ease-in-out;
+    display: flex; flex-direction: column; box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+}
+.sidebar.active { left: 0; }
 
-/* MODAL FIX ANTI TERTUMPAH (PENTING!) */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 99999; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(4px); }
-.modal-box { background: white; border-radius: 20px; width: 100%; max-width: 450px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-.modal-header { padding: 18px 20px; border-bottom: 1px solid #f1f5f9; background: #fff; }
-.modal-header h3 { margin: 0; font-size: 16px; color: #0f172a; }
-.modal-body { padding: 20px; overflow-y: auto; flex-grow: 1; }
+/* Header Profil di Sidebar (Bisa di-klik) */
+.sidebar-header {
+    padding: 25px 20px; background: #0f172a; border-bottom: 1px solid #334155;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;
+}
+.sidebar-header:active { background: #1e293b; }
+.sidebar-profile-info { display: flex; flex-direction: column; }
+.sidebar-role { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 2px;}
+.sidebar-name { font-size: 13px; color: #94a3b8; }
+.sidebar-store { font-size: 11px; color: #10b981; margin-top: 5px; font-weight: 600;}
+.sidebar-lock-icon { font-size: 20px; color: #64748b; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 50%;}
+
+/* Menu Sidebar */
+.sidebar-menu { padding: 10px 0; overflow-y: auto; flex: 1; }
+.sidebar-item {
+    padding: 15px 20px; display: flex; align-items: center; gap: 15px;
+    color: #cbd5e1; font-weight: 500; cursor: pointer; transition: 0.2s; font-size: 14px;
+    border-left: 4px solid transparent;
+}
+.sidebar-item:hover, .sidebar-item:active { background: rgba(59, 130, 246, 0.1); color: white; border-left-color: #3b82f6; }
+.sidebar-item i { font-size: 18px; width: 25px; text-align: center; }
+.sidebar-item.active-menu { border-left-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.05); }
+
+.sidebar-divider { height: 1px; background: #334155; margin: 10px 0; }
+.sidebar-version { padding: 20px; font-size: 11px; color: #64748b; text-align: left; opacity: 0.7;}
+
+.hamburger-btn { background: transparent; border: none; color: white; font-size: 24px; padding: 0 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
