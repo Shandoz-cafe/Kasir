@@ -241,6 +241,9 @@
     <script src="auth.js"></script>
 
     <script>
+        // === FIX PALING PENTING: MENGHIDUPKAN MESIN SINKRONISASI ===
+        checkAuth(); // Menyalakan satpam watchdog & sinkronisasi Cloud
+
         // =========================================
         // MESIN DIALOG MODERN (GANTI ALERT & CONFIRM)
         // =========================================
@@ -333,6 +336,14 @@
                     function() {
                         products[index].stock = stokFisik;
                         localStorage.setItem('products', JSON.stringify(products)); 
+                        
+                        // FIX: TEMBAKAN PAKSA KE FIREBASE (Double Protection)
+                        const uid = localStorage.getItem('userUid');
+                        if (uid && typeof firebase !== 'undefined') {
+                            firebase.database().ref('ShandozPOS/' + uid + '/products').set(products)
+                            .catch(err => console.error("Gagal push:", err));
+                        }
+
                         customAlert('✅ Stok berhasil disesuaikan secara sinkron dengan sistem cloud.', 'Berhasil', '📦');
                         loadOpnameData();
                     },
