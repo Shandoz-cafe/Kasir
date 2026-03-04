@@ -14,13 +14,8 @@
         @media print {
             @page { size: A4 portrait; margin: 15mm; }
             body { background: white !important; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-            
-            /* Sembunyikan UI Layar secara total (Bukan sekadar kasat mata) */
-            header, .container, .sidebar-overlay, .sidebar { display: none !important; }
-            
-            /* Tampilkan Kertas Cetak dengan posisi statis/normal */
+            header, .container, .sidebar-overlay, .sidebar, #customDialog { display: none !important; }
             #printLayer { display: block !important; position: relative !important; width: 100% !important; left: 0; top: 0; }
-            
             table { border-collapse: collapse; width: 100%; font-size: 10pt; page-break-inside: auto; }
             tr { page-break-inside: avoid; page-break-after: auto; }
             th { border: 1px solid #000; padding: 8px 4px; background-color: #f8fafc !important; -webkit-print-color-adjust: exact; color-adjust: exact; text-align: center;}
@@ -33,9 +28,46 @@
         .input-group label { font-size: 11px; color: #64748b; font-weight: 600; }
         .grid-po { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
         @media(min-width: 600px) { .grid-po { grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr; } }
+
+        /* =========================================
+           CUSTOM MODERN DIALOG (PENGGANTI ALERT/CONFIRM NORAK)
+           ========================================= */
+        .custom-dialog-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7); z-index: 999999;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .custom-dialog-box {
+            background: white; width: 90%; max-width: 340px; border-radius: 20px;
+            padding: 25px 20px; text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.9); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn { to { transform: scale(1); } }
+        .dialog-icon { font-size: 45px; margin-bottom: 10px; line-height: 1; }
+        .dialog-title { color: #0f172a; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .dialog-message { color: #475569; font-size: 13px; margin-bottom: 25px; line-height: 1.5; }
+        .dialog-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-dialog { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-dialog:active { transform: scale(0.95); }
+        .btn-dialog-ok { background: #3b82f6; color: white; }
+        .btn-dialog-cancel { background: #f1f5f9; color: #475569; }
     </style>
 </head>
 <body style="background: #f8fafc;">
+
+    <div class="custom-dialog-overlay" id="customDialog">
+        <div class="custom-dialog-box">
+            <div class="dialog-icon" id="dialogIcon">⚠️</div>
+            <div class="dialog-title" id="dialogTitle">Peringatan</div>
+            <div class="dialog-message" id="dialogMessage">Pesan error di sini.</div>
+            <div class="dialog-actions">
+                <button class="btn-dialog btn-dialog-cancel" id="btnDialogCancel" style="display: none;">Batal</button>
+                <button class="btn-dialog btn-dialog-ok" id="btnDialogOk">OK</button>
+            </div>
+        </div>
+    </div>
     
     <header style="background: #d97706;">
         <h2>📋 Procurement & PO</h2>
@@ -209,11 +241,58 @@
     <script src="auth.js"></script>
 
     <script>
+        // =========================================
+        // MESIN DIALOG MODERN (GANTI ALERT & CONFIRM)
+        // =========================================
+        let dialogCallback = null;
+
+        function customAlert(message, title="Pemberitahuan", icon="ℹ️") {
+            document.getElementById('dialogIcon').innerText = icon;
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogMessage').innerHTML = message;
+            document.getElementById('btnDialogCancel').style.display = 'none';
+            
+            let btnOk = document.getElementById('btnDialogOk');
+            btnOk.innerText = "Oke Mengerti";
+            btnOk.className = "btn-dialog btn-dialog-ok";
+            
+            btnOk.onclick = () => { document.getElementById('customDialog').style.display = 'none'; };
+            document.getElementById('customDialog').style.display = 'flex';
+        }
+
+        function customConfirm(message, callback, title="Konfirmasi", icon="⚠️") {
+            document.getElementById('dialogIcon').innerText = icon;
+            document.getElementById('dialogTitle').innerText = title;
+            document.getElementById('dialogMessage').innerHTML = message;
+            document.getElementById('btnDialogCancel').style.display = 'block';
+            
+            let btnOk = document.getElementById('btnDialogOk');
+            btnOk.innerText = "Ya, Lanjutkan";
+            btnOk.className = "btn-dialog";
+            btnOk.style.background = "#10b981"; // Warna Hijau untuk Confirm
+            btnOk.style.color = "white";
+            
+            dialogCallback = callback;
+            
+            btnOk.onclick = () => {
+                document.getElementById('customDialog').style.display = 'none';
+                if(dialogCallback) dialogCallback();
+            };
+            
+            document.getElementById('btnDialogCancel').onclick = () => {
+                document.getElementById('customDialog').style.display = 'none';
+            };
+            
+            document.getElementById('customDialog').style.display = 'flex';
+        }
+
+        // =========================================
+
         document.addEventListener('DOMContentLoaded', () => {
             const role = localStorage.getItem('currentRole');
             if(role !== 'admin') {
-                alert("⛔ AKSES DITOLAK! Halaman ini khusus Manajemen.");
-                window.location.replace('dashboard.html');
+                customAlert("⛔ Akses ditolak! Halaman ini khusus Manajemen.", "Peringatan Akses", "⛔");
+                setTimeout(() => { window.location.replace('dashboard.html'); }, 2000);
             } else {
                 loadOpnameData();
                 renderPO();
@@ -243,15 +322,23 @@
         function simpanOpname(index) {
             let products = JSON.parse(localStorage.getItem('products') || '[]');
             let stokFisik = parseInt(document.getElementById(`fisik_${index}`).value);
-            if (isNaN(stokFisik)) return alert('Masukkan angka valid!');
+            
+            if (isNaN(stokFisik)) return customAlert('Masukkan angka yang valid untuk stok fisik!', 'Format Salah', '❌');
+            
             let selisih = stokFisik - products[index].stock;
             if (selisih !== 0) {
-                if(confirm(`Yakin menyesuaikan stok ${products[index].name}?\nSistem: ${products[index].stock} -> Fisik: ${stokFisik}`)) {
-                    products[index].stock = stokFisik;
-                    localStorage.setItem('products', JSON.stringify(products)); 
-                    alert('✅ Stok berhasil disesuaikan!');
-                    loadOpnameData();
-                }
+                // MENGGUNAKAN CUSTOM CONFIRM MODERN
+                customConfirm(
+                    `Yakin menyesuaikan stok <b>${products[index].name}</b>?<br><br>Stok Sistem: <b>${products[index].stock}</b><br>Fisik Riil: <b style="color:#3b82f6; font-size:16px;">${stokFisik}</b>`, 
+                    function() {
+                        products[index].stock = stokFisik;
+                        localStorage.setItem('products', JSON.stringify(products)); 
+                        customAlert('✅ Stok berhasil disesuaikan secara sinkron dengan sistem cloud.', 'Berhasil', '📦');
+                        loadOpnameData();
+                    },
+                    "Konfirmasi Opname",
+                    "📊"
+                );
             }
         }
 
@@ -271,7 +358,9 @@
             const unit = document.getElementById('poUnit').value;
             const price = parseFloat(document.getElementById('poPrice').value);
 
-            if(!name || isNaN(qty) || isNaN(price)) return alert("Isi Nama Barang, Qty, dan Harga Satuan!");
+            if(!name || isNaN(qty) || isNaN(price)) {
+                return customAlert("Isi Nama Barang, Jumlah, dan Estimasi Harga Satuan dengan lengkap!", "Data Kurang Lengkap", "📝");
+            }
 
             poCart.push({ name, category, qty, unit, price, total: (qty * price) });
             
@@ -323,34 +412,26 @@
             let historyPO = JSON.parse(localStorage.getItem('purchaseOrders') || '[]');
             const tbody = document.getElementById('poHistoryList');
             
-            // Ambil Nilai dari Input Filter
-            const filterDate = document.getElementById('filterPoDate').value; // Format: YYYY-MM-DD
+            const filterDate = document.getElementById('filterPoDate').value; 
             const filterSearch = document.getElementById('filterPoSearch').value.toLowerCase().trim();
 
-            // Balik urutan dari yang terbaru dulu, lalu filter
             let filteredPO = historyPO.reverse().filter(po => {
                 let matchSearch = true;
-                if (filterSearch) {
-                    // Cari berdasarkan ID (No Ref) PO
-                    matchSearch = po.id.toLowerCase().includes(filterSearch);
-                }
+                if (filterSearch) matchSearch = po.id.toLowerCase().includes(filterSearch);
 
                 let matchDate = true;
                 if (filterDate) {
-                    // Konversi po.date (ex: 4/3/2026, 21:51:00) ke format YYYY-MM-DD untuk dicocokkan
                     let dParts = po.date.split(',')[0].split('/');
-                    if(dParts.length !== 3) dParts = po.date.split(',')[0].split('-'); // Fallback
+                    if(dParts.length !== 3) dParts = po.date.split(',')[0].split('-'); 
                     
                     if(dParts.length === 3) {
                         let y = dParts[2];
                         let m = dParts[1].padStart(2, '0');
                         let d = dParts[0].padStart(2, '0');
                         let poDateStr = `${y}-${m}-${d}`;
-                        
                         matchDate = (poDateStr === filterDate);
                     }
                 }
-
                 return matchSearch && matchDate;
             });
 
@@ -374,7 +455,7 @@
 
         // === MESIN SIMPAN DAN CETAK PDF ===
         function cetakDanSimpanPO() {
-            if(poCart.length === 0) return alert("Daftar PO kosong! Masukkan minimal 1 barang.");
+            if(poCart.length === 0) return customAlert("Daftar belanja (PO) masih kosong! Silakan masukkan minimal 1 barang.", "Keranjang Kosong", "🛒");
 
             const currentUser = localStorage.getItem('currentUser') || 'Admin';
             const now = new Date();
@@ -388,38 +469,32 @@
             let historyPO = JSON.parse(localStorage.getItem('purchaseOrders') || '[]');
             const grandTotal = poCart.reduce((sum, item) => sum + item.total, 0);
             
-            // 1. Simpan Data History
+            // Simpan Data History
             historyPO.push({
                 id: poRef, date: standardDateStr, displayDate: fullDateStr, user: currentUser, 
                 items: [...poCart], total: grandTotal
             });
             localStorage.setItem('purchaseOrders', JSON.stringify(historyPO)); 
 
-            // 2. Siapkan Data di Kertas PDF
             siapkanKertasPO(poRef, fullDateStr, currentUser, grandTotal, poCart);
             
-            // 3. Langsung kosongkan keranjang UI di latar belakang & Reset Filter
+            // Kosongkan keranjang & Reset
             poCart = []; 
             document.getElementById('filterPoDate').value = '';
             document.getElementById('filterPoSearch').value = '';
             renderPO(); 
             renderPOHistory();
 
-            // 4. Beri jeda 0.5 detik agar HP selesai memproses UI, lalu panggil Print
-            setTimeout(() => {
-                window.print();
-            }, 500);
+            setTimeout(() => { window.print(); }, 500);
         }
 
         function cetakUlangPO(poId) {
             let historyPO = JSON.parse(localStorage.getItem('purchaseOrders') || '[]');
             const po = historyPO.find(p => p.id === poId);
-            if(!po) return alert("Data tidak ditemukan");
+            if(!po) return customAlert("Data dokumen tidak ditemukan di server lokal.", "Error", "❌");
             
             siapkanKertasPO(po.id, po.displayDate || po.date, po.user, po.total, po.items);
-            setTimeout(() => {
-                window.print();
-            }, 500);
+            setTimeout(() => { window.print(); }, 500);
         }
 
         function siapkanKertasPO(poRef, dateStr, user, grandTotal, items) {
