@@ -257,13 +257,14 @@ function mulaiSinkronisasiCloud() {
             userRef.child('users').set(usersData); 
         }
 
-        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
+        // FIX: purchaseOrders SEKARANG MASUK RADAR SINKRONISASI
+        const cloudKeys = ['products', 'sales', 'users', 'expenses', 'purchaseOrders', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
         
         cloudKeys.forEach(key => {
             let val = (key === 'users' && !data.users) ? usersData : data[key];
             if (val !== undefined) {
                 if (typeof val === 'object') {
-                    if (['products', 'sales', 'users', 'expenses'].includes(key) && !Array.isArray(val)) {
+                    if (['products', 'sales', 'users', 'expenses', 'purchaseOrders'].includes(key) && !Array.isArray(val)) {
                         val = Object.values(val); 
                     }
                     localStorage.setItem(key, JSON.stringify(val));
@@ -273,31 +274,34 @@ function mulaiSinkronisasiCloud() {
             }
         });
 
+        // INISIALISASI JIKA KOSONG
         if (!localStorage.getItem('products')) localStorage.setItem('products', '[]');
         if (!localStorage.getItem('sales')) localStorage.setItem('sales', '[]');
         if (!localStorage.getItem('expenses')) localStorage.setItem('expenses', '[]');
         if (!localStorage.getItem('users')) localStorage.setItem('users', '[]');
+        if (!localStorage.getItem('purchaseOrders')) localStorage.setItem('purchaseOrders', '[]');
 
         if(typeof filterAndSortProducts === 'function') filterAndSortProducts();
         if(typeof initDashboardData === 'function') initDashboardData();
         if(typeof renderProfiles === 'function') renderProfiles();
         if(typeof loadFinanceReports === 'function') loadFinanceReports();
+        if(typeof renderPOHistory === 'function') renderPOHistory(); // Render ulang jika di halaman PO
 
         isSyncingFromCloud = false; 
     });
 
-    // 2. SENSOR PINTU DEPAN (OVERRIDE LOKAL) - FIX ANTI TABRAKAN
+    // 2. SENSOR PINTU DEPAN (OVERRIDE LOKAL)
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = function(key, value) {
         originalSetItem.apply(this, arguments);
-        const cloudKeys = ['products', 'users', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
-        if (!isSyncingFromCloud && cloudKeys.includes(key)) {
+        const autoSyncKeys = ['products', 'users', 'purchaseOrders', 'storeName', 'storeLogo', 'printerSettings', 'appLang'];
+        if (!isSyncingFromCloud && autoSyncKeys.includes(key)) {
             userRef.child(key).set(value).catch(e => console.error(e));
         }
     };
 
     // 3. MESIN WATCHDOG (SATPAM PATROLI TIAP 2 DETIK)
-    const watchKeys = ['products', 'users'];
+    const watchKeys = ['products', 'users', 'purchaseOrders'];
     let lastStates = {};
     watchKeys.forEach(k => lastStates[k] = localStorage.getItem(k));
 
