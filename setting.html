@@ -19,7 +19,8 @@
         .setting-item label { display: block; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 5px; }
         .setting-item input, .setting-item select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Poppins', sans-serif; outline: none; }
         .setting-item input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
-        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; margin-top: 5px; }
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; margin-top: 5px; transition: 0.2s; }
+        .btn-action:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="pos-body" style="background: #f8fafc;">
@@ -93,7 +94,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="auth.js"></script>
-    
     <script src="lang.js"></script>
 
     <script>
@@ -121,9 +121,8 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
-                // Pembatas ukuran maksimal (sekitar 300KB) biar awan/cloud nggak berat
                 if (file.size > 300 * 1024) {
-                    alert("❌ Ukuran gambar terlalu besar! Maksimal 300KB agar sinkronisasi cloud lancar.");
+                    customAlert("Ukuran gambar terlalu besar! Maksimal 300KB agar cloud tidak berat.", "Peringatan Ukuran", "⚠️");
                     this.value = "";
                     return;
                 }
@@ -140,47 +139,58 @@
             });
         });
 
+        // HAPUS LOGO PAKE CUSTOM CONFIRM MODERN
         function hapusLogo() {
-            if(!confirm("Hapus logo dari struk?")) return;
-            currentLogoBase64 = "";
-            document.getElementById('setStoreLogo').value = "";
-            document.getElementById('logoPreview').src = "";
-            document.getElementById('logoPreview').style.display = 'none';
-            document.getElementById('noLogoText').style.display = 'block';
-            document.getElementById('btnHapusLogo').style.display = 'none';
+            customConfirm("Yakin ingin menghapus logo ini dari struk cetak Anda?", () => {
+                currentLogoBase64 = "";
+                document.getElementById('setStoreLogo').value = "";
+                document.getElementById('logoPreview').src = "";
+                document.getElementById('logoPreview').style.display = 'none';
+                document.getElementById('noLogoText').style.display = 'block';
+                document.getElementById('btnHapusLogo').style.display = 'none';
+            }, "Hapus Logo", "🗑️");
         }
 
+        // SIMPAN SETTING PAKE CUSTOM ALERT
         function saveStoreSettings() {
             const role = localStorage.getItem('currentRole');
-            if(role !== 'admin') return alert("Hanya Owner!");
+            if(role !== 'admin') return customAlert("Akses ditolak! Hanya Owner yang bisa mengubah ini.", "Akses Terbatas", "⛔");
             
             const newName = document.getElementById('setStoreName').value.trim();
             const newSize = document.getElementById('setPrinterSize').value;
             
             if(newName) localStorage.setItem('storeName', newName);
             localStorage.setItem('printerSettings', JSON.stringify({ paperSize: newSize, autoPrint: true }));
-            
-            // Simpan Logo ke Memori (Otomatis dilempar ke awan oleh Watchdog auth.js)
             localStorage.setItem('storeLogo', currentLogoBase64);
             
-            alert("✅ Sukses Disimpan!");
+            customAlert("Pengaturan profil toko dan printer berhasil disimpan ke sistem.", "Sukses", "✅");
         }
 
         function saveLanguage() {
             const newLang = document.getElementById('setLanguageDropdown').value;
-            setLanguage(newLang); // Panggil fungsi dari lang.js
-            alert(newLang === 'en' ? "✅ Language updated successfully!" : "✅ Bahasa berhasil diperbarui!");
+            setLanguage(newLang);
+            if(newLang === 'en') customAlert("Language updated successfully!", "Success", "✅");
+            else customAlert("Bahasa aplikasi berhasil diperbarui!", "Sukses", "✅");
         }
 
+        // ALUR GANTI PIN PAKE CUSTOM PROMPT BERUNTUN
         let generatedOTP = "";
         function requestPinChangeWithOTP() {
             const role = localStorage.getItem('currentRole');
-            if(role !== 'admin') return alert("❌ Hanya Owner!");
+            if(role !== 'admin') return customAlert("Akses ditolak! Fitur ini khusus Owner.", "Keamanan", "⛔");
 
             const currentUser = auth.currentUser;
-            let emailTarget = currentUser ? currentUser.email : prompt("Masukkan Email Anda:");
-            if(!emailTarget) return;
+            
+            if (currentUser && currentUser.email) {
+                prosesKirimEmailOTP(currentUser.email);
+            } else {
+                customPrompt("Masukkan alamat Email Anda yang terdaftar:", (inputEmail) => {
+                    if(inputEmail) prosesKirimEmailOTP(inputEmail.trim());
+                }, "Verifikasi Identitas", "📧", "email");
+            }
+        }
 
+        function prosesKirimEmailOTP(emailTarget) {
             generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
             showLoader(true);
 
@@ -188,13 +198,29 @@
                 email: emailTarget, otp_code: generatedOTP
             }).then(function() {
                 showLoader(false);
-                let inputOTP = prompt(`🔒 OTP TERKIRIM!\nCek email: ${emailTarget}\nMasukkan 4 Angka OTP:`);
-                if (inputOTP === generatedOTP) {
-                    let newPin = prompt("✅ BERHASIL!\nBuat 4 digit PIN BARU:");
-                    if (newPin && newPin.length === 4 && !isNaN(newPin)) simpanPinOwnerBaru(newPin);
-                    else alert("❌ Gagal. PIN wajib 4 angka!");
-                } else alert("❌ OTP SALAH!");
-            }, function(error) { showLoader(false); alert("❌ Gagal kirim email OTP."); });
+                
+                // Minta OTP
+                customPrompt(`OTP TERKIRIM! 🔒<br>Silakan cek pesan masuk di email:<br><b style="color:#3b82f6;">${emailTarget}</b><br><br>Masukkan 4 Angka kode OTP:`, (inputOTP) => {
+                    
+                    if (inputOTP === generatedOTP) {
+                        // Jika OTP Benar, minta PIN Baru
+                        customPrompt("OTP BENAR! ✅<br><br>Silakan buat 4 digit PIN BARU Anda:", (newPin) => {
+                            if (newPin && newPin.length === 4 && !isNaN(newPin)) {
+                                simpanPinOwnerBaru(newPin);
+                            } else {
+                                customAlert("Gagal menyimpan. PIN wajib terdiri dari 4 angka!", "Format Salah", "❌");
+                            }
+                        }, "Buat PIN Baru", "🔑", "password");
+                    } else {
+                        customAlert("Kode OTP yang Anda masukkan SALAH!", "Gagal Verifikasi", "❌");
+                    }
+                    
+                }, "Verifikasi OTP Email", "📨", "number");
+
+            }, function(error) { 
+                showLoader(false); 
+                customAlert("Gagal mengirim email OTP. Pastikan koneksi internet aktif.", "Error Server", "📡"); 
+            });
         }
 
         function simpanPinOwnerBaru(newPin) {
@@ -203,7 +229,7 @@
             if(ownerIndex > -1) {
                 users[ownerIndex].pin = newPin;
                 localStorage.setItem('users', JSON.stringify(users)); 
-                alert("🎉 PIN Kemananan berhasil diganti!");
+                customAlert("Hore! PIN Keamanan Owner berhasil diganti. Harap ingat PIN Anda baik-baik.", "PIN Diperbarui", "🎉");
             }
         }
     </script>
