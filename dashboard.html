@@ -32,20 +32,20 @@
         </div>
 
         <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="window.location.href='pos.html'"><i>🛒</i> Penjualan (POS)</div>
-            <div class="sidebar-item" onclick="bukaHistoryStruk()"><i>🧾</i> Riwayat Struk</div>
-            <div class="sidebar-item" onclick="window.location.href='product.html'"><i>📦</i> Data Barang</div>
-            <div class="sidebar-item" onclick="window.location.href='procurement.html'"><i>📋</i> Stock Opname & PO</div>
+            <div class="sidebar-item" onclick="window.location.href='pos.html'" data-i18n="side_pos"><i>🛒</i> Penjualan (POS)</div>
+            <div class="sidebar-item" onclick="bukaHistoryStruk()" data-i18n="side_history"><i>🧾</i> Riwayat Struk</div>
+            <div class="sidebar-item" onclick="window.location.href='product.html'" data-i18n="side_inv"><i>📦</i> Data Barang</div>
+            <div class="sidebar-item" onclick="window.location.href='procurement.html'" data-i18n="side_proc"><i>📋</i> Stock Opname & PO</div>
             
             <div class="sidebar-divider"></div>
             
-            <div class="sidebar-item" onclick="window.location.href='reports.html'"><i>📊</i> Back Office (Laporan)</div>
-            <div class="sidebar-item" onclick="window.location.href='setting.html'"><i>⚙️</i> Pengaturan Toko</div>
+            <div class="sidebar-item" onclick="window.location.href='reports.html'" data-i18n="side_rep"><i>📊</i> Back Office (Laporan)</div>
+            <div class="sidebar-item" onclick="window.location.href='setting.html'" data-i18n="side_set"><i>⚙️</i> Pengaturan Toko</div>
             
             <div class="sidebar-divider"></div>
             
-            <div class="sidebar-item" onclick="document.getElementById('aboutModal').style.display='flex'; toggleSidebar();"><i>ℹ️</i> Dukungan & Info</div>
-            <div class="sidebar-item" onclick="logout()" style="color: #ef4444;"><i>🛑</i> Keluar Sistem</div>
+            <div class="sidebar-item" onclick="document.getElementById('aboutModal').style.display='flex'; toggleSidebar();" data-i18n="side_info"><i>ℹ️</i> Dukungan & Info</div>
+            <div class="sidebar-item" onclick="logout()" style="color: #ef4444;" data-i18n="side_logout"><i>🛑</i> Keluar Sistem</div>
         </div>
         
         <div class="sidebar-version">v.4.0 Virexon Enterprise Command Center</div>
@@ -80,19 +80,19 @@
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
             <a href="pos.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">🛒</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">KASIR (POS)</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_pos">KASIR (POS)</span>
             </a>
             <a href="product.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📦</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">GUDANG / MENU</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_inv">GUDANG / MENU</span>
             </a>
             <a href="reports.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📈</span>
-                <span style="font-size: 13px; font-weight: 700; color: #334155;">LAPORAN KEUANGAN</span>
+                <span style="font-size: 13px; font-weight: 700; color: #334155;" data-i18n="app_rep">LAPORAN KEUANGAN</span>
             </a>
             <a href="procurement.html" style="background: white; padding: 25px 15px; border-radius: 16px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; border-bottom: 4px solid #f59e0b; display: flex; flex-direction: column; align-items: center;">
                 <span style="font-size: 35px; margin-bottom: 10px;">📋</span>
-                <span style="font-size: 13px; font-weight: 800; color: #f59e0b;">PENGADAAN & OPNAME</span>
+                <span style="font-size: 13px; font-weight: 800; color: #f59e0b;" data-i18n="app_proc">PENGADAAN & OPNAME</span>
             </a>
         </div>
         
