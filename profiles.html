@@ -28,12 +28,12 @@
 </head>
 <body>
 
-    <h1>Siapa yang bertugas?</h1>
+    <h1 data-i18n="prof_title">Siapa yang bertugas?</h1>
     <div class="profile-container" id="profileList"></div>
 
     <div class="pin-modal" id="pinModal">
-        <h2 id="pinTitle" style="margin-bottom: 5px; text-align: center; font-size: 18px;">Masukkan PIN</h2>
-        <p id="pinSubtitle" style="color: #94a3b8; font-size: 12px; margin-bottom: 15px; text-align: center;">4 Angka Rahasia.</p>
+        <h2 id="pinTitle" style="margin-bottom: 5px; text-align: center; font-size: 18px;" data-i18n="prof_pin_title">Masukkan PIN</h2>
+        <p id="pinSubtitle" style="color: #94a3b8; font-size: 12px; margin-bottom: 15px; text-align: center;" data-i18n="prof_pin_sub">4 Angka Rahasia.</p>
         
         <div id="pinPadArea" style="display: flex; flex-direction: column; align-items: center;">
             <div class="pin-display" id="pinDisplay">_ _ _ _</div>
@@ -47,13 +47,14 @@
             </div>
         </div>
 
-        <div class="btn-cancel" onclick="closePinModal()">Batal</div>
+        <div class="btn-cancel" onclick="closePinModal()" data-i18n="prof_btn_cancel">Batal</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="auth.js"></script>
+    <script src="lang.js"></script>
     <script>
         checkAuth(); 
 
@@ -64,14 +65,24 @@
         function renderProfiles() {
             const users = JSON.parse(localStorage.getItem('users') || '[]');
             if(users.length === 0) return; // Nunggu sedotan data dari awan turun
+            
+            const lang = localStorage.getItem('appLang') || 'id';
 
-            let html = users.map(u => `
-                <div class="profile-card" onclick="openPinModal('${u.id}')">
-                    <div class="avatar">${u.role === 'admin' ? '👑' : '🧑‍🍳'}</div>
-                    <div class="name">${u.name}</div>
-                    <div class="role-badge ${u.role === 'cashier' ? 'role-cashier' : ''}">${u.role.toUpperCase()}</div>
-                </div>
-            `).join('');
+            let html = users.map(u => {
+                let displayRole = u.role.toUpperCase();
+                if (lang === 'en') {
+                    if (u.role === 'admin') displayRole = 'OWNER';
+                    if (u.role === 'cashier') displayRole = 'CASHIER';
+                }
+                
+                return `
+                    <div class="profile-card" onclick="openPinModal('${u.id}')">
+                        <div class="avatar">${u.role === 'admin' ? '👑' : '🧑‍🍳'}</div>
+                        <div class="name">${u.name}</div>
+                        <div class="role-badge ${u.role === 'cashier' ? 'role-cashier' : ''}">${displayRole}</div>
+                    </div>
+                `;
+            }).join('');
 
             document.getElementById('profileList').innerHTML = html;
 
@@ -84,6 +95,7 @@
 
         function openPinModal(userId) {
             const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const lang = localStorage.getItem('appLang') || 'id';
             activeProfile = users.find(u => u.id === userId);
             typedPin = "";
             updatePinDisplay();
@@ -91,12 +103,12 @@
             document.getElementById('pinPadArea').style.display = 'flex';
 
             if (activeProfile.pin === "SETUP") {
-                document.getElementById('pinTitle').innerText = "Buat PIN Keamanan";
-                document.getElementById('pinSubtitle').innerText = "Amankan kasir Anda dengan 4 angka.";
+                document.getElementById('pinTitle').innerText = lang === 'en' ? "Create Security PIN" : "Buat PIN Keamanan";
+                document.getElementById('pinSubtitle').innerText = lang === 'en' ? "Secure your register with 4 digits." : "Amankan kasir Anda dengan 4 angka.";
                 document.getElementById('pinTitle').style.color = "#10b981";
             } else {
                 document.getElementById('pinTitle').innerText = "PIN " + activeProfile.name;
-                document.getElementById('pinSubtitle').innerText = "Masukkan 4 digit PIN Anda.";
+                document.getElementById('pinSubtitle').innerText = lang === 'en' ? "Enter your 4 digit PIN." : "Masukkan 4 digit PIN Anda.";
                 document.getElementById('pinTitle').style.color = "#fff";
             }
             
@@ -126,6 +138,7 @@
 
         function submitPin() {
             if(typedPin.length !== 4) return;
+            const lang = localStorage.getItem('appLang') || 'id';
 
             // PROSES SIMPAN PIN PERTAMA KALI
             if (activeProfile.pin === "SETUP") {
@@ -145,7 +158,8 @@
                 localStorage.setItem('currentRole', activeProfile.role);
                 window.location.replace('dashboard.html');
             } else {
-                alert("PIN Salah! Coba lagi."); 
+                let msg = lang === 'en' ? "Wrong PIN! Please try again." : "PIN Salah! Coba lagi.";
+                alert(msg); 
                 typedPin = ""; 
                 updatePinDisplay();
             }
