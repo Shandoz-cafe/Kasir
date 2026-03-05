@@ -1,6 +1,7 @@
 // Fungsi untuk memuat dropdown kategori secara otomatis (Urut A-Z)
 function updateCategoryDropdown(products, currentLang) {
     const dropdown = document.getElementById('filterCatDropdown');
+    if (!dropdown) return;
     const selectedValue = dropdown.value; // Simpan pilihan saat ini
     
     // Ambil semua kategori unik, abaikan huruf besar/kecil, lalu urutkan A-Z
@@ -8,16 +9,22 @@ function updateCategoryDropdown(products, currentLang) {
     categories.sort((a, b) => a.localeCompare(b));
     
     const allText = currentLang === 'en' ? 'All Categories' : 'Semua Kategori';
-    let optionsHtml = `<option value="ALL" data-i18n="inv_filter_all">${allText}</option>`;
     
-    categories.forEach(c => {
-        optionsHtml += `<option value="${c}">${c}</option>`;
-    });
+    // Cek apakah ada kategori baru (Biar dropdown gak kedip pas ngetik)
+    let currentOptions = Array.from(dropdown.options).map(opt => opt.value);
+    let newOptions = ['ALL', ...categories];
     
-    dropdown.innerHTML = optionsHtml;
-    // Kembalikan pilihan sebelumnya jika masih ada di daftar
-    if(categories.includes(selectedValue) || selectedValue === 'ALL') {
-        dropdown.value = selectedValue;
+    if(JSON.stringify(currentOptions) !== JSON.stringify(newOptions)) {
+        let optionsHtml = `<option value="ALL" data-i18n="inv_filter_all">${allText}</option>`;
+        categories.forEach(c => {
+            optionsHtml += `<option value="${c}">${c}</option>`;
+        });
+        dropdown.innerHTML = optionsHtml;
+        
+        // Kembalikan pilihan sebelumnya jika masih ada di daftar
+        if(categories.includes(selectedValue) || selectedValue === 'ALL') {
+            dropdown.value = selectedValue;
+        }
     }
 }
 
@@ -26,27 +33,32 @@ function loadProducts() {
     const role = localStorage.getItem('currentRole') || 'cashier'; 
     const lang = localStorage.getItem('appLang') || 'id';
     
-    // Update isi Dropdown Kategori
+    // Update isi Dropdown Kategori otomatis
     updateCategoryDropdown(products, lang);
     
     // Ambil nilai dari kolom pencarian dan filter
-    const searchQuery = (document.getElementById('searchItemInput')?.value || '').toLowerCase();
-    const filterCat = document.getElementById('filterCatDropdown')?.value || 'ALL';
+    const searchInput = document.getElementById('searchItemInput');
+    const dropdownCat = document.getElementById('filterCatDropdown');
+    
+    const searchQuery = (searchInput ? searchInput.value : '').toLowerCase();
+    const filterCat = dropdownCat ? dropdownCat.value : 'ALL';
     
     // PROSES 1: FILTERING (Pencarian & Kategori)
     let filteredProducts = products.filter(p => {
-        const matchName = p.name.toLowerCase().includes(searchQuery);
+        const name = p.name || '';
+        const matchName = name.toLowerCase().includes(searchQuery);
         const cat = p.category ? p.category.trim() : (lang === 'en' ? 'General' : 'Umum');
         const matchCat = (filterCat === 'ALL') || (cat === filterCat);
         return matchName && matchCat;
     });
     
     // PROSES 2: SORTING A-Z BERDASARKAN NAMA ITEM
-    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+    filteredProducts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     
     const btnStock = lang === 'en' ? '+ Stock' : '+ Stok';
     const btnDel = lang === 'en' ? 'Delete' : 'Hapus';
     const tbody = document.getElementById('productList');
+    if(!tbody) return;
     
     // Jika data kosong setelah difilter
     if(filteredProducts.length === 0) {
@@ -114,12 +126,10 @@ function addProduct() {
     customAlert(msgSuccess, titleSuccess, "✅");
 }
 
-// PERUBAHAN PENTING: Menerima ID item, bukan Index. Supaya akurat saat disortir.
 function addStock(id) {
     const lang = localStorage.getItem('appLang') || 'id';
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     
-    // Cari index asli dari ID
     const index = products.findIndex(p => String(p.id) === String(id));
     if(index === -1) return;
 
@@ -145,7 +155,6 @@ function addStock(id) {
     }, promptTitle, "➕", "number");
 }
 
-// PERUBAHAN PENTING: Menerima ID item, bukan Index.
 function deleteProduct(id) {
     const lang = localStorage.getItem('appLang') || 'id';
     
@@ -157,7 +166,6 @@ function deleteProduct(id) {
     
     const products = JSON.parse(localStorage.getItem('products') || '[]');
     
-    // Cari index asli dari ID
     const index = products.findIndex(p => String(p.id) === String(id));
     if(index === -1) return;
     
