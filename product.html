@@ -32,6 +32,13 @@
                 <button class="bg-primary" style="white-space: nowrap; margin:0; color: white;" onclick="addProduct()" data-i18n="inv_btn_save">➕ Simpan</button>
             </div>
         </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <input type="text" id="searchItemInput" data-i18n-ph="inv_search_ph" placeholder="🔍 Cari nama item..." style="flex: 2; margin: 0; min-width: 150px;" oninput="loadProducts()">
+            <select id="filterCatDropdown" style="flex: 1; margin: 0; min-width: 130px;" onchange="loadProducts()">
+                <option value="ALL" data-i18n="inv_filter_all">Semua Kategori</option>
+            </select>
+        </div>
         
         <div class="card" style="overflow-x: auto; padding: 0;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
@@ -64,10 +71,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="auth.js"></script>
-    <script src="lang.js"></script> <script>
+    <script src="lang.js"></script>
+    
+    <script>
         checkAuth(); 
         
-        // OTOMATIS SEMBUNYIKAN FORM TAMBAH JIKA YANG LOGIN ADALAH KASIR
         window.onload = function() {
             const role = localStorage.getItem('currentRole') || 'cashier';
             if(role !== 'admin') {
