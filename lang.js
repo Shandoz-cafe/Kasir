@@ -189,6 +189,15 @@ const translations = {
         "inv_th_action": "Action",
         "inv_scan_title": "Point Camera at Barcode",
         "inv_btn_cancel": "Cancel",
+                "inv_scan_title": "Arahkan Kamera ke Barcode",
+        "inv_btn_cancel": "Batal",
+        "inv_search_ph": "🔍 Cari nama item...",
+        "inv_filter_all": "Semua Kategori",
+                "inv_scan_title": "Point Camera at Barcode",
+        "inv_btn_cancel": "Cancel",
+        "inv_search_ph": "🔍 Search item name...",
+        "inv_filter_all": "All Categories",
+
 
         // Procurement & Opname
         "proc_title": "📋 Procurement & PO",
